@@ -21,7 +21,7 @@
 #import <React/RCTLog.h>
 #import <React/RCTUtils.h>
 
-#import "RCTAssetsLibraryRequestHandler.h"
+#import "RNCAssetsLibraryRequestHandler.h"
 
 @implementation RCTConvert (PHAssetCollectionSubtype)
 
