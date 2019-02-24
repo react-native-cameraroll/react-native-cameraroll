@@ -5,10 +5,16 @@
   "homepage": "https://github.com/react-native-community/react-native-cameraroll#readme",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "./js/CameraRoll.js",
   "scripts": {
-    "start": "node node_modules/react-native/local-cli/cli.js start",
-    "test": "jest"
+    "start": "react-native start",
+    "test": "yarn validate:eslint && yarn validate:flow && yarn validate:typescript && yarn test:jest",
+    "validate:eslint": "eslint 'js/**/*.js' 'example/**/*.js'",
+    "validate:flow": "flow check",
+    "validate:typescript": "tsc --project ./",
+    "test:jest": "jest js/",
+    "ci:publish": "yarn semantic-release",
+    "semantic-release": "semantic-release"
   },
   "keywords": [
     "react-native",
