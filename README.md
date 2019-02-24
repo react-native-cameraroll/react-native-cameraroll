@@ -43,7 +43,7 @@ title: CameraRoll
 
 `CameraRoll` provides access to the local camera roll or photo library.
 
-On iOS, the `CameraRoll` API requires the `RCTCameraRoll` library to be linked. You can refer to [Linking Libraries (iOS)](linking-libraries-ios.md) to learn more.
+On iOS, the `CameraRoll` API requires the `RNCCameraRoll` library to be linked. You can refer to [Linking Libraries (iOS)](linking-libraries-ios.md) to learn more.
 
 ### Permissions
 

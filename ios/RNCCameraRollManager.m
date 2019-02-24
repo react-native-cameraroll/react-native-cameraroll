@@ -69,7 +69,7 @@ RCT_ENUM_CONVERTER(PHAssetCollectionSubtype, (@{
 
 @implementation RNCCameraRollManager
 
-RCT_EXPORT_MODULE()
+RCT_EXPORT_MODULE(CameraRollManager)
 
 @synthesize bridge = _bridge;
 

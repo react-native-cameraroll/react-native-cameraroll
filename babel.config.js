@@ -5,7 +5,7 @@ module.exports = {
       "module-resolver",
       {
         alias: {
-          "@react-native-community/cameraroll": "./js"
+          "@react-native-community/cameraroll": "./js/CameraRoll.js"
         },
         cwd: "babelrc"
       }
