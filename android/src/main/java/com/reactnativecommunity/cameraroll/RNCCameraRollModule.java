@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-package com.facebook.react.modules.camera;
+package com.reactnativecommunity.cameraroll;
 
 import android.content.ContentResolver;
 import android.content.Context;

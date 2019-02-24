@@ -10,6 +10,6 @@
 
 @class PHPhotoLibrary;
 
-@interface RCTAssetsLibraryRequestHandler : NSObject <RCTURLRequestHandler>
+@interface RNCAssetsLibraryRequestHandler : NSObject <RCTURLRequestHandler>
 
 @end

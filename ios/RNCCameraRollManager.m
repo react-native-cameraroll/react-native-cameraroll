@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#import "RCTCameraRollManager.h"
+#import "RNCCameraRollManager.h"
 
 #import <CoreLocation/CoreLocation.h>
 #import <Foundation/Foundation.h>
@@ -67,7 +67,7 @@ RCT_ENUM_CONVERTER(PHAssetCollectionSubtype, (@{
 
 @end
 
-@implementation RCTCameraRollManager
+@implementation RNCCameraRollManager
 
 RCT_EXPORT_MODULE()
 
