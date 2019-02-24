@@ -16,12 +16,11 @@ import android.media.MediaMetadataRetriever;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.provider.MediaStore.Images;
-import android.provider.MediaStore.MediaColumns;
 import android.text.TextUtils;
+
 import com.facebook.common.logging.FLog;
 import com.facebook.react.bridge.GuardedAsyncTask;
 import com.facebook.react.bridge.JSApplicationIllegalArgumentException;
@@ -39,23 +38,24 @@ import com.facebook.react.bridge.WritableNativeArray;
 import com.facebook.react.bridge.WritableNativeMap;
 import com.facebook.react.common.ReactConstants;
 import com.facebook.react.module.annotations.ReactModule;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URLConnection;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.Nullable;
-import java.net.URLConnection;
 
-// TODO #6015104: rename to something less iOSish
+import javax.annotation.Nullable;
+
 /**
  * {@link NativeModule} that allows JS to interact with the photos and videos on the device (i.e.
  * {@link MediaStore.Images}).
  */
-@ReactModule(name = CameraRollManager.NAME)
-public class CameraRollManager extends ReactContextBaseJavaModule {
+@ReactModule(name = CameraRollModule.NAME)
+public class CameraRollModule extends ReactContextBaseJavaModule {
 
   public static final String NAME = "CameraRollManager";
 
@@ -83,7 +83,7 @@ public class CameraRollManager extends ReactContextBaseJavaModule {
   private static final String SELECTION_BUCKET = Images.Media.BUCKET_DISPLAY_NAME + " = ?";
   private static final String SELECTION_DATE_TAKEN = Images.Media.DATE_TAKEN + " < ?";
 
-  public CameraRollManager(ReactApplicationContext reactContext) {
+  public CameraRollModule(ReactApplicationContext reactContext) {
     super(reactContext);
   }
 
