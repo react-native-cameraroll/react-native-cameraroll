@@ -10,6 +10,7 @@
 import React, {Component} from 'react';
 import {StyleSheet, Text, View} from 'react-native';
 import CameraRoll from '@react-native-community/cameraroll';
+import CameraRollExample from './js/CameraRollExample';
 
 type Props = {};
 export default class App extends Component<Props> {
@@ -20,7 +21,7 @@ export default class App extends Component<Props> {
   render() {
     return (
       <View style={styles.container}>
-        <Text>Welcome</Text>
+        <CameraRollExample />
       </View>
     );
   }
