@@ -9,10 +9,7 @@
  */
 'use strict';
 
-const PropTypes = require('prop-types');
-const {checkPropTypes} = PropTypes;
-const RNCCameraRoll = require('./nativeInterface');
-const deprecatedCreateStrictShapeTypeChecker = require('deprecatedCreateStrictShapeTypeChecker');
+import RNCCameraRoll from './nativeInterface';
 const invariant = require('fbjs/lib/invariant');
 
 const GROUP_TYPES_OPTIONS = {
@@ -33,52 +30,43 @@ const ASSET_TYPE_OPTIONS = {
 
 export type GroupTypes = $Keys<typeof GROUP_TYPES_OPTIONS>;
 
-export type GetPhotosParams = {
-  first: number,
-  after?: string,
-  groupTypes?: GroupTypes,
-  groupName?: string,
-  assetType?: $Keys<typeof ASSET_TYPE_OPTIONS>,
-  mimeTypes?: Array<string>,
-};
-
 /**
  * Shape of the param arg for the `getPhotos` function.
  */
-const getPhotosParamChecker = deprecatedCreateStrictShapeTypeChecker({
+export type GetPhotosParams = {
   /**
    * The number of photos wanted in reverse order of the photo application
    * (i.e. most recent first for SavedPhotos).
    */
-  first: PropTypes.number.isRequired,
+  first: number,
 
   /**
    * A cursor that matches `page_info { end_cursor }` returned from a previous
    * call to `getPhotos`
    */
-  after: PropTypes.string,
+  after?: string,
 
   /**
    * Specifies which group types to filter the results to.
    */
-  groupTypes: PropTypes.oneOf(Object.keys(GROUP_TYPES_OPTIONS)),
+  groupTypes?: GroupTypes,
 
   /**
    * Specifies filter on group names, like 'Recent Photos' or custom album
    * titles.
    */
-  groupName: PropTypes.string,
+  groupName?: string,
 
   /**
    * Specifies filter on asset type
    */
-  assetType: PropTypes.oneOf(Object.keys(ASSET_TYPE_OPTIONS)),
+  assetType?: $Keys<typeof ASSET_TYPE_OPTIONS>,
 
   /**
    * Filter by mimetype (e.g. image/jpeg).
    */
-  mimeTypes: PropTypes.arrayOf(PropTypes.string),
-});
+  mimeTypes?: Array<string>,
+};
 
 export type PhotoIdentifier = {
   node: {
@@ -111,43 +99,6 @@ export type PhotoIdentifiersPage = {
     end_cursor?: string,
   },
 };
-
-/**
- * Shape of the return value of the `getPhotos` function.
- */
-const getPhotosReturnChecker = deprecatedCreateStrictShapeTypeChecker({
-  edges: PropTypes.arrayOf(
-    /* $FlowFixMe(>=0.66.0 site=react_native_fb) This comment suppresses an
-     * error found when Flow v0.66 was deployed. To see the error delete this
-     * comment and run Flow. */
-    deprecatedCreateStrictShapeTypeChecker({
-      node: deprecatedCreateStrictShapeTypeChecker({
-        type: PropTypes.string.isRequired,
-        group_name: PropTypes.string.isRequired,
-        image: deprecatedCreateStrictShapeTypeChecker({
-          uri: PropTypes.string.isRequired,
-          height: PropTypes.number.isRequired,
-          width: PropTypes.number.isRequired,
-          isStored: PropTypes.bool,
-          playableDuration: PropTypes.number.isRequired,
-        }).isRequired,
-        timestamp: PropTypes.number.isRequired,
-        location: deprecatedCreateStrictShapeTypeChecker({
-          latitude: PropTypes.number,
-          longitude: PropTypes.number,
-          altitude: PropTypes.number,
-          heading: PropTypes.number,
-          speed: PropTypes.number,
-        }),
-      }).isRequired,
-    }),
-  ).isRequired,
-  page_info: deprecatedCreateStrictShapeTypeChecker({
-    has_next_page: PropTypes.bool.isRequired,
-    start_cursor: PropTypes.string,
-    end_cursor: PropTypes.string,
-  }).isRequired,
-});
 
 /**
  * `CameraRoll` provides access to the local camera roll or photo library.
@@ -208,35 +159,14 @@ class CameraRoll {
    * See https://facebook.github.io/react-native/docs/cameraroll.html#getphotos
    */
   static getPhotos(params: GetPhotosParams): Promise<PhotoIdentifiersPage> {
-    if (__DEV__) {
-      checkPropTypes(
-        {params: getPhotosParamChecker},
-        {params},
-        'params',
-        'CameraRoll.getPhotos',
-      );
-    }
     if (arguments.length > 1) {
       console.warn(
         'CameraRoll.getPhotos(tag, success, error) is deprecated.  Use the returned Promise instead',
       );
       let successCallback = arguments[1];
-      if (__DEV__) {
-        const callback = arguments[1];
-        successCallback = response => {
-          checkPropTypes(
-            {response: getPhotosReturnChecker},
-            {response},
-            'response',
-            'CameraRoll.getPhotos callback',
-          );
-          callback(response);
-        };
-      }
       const errorCallback = arguments[2] || (() => {});
       RNCCameraRoll.getPhotos(params).then(successCallback, errorCallback);
     }
-    // TODO: Add the __DEV__ check back in to verify the Promise result
     return RNCCameraRoll.getPhotos(params);
   }
 }
