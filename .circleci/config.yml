@@ -18,7 +18,7 @@ aliases:
 
 - &save-ios-build-cache
   paths:
-  - ~/react-native-netinfo/example/ios/build/Build
+  - ~/react-native-cameraroll/example/ios/build/Build
   key: v1-ios-build-cache-{{ arch }}-{{ checksum "~/.tmp/checksumfiles/package.json" }}
   when: always
 
