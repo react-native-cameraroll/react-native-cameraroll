@@ -2,7 +2,7 @@
   "name": "@react-native-community/cameraroll",
   "author": "Bartol Karuza <bartol.k@gmail.com>",
   "homepage": "https://github.com/react-native-community/react-native-cameraroll#readme",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "",
   "main": "./js/CameraRoll.js",
   "scripts": {
