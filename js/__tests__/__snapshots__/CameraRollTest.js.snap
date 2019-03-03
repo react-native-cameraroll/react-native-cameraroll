@@ -1,0 +1,30 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CameraRoll Should call deletePhotos 1`] = `
+Array [
+  Array [
+    Array [
+      "a uri",
+    ],
+  ],
+]
+`;
+
+exports[`CameraRoll Should call getPhotos 1`] = `
+Array [
+  Array [
+    Object {
+      "first": 0,
+    },
+  ],
+]
+`;
+
+exports[`CameraRoll Should call saveToCameraRoll 1`] = `
+Array [
+  Array [
+    "a tag",
+    "photo",
+  ],
+]
+`;

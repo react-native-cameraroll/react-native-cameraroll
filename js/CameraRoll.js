@@ -11,10 +11,9 @@
 
 const PropTypes = require('prop-types');
 const {checkPropTypes} = PropTypes;
-const RCTCameraRollManager = require('NativeModules').CameraRollManager;
-
+const RNCCameraRoll = require('nativeInterface');
 const deprecatedCreateStrictShapeTypeChecker = require('deprecatedCreateStrictShapeTypeChecker');
-const invariant = require('invariant');
+const invariant = require('fbjs/lib/invariant');
 
 const GROUP_TYPES_OPTIONS = {
   Album: 'Album',
@@ -170,13 +169,12 @@ class CameraRoll {
   }
 
   static deletePhotos(photos: Array<string>) {
-    return RCTCameraRollManager.deletePhotos(photos);
+    return RNCCameraRoll.deletePhotos(photos);
   }
 
   /**
    * Saves the photo or video to the camera roll or photo library.
    *
-   * See https://facebook.github.io/react-native/docs/cameraroll.html#savetocameraroll
    */
   static saveToCameraRoll(
     tag: string,
@@ -200,7 +198,7 @@ class CameraRoll {
       mediaType = 'video';
     }
 
-    return RCTCameraRollManager.saveToCameraRoll(tag, mediaType);
+    return RNCCameraRoll.saveToCameraRoll(tag, mediaType);
   }
 
   /**
@@ -236,13 +234,10 @@ class CameraRoll {
         };
       }
       const errorCallback = arguments[2] || (() => {});
-      RCTCameraRollManager.getPhotos(params).then(
-        successCallback,
-        errorCallback,
-      );
+      RNCCameraRoll.getPhotos(params).then(successCallback, errorCallback);
     }
     // TODO: Add the __DEV__ check back in to verify the Promise result
-    return RCTCameraRollManager.getPhotos(params);
+    return RNCCameraRoll.getPhotos(params);
   }
 }
 

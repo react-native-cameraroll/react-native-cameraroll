@@ -1,5 +1,6 @@
+# `@react-native-community/cameraroll`
 
-# react-native-cameraroll
+[![CircleCI Status](https://img.shields.io/circleci/project/github/react-native-community/react-native-netinfo/master.svg)](https://circleci.com/gh/react-native-community/workflows/react-native-cameraroll/tree/master) ![Supports Android and iOS](https://img.shields.io/badge/platforms-android%20|%20ios-lightgrey.svg) ![MIT License](https://img.shields.io/npm/l/@react-native-community/cameraroll.svg)
 
 ## Getting started
 
@@ -34,12 +35,20 @@
       compile project(':@react-native-community/cameraroll')
   	```
 
+## Migrating from the core `react-native` module
+This module was created when the CameraRoll was split out from the core of React Native. To migrate to this module you need to follow the installation instructions above and then change you imports from:
+
+```javascript
+import { CameraRoll } from "react-native";
+```
+
+to:
+
+```javascript
+import CameraRoll from "@react-native-community/cameraroll";
+```
 
 ## Usage
----
-id: cameraroll
-title: CameraRoll
----
 
 `CameraRoll` provides access to the local camera roll or photo library.
 

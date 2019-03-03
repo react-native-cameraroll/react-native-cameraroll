@@ -22,7 +22,7 @@ const {
   TouchableOpacity,
 } = ReactNative;
 
-const invariant = require('invariant');
+const invariant = require('fbjs/lib/invariant');
 
 const CameraRollView = require('./CameraRollView');
 
@@ -38,7 +38,7 @@ type Props = $ReadOnly<{|
       backButtonTitle: string,
       passProps: $ReadOnly<{|asset: PhotoIdentifier|}>,
     |}>,
-    >,
+  >,
 |}>;
 
 type State = {|
@@ -80,7 +80,7 @@ export default class CameraRollExample extends React.Component<Props, State> {
     );
   }
 
-  loadAsset(asset) {
+  loadAsset(asset: PhotoIdentifier) {
     if (this.props.navigator) {
       this.props.navigator.push({
         title: 'Camera Roll Image',

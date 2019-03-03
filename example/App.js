@@ -1,23 +1,18 @@
 /**
- * Sample React Native App
- * https://github.com/facebook/react-native
+ * Copyright (c) Facebook, Inc. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
  *
  * @format
  * @flow
- * @lint-ignore-every XPLATJSCOPYRIGHT1
  */
-
 import React, {Component} from 'react';
-import {StyleSheet, Text, View} from 'react-native';
-import CameraRoll from '@react-native-community/cameraroll';
+import {StyleSheet, View} from 'react-native';
 import CameraRollExample from './js/CameraRollExample';
 
 type Props = {};
 export default class App extends Component<Props> {
-  componentDidMount = async () => {
-    const photos = await CameraRoll.getPhotos({first: 0, assetType: 'Photos'});
-  };
-
   render() {
     return (
       <View style={styles.container}>
@@ -33,15 +28,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#F5FCFF',
-  },
-  welcome: {
-    fontSize: 20,
-    textAlign: 'center',
-    margin: 10,
-  },
-  instructions: {
-    textAlign: 'center',
-    color: '#333333',
-    marginBottom: 5,
   },
 });
