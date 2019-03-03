@@ -14,6 +14,7 @@ exports[`CameraRoll Should call getPhotos 1`] = `
 Array [
   Array [
     Object {
+      "assetType": "All",
       "first": 0,
     },
   ],

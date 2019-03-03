@@ -29,7 +29,7 @@ export interface GetPhotosParams {
   groupName?: string,
   assetType?: AssetType
   mimeTypes?: Array<string>,
-};
+}
 
 export interface PhotoIdentifier {
   node: {

@@ -10,6 +10,7 @@
 'use strict';
 
 import RNCCameraRoll from './nativeInterface';
+
 const invariant = require('fbjs/lib/invariant');
 
 const GROUP_TYPES_OPTIONS = {
@@ -159,6 +160,9 @@ class CameraRoll {
    * See https://facebook.github.io/react-native/docs/cameraroll.html#getphotos
    */
   static getPhotos(params: GetPhotosParams): Promise<PhotoIdentifiersPage> {
+    if (!params.assetType) {
+      params.assetType = ASSET_TYPE_OPTIONS.All;
+    }
     if (arguments.length > 1) {
       console.warn(
         'CameraRoll.getPhotos(tag, success, error) is deprecated.  Use the returned Promise instead',
