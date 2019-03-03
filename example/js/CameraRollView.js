@@ -15,7 +15,6 @@ const ReactNative = require('react-native');
 const {
   ActivityIndicator,
   Alert,
-  CameraRoll,
   Image,
   FlatList,
   PermissionsAndroid,
@@ -24,6 +23,8 @@ const {
   View,
 } = ReactNative;
 
+import CameraRoll from '../../js/CameraRoll';
+
 const groupByEveryN = require('groupByEveryN');
 const logError = require('logError');
 
@@ -31,7 +32,7 @@ import type {
   PhotoIdentifier,
   PhotoIdentifiersPage,
   GetPhotosParams,
-} from 'CameraRoll';
+} from '../../js/CameraRoll';
 
 type Props = $ReadOnly<{|
   /**

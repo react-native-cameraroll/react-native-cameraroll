@@ -11,7 +11,7 @@
 
 const PropTypes = require('prop-types');
 const {checkPropTypes} = PropTypes;
-const RNCCameraRoll = require('nativeInterface');
+const RNCCameraRoll = require('./nativeInterface');
 const deprecatedCreateStrictShapeTypeChecker = require('deprecatedCreateStrictShapeTypeChecker');
 const invariant = require('fbjs/lib/invariant');
 

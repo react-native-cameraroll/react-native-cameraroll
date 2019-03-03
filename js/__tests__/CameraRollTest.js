@@ -11,7 +11,9 @@
 
 import CameraRoll from '../CameraRoll';
 
-const NativeModule = require('nativeInterface');
+const NativeModule = require('../nativeInterface');
+
+jest.mock('../nativeInterface');
 
 describe('CameraRoll', () => {
   it('Should call deletePhotos', () => {

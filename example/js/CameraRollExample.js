@@ -12,7 +12,6 @@
 const React = require('react');
 const ReactNative = require('react-native');
 const {
-  CameraRoll,
   Image,
   Slider,
   StyleSheet,
@@ -21,14 +20,14 @@ const {
   View,
   TouchableOpacity,
 } = ReactNative;
+import CameraRoll from '../../js/CameraRoll';
+import type {PhotoIdentifier, GroupTypes} from '../../js/CameraRoll';
 
 const invariant = require('fbjs/lib/invariant');
 
 const CameraRollView = require('./CameraRollView');
 
 const AssetScaledImageExampleView = require('./AssetScaledImageExample');
-
-import type {PhotoIdentifier, GroupTypes} from 'CameraRoll';
 
 type Props = $ReadOnly<{|
   navigator?: ?Array<
@@ -54,6 +53,7 @@ export default class CameraRollExample extends React.Component<Props, State> {
     bigImages: true,
   };
   _cameraRollView: ?React.ElementRef<typeof CameraRollView>;
+
   render() {
     return (
       <View>
