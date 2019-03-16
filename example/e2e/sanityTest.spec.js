@@ -8,7 +8,7 @@
  * @flow
  */
 /* eslint-env jest */
-const {device, expect, element, by} = require('detox');
+/* global device, element, by */
 
 describe('CameraRoll', () => {
   beforeEach(async () => {
