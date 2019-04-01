@@ -90,7 +90,7 @@ type Row = {
 
 class CameraRollView extends React.Component<Props, State> {
   static defaultProps = {
-    groupTypes: 'SavedPhotos',
+    groupTypes: 'All',
     batchSize: 5,
     imagesPerRow: 1,
     assetType: 'Photos',

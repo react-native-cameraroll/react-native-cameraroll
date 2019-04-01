@@ -48,7 +48,7 @@ type State = {|
 
 export default class CameraRollExample extends React.Component<Props, State> {
   state = {
-    groupTypes: 'SavedPhotos',
+    groupTypes: 'All',
     sliderValue: 1,
     bigImages: true,
   };

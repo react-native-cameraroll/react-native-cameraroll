@@ -15,12 +15,12 @@ const invariant = require('fbjs/lib/invariant');
 
 const GROUP_TYPES_OPTIONS = {
   Album: 'Album',
-  All: 'All',
+  All: 'All', // default
   Event: 'Event',
   Faces: 'Faces',
   Library: 'Library',
   PhotoStream: 'PhotoStream',
-  SavedPhotos: 'SavedPhotos', // default
+  SavedPhotos: 'SavedPhotos',
 };
 
 const ASSET_TYPE_OPTIONS = {
@@ -37,7 +37,7 @@ export type GroupTypes = $Keys<typeof GROUP_TYPES_OPTIONS>;
 export type GetPhotosParams = {
   /**
    * The number of photos wanted in reverse order of the photo application
-   * (i.e. most recent first for SavedPhotos).
+   * (i.e. most recent first).
    */
   first: number,
 
@@ -162,6 +162,9 @@ class CameraRoll {
   static getPhotos(params: GetPhotosParams): Promise<PhotoIdentifiersPage> {
     if (!params.assetType) {
       params.assetType = ASSET_TYPE_OPTIONS.All;
+    }
+    if (!params.groupTypes) {
+      params.groupTypes = GROUP_TYPES_OPTIONS.All;
     }
     if (arguments.length > 1) {
       console.warn(
