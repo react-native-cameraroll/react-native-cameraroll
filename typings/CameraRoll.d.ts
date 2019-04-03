@@ -85,3 +85,7 @@ export interface CameraRollStatic {
    */
   getPhotos: (params: GetPhotosParams) => Promise<PhotoIdentifiersPage>;
 }
+
+let CameraRoll: CameraRollStatic;
+
+export default CameraRoll;

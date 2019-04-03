@@ -5,6 +5,7 @@
   "version": "1.0.3",
   "description": "",
   "main": "./js/CameraRoll.js",
+  "types": "./typings/CameraRoll.d.ts",
   "scripts": {
     "start": "react-native start",
     "test": "yarn validate:eslint && yarn validate:flow && yarn validate:typescript && yarn test:jest",
