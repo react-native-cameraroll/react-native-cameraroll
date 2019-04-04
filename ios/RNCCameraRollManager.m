@@ -61,7 +61,8 @@ RCT_ENUM_CONVERTER(PHAssetCollectionSubtype, (@{
                   "'videos' or 'all'.", mediaType);
     }
     // This case includes the "all" mediatype
-    return nil;
+    PHFetchOptions *const options = [PHFetchOptions new];
+    return options;
   }
 }
 
