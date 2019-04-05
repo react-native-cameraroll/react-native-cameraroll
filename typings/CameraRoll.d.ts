@@ -27,7 +27,7 @@ export interface GetPhotosParams {
   after?: string,
   groupTypes?: GroupType,
   groupName?: string,
-  assetType?: AssetType
+  assetType?: AssetType,
   mimeTypes?: Array<string>,
 }
 
@@ -72,12 +72,12 @@ export interface CameraRollStatic {
   /**
    * Delete a photo from the camera roll or media library. photos is an array of photo uri's.
    */
-  deletePhotos: (photos: Array<string>) => void,
+  deletePhotos: (photos: Array<string>) => void;
 
   /**
    * Saves the photo or video to the camera roll or photo library.
    */
-  saveToCameraRoll: (tag: string, type?: 'photo'  | 'video') => Promise<string>;
+  saveToCameraRoll: (tag: string, type?: 'photo' | 'video') => Promise<string>;
 
   /**
    * Returns a Promise with photo identifier objects from the local camera
