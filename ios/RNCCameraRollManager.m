@@ -231,16 +231,16 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
         }
 
         // Get underlying resources of an asset - this includes files as well as details about edited PHAssets
+        NSArray<PHAssetResource *> *const assetResources = [PHAssetResource assetResourcesForAsset:asset];
+        if (![assetResources firstObject]) {
+          return;
+        }
+
+        PHAssetResource *const _Nonnull resource = [assetResources firstObject];
+        CFStringRef const uti = (__bridge CFStringRef _Nonnull)(resource.uniformTypeIdentifier);
+        NSString *const mimeType = (NSString *)CFBridgingRelease(UTTypeCopyPreferredTagWithClass(uti, kUTTagClassMIMEType));
+
         if ([mimeTypes count] > 0) {
-          NSArray<PHAssetResource *> *const assetResources = [PHAssetResource assetResourcesForAsset:asset];
-          if (![assetResources firstObject]) {
-            return;
-          }
-
-          PHAssetResource *const _Nonnull resource = [assetResources firstObject];
-          CFStringRef const uti = (__bridge CFStringRef _Nonnull)(resource.uniformTypeIdentifier);
-          NSString *const mimeType = (NSString *)CFBridgingRelease(UTTypeCopyPreferredTagWithClass(uti, kUTTagClassMIMEType));
-
           BOOL __block mimeTypeFound = NO;
           [mimeTypes enumerateObjectsUsingBlock:^(NSString * _Nonnull mimeTypeFilter, NSUInteger idx, BOOL * _Nonnull stop) {
             if ([mimeType isEqualToString:mimeTypeFilter]) {
@@ -273,7 +273,7 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
                                                      ? @"audio"
                                                      : @"unknown")));
         CLLocation *const loc = asset.location;
-
+        
         // A note on isStored: in the previous code that used ALAssets, isStored
         // was always set to YES, probably because iCloud-synced images were never returned (?).
         // To get the "isStored" information and filename, we would need to actually request the
@@ -287,8 +287,12 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
              @"group_name": [assetCollection localizedTitle],
              @"image": @{
                  @"uri": uri,
+                 @"fileName": [asset valueForKey:@"filename"],
+                 @"originalRotation": [asset valueForKey:@"exifOrientation"],
+                 @"type": mimeType,
                  @"height": @([asset pixelHeight]),
                  @"width": @([asset pixelWidth]),
+                 @"fileSize": [resource valueForKey:@"fileSize"],
                  @"isStored": @YES, // this field doesn't seem to exist on android
                  @"playableDuration": @([asset duration]) // fractional seconds
              },
