@@ -7,7 +7,6 @@
  * @flow
  * @format
  */
-/* eslint-env jest */
 
 import CameraRoll from '../CameraRoll';
 
