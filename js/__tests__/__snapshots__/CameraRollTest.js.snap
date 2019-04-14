@@ -16,6 +16,7 @@ Array [
     Object {
       "assetType": "All",
       "first": 0,
+      "groupTypes": "All",
     },
   ],
 ]

@@ -118,16 +118,16 @@ Returns a Promise with photo identifier objects from the local camera roll of th
 | ------ | ------ | -------- | ------------------------------------------------ |
 | params | object | Yes      | Expects a params with the shape described below. |
 
-* `first` : {number} : The number of photos wanted in reverse order of the photo application (i.e. most recent first for SavedPhotos).
+* `first` : {number} : The number of photos wanted in reverse order of the photo application (i.e. most recent first for SavedPhotos). Required.
 * `after` : {string} : A cursor that matches `page_info { end_cursor }` returned from a previous call to `getPhotos`.
 * `groupTypes` : {string} : Specifies which group types to filter the results to. Valid values are:
   * `Album`
-  * `All`
+  * `All` // default
   * `Event`
   * `Faces`
   * `Library`
   * `PhotoStream`
-  * `SavedPhotos` // default
+  * `SavedPhotos`
 * `groupName` : {string} : Specifies filter on group names, like 'Recent Photos' or custom album titles.
 * `assetType` : {string} : Specifies filter on asset type. Valid values are:
   * `All`
