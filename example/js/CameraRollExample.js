@@ -19,7 +19,7 @@ const {
   Text,
   View,
   TouchableOpacity,
-  Dimensions
+  Dimensions,
 } = ReactNative;
 import CameraRoll from '../../js/CameraRoll';
 import type {PhotoIdentifier, GroupTypes} from '../../js/CameraRoll';
@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
   header: {
     marginTop: 44,
     padding: 20,
-    width: Dimensions.get('window').width
+    width: Dimensions.get('window').width,
   },
   row: {
     flexDirection: 'row',
