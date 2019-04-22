@@ -19,6 +19,7 @@ const {
   Text,
   View,
   TouchableOpacity,
+  Dimensions,
 } = ReactNative;
 import CameraRoll from '../../js/CameraRoll';
 import type {PhotoIdentifier, GroupTypes} from '../../js/CameraRoll';
@@ -57,16 +58,18 @@ export default class CameraRollExample extends React.Component<Props, State> {
   render() {
     return (
       <View>
-        <Switch
-          onValueChange={this._onSwitchChange}
-          value={this.state.bigImages}
-        />
-        <Text>{(this.state.bigImages ? 'Big' : 'Small') + ' Images'}</Text>
-        <Slider
-          value={this.state.sliderValue}
-          onValueChange={this._onSliderChange}
-        />
-        <Text>{'Group Type: ' + this.state.groupTypes}</Text>
+        <View style={styles.header}>
+          <Switch
+            onValueChange={this._onSwitchChange}
+            value={this.state.bigImages}
+          />
+          <Text>{(this.state.bigImages ? 'Big' : 'Small') + ' Images'}</Text>
+          <Slider
+            value={this.state.sliderValue}
+            onValueChange={this._onSliderChange}
+          />
+          <Text>{'Group Type: ' + this.state.groupTypes}</Text>
+        </View>
         <CameraRollView
           ref={ref => {
             this._cameraRollView = ref;
@@ -131,6 +134,11 @@ export default class CameraRollExample extends React.Component<Props, State> {
 }
 
 const styles = StyleSheet.create({
+  header: {
+    marginTop: 44,
+    padding: 20,
+    width: Dimensions.get('window').width,
+  },
   row: {
     flexDirection: 'row',
     flex: 1,
