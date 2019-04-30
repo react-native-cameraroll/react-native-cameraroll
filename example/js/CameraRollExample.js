@@ -22,7 +22,8 @@ const {
   Dimensions,
 } = ReactNative;
 import CameraRoll from '../../js/CameraRoll';
-import type {PhotoIdentifier, GroupTypes} from '../../js/CameraRoll';
+import type { PhotoIdentifier, GroupTypes } from '../../js/CameraRoll';
+import { NativeModules } from 'react-native'
 
 const invariant = require('fbjs/lib/invariant');
 
@@ -31,20 +32,20 @@ const CameraRollView = require('./CameraRollView');
 const AssetScaledImageExampleView = require('./AssetScaledImageExample');
 
 type Props = $ReadOnly<{|
-  navigator?: ?Array<
-    $ReadOnly<{|
-      title: string,
-      component: Class<React.Component<any, any>>,
-      backButtonTitle: string,
-      passProps: $ReadOnly<{|asset: PhotoIdentifier|}>,
+  navigator?: ?Array <
+    $ReadOnly < {|
+    title: string,
+      component: Class < React.Component < any, any >>,
+        backButtonTitle: string,
+          passProps: $ReadOnly < {| asset: PhotoIdentifier |}>,
     |}>,
   >,
 |}>;
 
 type State = {|
   groupTypes: GroupTypes,
-  sliderValue: number,
-  bigImages: boolean,
+    sliderValue: number,
+      bigImages: boolean,
 |};
 
 export default class CameraRollExample extends React.Component<Props, State> {
@@ -55,7 +56,14 @@ export default class CameraRollExample extends React.Component<Props, State> {
   };
   _cameraRollView: ?React.ElementRef<typeof CameraRollView>;
 
+  saveVideoIOS() {
+    let dummyURL = "https://www.kj.com/sites/default/files/video/530262769.mp4"
+    NativeModules.SaveVideo.saveVideoToPhone(dummyURL)
+    alert("saved")
+  }
+
   render() {
+
     return (
       <View>
         <View style={styles.header}>
@@ -63,6 +71,13 @@ export default class CameraRollExample extends React.Component<Props, State> {
             onValueChange={this._onSwitchChange}
             value={this.state.bigImages}
           />
+          <TouchableOpacity style={styles.topRightButton}
+            onPress={() => { this.saveVideoIOS() }}
+          >
+            <Text style={styles.buttonText}>
+              Save video iOS
+            </Text>
+          </TouchableOpacity>
           <Text>{(this.state.bigImages ? 'Big' : 'Small') + ' Images'}</Text>
           <Slider
             value={this.state.sliderValue}
@@ -89,15 +104,15 @@ export default class CameraRollExample extends React.Component<Props, State> {
         title: 'Camera Roll Image',
         component: AssetScaledImageExampleView,
         backButtonTitle: 'Back',
-        passProps: {asset: asset},
+        passProps: { asset: asset },
       });
     }
   }
 
   _renderImage = (asset: PhotoIdentifier) => {
     const imageSize = this.state.bigImages ? 150 : 75;
-    const imageStyle = [styles.image, {width: imageSize, height: imageSize}];
-    const {location} = asset.node;
+    const imageStyle = [styles.image, { width: imageSize, height: imageSize }];
+    const { location } = asset.node;
     const locationStr = location
       ? JSON.stringify(location)
       : 'Unknown location';
@@ -123,13 +138,13 @@ export default class CameraRollExample extends React.Component<Props, State> {
     const index = Math.floor(value * options.length * 0.99);
     const groupTypes = options[index];
     if (groupTypes !== this.state.groupTypes) {
-      this.setState({groupTypes: groupTypes});
+      this.setState({ groupTypes: groupTypes });
     }
   };
 
   _onSwitchChange = value => {
     invariant(this._cameraRollView, 'ref should be set');
-    this.setState({bigImages: value});
+    this.setState({ bigImages: value });
   };
 }
 
@@ -153,4 +168,19 @@ const styles = StyleSheet.create({
   info: {
     flex: 1,
   },
+  topRightButton: {
+    alignSelf: 'flex-end',
+    height: 30,
+    width: 150,
+    backgroundColor: 'green',
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignContent: 'center',
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 14,
+    alignSelf: 'center',
+  }
 });
