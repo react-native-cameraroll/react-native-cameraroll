@@ -62,6 +62,10 @@ export interface PhotoIdentifiersPage {
     end_cursor?: string,
   },
 }
+export type SaveToCameraRollOptions = {
+  type?: 'photo' | 'video' | 'auto',
+  album?: string,
+};
 
 export interface CameraRollStatic {
   /**
@@ -77,7 +81,7 @@ export interface CameraRollStatic {
   /**
    * Saves the photo or video to the camera roll or photo library.
    */
-  saveToCameraRoll: (tag: string, type?: 'photo' | 'video') => Promise<string>;
+  static saveToCameraRoll(tag: string, options?: SaveToCameraRollOptions): Promise<string> 
 
   /**
    * Returns a Promise with photo identifier objects from the local camera
