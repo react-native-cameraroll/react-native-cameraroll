@@ -142,7 +142,7 @@ class CameraRoll {
     );
     invariant(
       options.type === 'photo' || options.type === 'video' || options.type==='auto'||options.type === undefined,
-      `The second argument to saveToCameraRoll must be 'photo' or 'video'. You passed ${type ||
+      `The second argument to saveToCameraRoll must be 'photo' or 'video' or 'auto'. You passed ${type ||
         'unknown'}`,
     );
     if (type === 'auto') {
