@@ -100,8 +100,8 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
    * @param promise to be resolved or rejected
    */
   @ReactMethod
-  public void saveToCameraRoll(String uri, String type, Promise promise) {
-    new SaveToCameraRoll(getReactApplicationContext(), Uri.parse(uri), promise)
+  public void saveToCameraRoll(String uri, ReadableMap options, Promise promise) {
+    new SaveToCameraRoll(getReactApplicationContext(), Uri.parse(uri),options, promise)
         .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
   }
 
@@ -110,12 +110,14 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
     private final Context mContext;
     private final Uri mUri;
     private final Promise mPromise;
+    private final ReadableMap mOptions;
 
-    public SaveToCameraRoll(ReactContext context, Uri uri, Promise promise) {
+    public SaveToCameraRoll(ReactContext context, Uri uri,ReadableMap options, Promise promise) {
       super(context);
       mContext = context;
       mUri = uri;
       mPromise = promise;
+      mOptions = options;
     }
 
     @Override
@@ -123,8 +125,25 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
       File source = new File(mUri.getPath());
       FileChannel input = null, output = null;
       try {
-        File exportDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
-        exportDir.mkdirs();
+        File environment;
+        if("mov".equals(mOptions.getString("type"))){
+          environment = Environment.getExternalStoragePublicDirectory(
+                  Environment.DIRECTORY_MOVIES);
+        }else{
+          environment = Environment.getExternalStoragePublicDirectory(
+                  Environment.DIRECTORY_PICTURES);
+        }
+        File exportDir;
+        if(!"".equals(mOptions.getString("album"))){
+          exportDir = new File(environment, mOptions.getString("album"));
+          if (!exportDir.exists()&&!exportDir.mkdirs()) {
+            mPromise.reject(ERROR_UNABLE_TO_LOAD, "Album Directory not created. Did you request WRITE_EXTERNAL_STORAGE?");
+            return;
+          }
+        }else{
+          exportDir=environment;
+        }
+
         if (!exportDir.isDirectory()) {
           mPromise.reject(ERROR_UNABLE_TO_LOAD, "External media storage directory not available");
           return;

@@ -100,7 +100,10 @@ export type PhotoIdentifiersPage = {
     end_cursor?: string,
   },
 };
-
+export type SaveToCameraRollOptions = {
+  type?: 'photo' | 'video' | 'auto',
+  album?: string,
+};
 /**
  * `CameraRoll` provides access to the local camera roll or photo library.
  *
@@ -117,7 +120,7 @@ class CameraRoll {
     console.warn(
       '`CameraRoll.saveImageWithTag()` is deprecated. Use `CameraRoll.saveToCameraRoll()` instead.',
     );
-    return this.saveToCameraRoll(tag, 'photo');
+    return this.saveToCameraRoll(tag, {type: 'photo'});
   }
 
   static deletePhotos(photos: Array<string>) {
@@ -130,27 +133,26 @@ class CameraRoll {
    */
   static saveToCameraRoll(
     tag: string,
-    type?: 'photo' | 'video',
+    options: SaveToCameraRollOptions= {},
   ): Promise<string> {
+    let {type='auto', album=''} = options;
     invariant(
       typeof tag === 'string',
       'CameraRoll.saveToCameraRoll must be a valid string.',
     );
-
     invariant(
-      type === 'photo' || type === 'video' || type === undefined,
+      options.type === 'photo' || options.type === 'video' || options.type==='auto'||options.type === undefined,
       `The second argument to saveToCameraRoll must be 'photo' or 'video'. You passed ${type ||
         'unknown'}`,
     );
-
-    let mediaType = 'photo';
-    if (type) {
-      mediaType = type;
-    } else if (['mov', 'mp4'].indexOf(tag.split('.').slice(-1)[0]) >= 0) {
-      mediaType = 'video';
+    if (type === 'auto') {
+      if (['mov', 'mp4'].indexOf(tag.split('.').slice(-1)[0]) >= 0) {
+        type = 'video';
+      } else {
+        type = 'photo';
+      }
     }
-
-    return RNCCameraRoll.saveToCameraRoll(tag, mediaType);
+    return RNCCameraRoll.saveToCameraRoll(tag, {type, album});
   }
 
   /**

@@ -98,49 +98,83 @@ static void requestPhotoLibraryAccess(RCTPromiseRejectBlock reject, PhotosAuthor
 }
 
 RCT_EXPORT_METHOD(saveToCameraRoll:(NSURLRequest *)request
-                  type:(NSString *)type
+                  options:(NSDictionary *)options
                   resolve:(RCTPromiseResolveBlock)resolve
                   reject:(RCTPromiseRejectBlock)reject)
 {
-  __block PHObjectPlaceholder *placeholder;
-
   // We load images and videos differently.
   // Images have many custom loaders which can load images from ALAssetsLibrary URLs, PHPhotoLibrary
   // URLs, `data:` URIs, etc. Video URLs are passed directly through for now; it may be nice to support
   // more ways of loading videos in the future.
   __block NSURL *inputURI = nil;
   __block UIImage *inputImage = nil;
-
+  __block PHFetchResult *photosAsset;
+  __block PHAssetCollection *collection;
+  __block PHObjectPlaceholder *placeholder;
+  
   void (^saveBlock)(void) = ^void() {
     // performChanges and the completionHandler are called on
     // arbitrary threads, not the main thread - this is safe
     // for now since all JS is queued and executed on a single thread.
     // We should reevaluate this if that assumption changes.
+
     [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
-      PHAssetChangeRequest *changeRequest;
-
-      // Defaults to "photo". `type` is an optional param.
-      if ([type isEqualToString:@"video"]) {
-        changeRequest = [PHAssetChangeRequest creationRequestForAssetFromVideoAtFileURL:inputURI];
+      PHAssetChangeRequest *assetRequest ;
+      if ([options[@"type"] isEqualToString:@"video"]) {
+        assetRequest = [PHAssetChangeRequest creationRequestForAssetFromVideoAtFileURL:inputURI];
       } else {
-        changeRequest = [PHAssetChangeRequest creationRequestForAssetFromImage:inputImage];
+        assetRequest = [PHAssetChangeRequest creationRequestForAssetFromImage:inputImage];
       }
-
-      placeholder = [changeRequest placeholderForCreatedAsset];
-    } completionHandler:^(BOOL success, NSError * _Nullable error) {
-      if (success) {
+      placeholder = [assetRequest placeholderForCreatedAsset];
+      if(![options[@"album"] isEqualToString:@""]){
+        photosAsset = [PHAsset fetchAssetsInAssetCollection:collection options:nil];
+        PHAssetCollectionChangeRequest *albumChangeRequest = [PHAssetCollectionChangeRequest changeRequestForAssetCollection:collection assets:photosAsset];
+        [albumChangeRequest addAssets:@[placeholder]];
+      }
+    } completionHandler:^(BOOL success, NSError *error) {
+      if (success){
         NSString *uri = [NSString stringWithFormat:@"ph://%@", [placeholder localIdentifier]];
         resolve(uri);
-      } else {
+      }else{
         reject(kErrorUnableToSave, nil, error);
       }
     }];
   };
+  void (^saveWithOptions)(void) = ^void() {
+    if (![options[@"album"] isEqualToString:@""]) {
+        
+        PHFetchOptions *fetchOptions = [[PHFetchOptions alloc] init];
+        fetchOptions.predicate = [NSPredicate predicateWithFormat:@"title = %@", options[@"album"] ];
+        collection = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeAlbum
+                                                              subtype:PHAssetCollectionSubtypeAny
+                                                              options:fetchOptions].firstObject;
+      // Create the album
+      if (!collection){
+        [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
+          PHAssetCollectionChangeRequest *createAlbum = [PHAssetCollectionChangeRequest creationRequestForAssetCollectionWithTitle:options[@"album"]];
+          placeholder = [createAlbum placeholderForCreatedAssetCollection];
+        } completionHandler:^(BOOL success, NSError *error) {
+          if (success){
+            PHFetchResult *collectionFetchResult = [PHAssetCollection fetchAssetCollectionsWithLocalIdentifiers:@[placeholder.localIdentifier]
+                                                  options:nil];
+            collection = collectionFetchResult.firstObject;
+            saveBlock();
+          }else{
+            reject(kErrorUnableToSave, nil, error);
+          }
+        }];
+      }else{
+        saveBlock();
+      }
+    }else{
+      saveBlock();
+    }
+  };
 
   void (^loadBlock)(void) = ^void() {
-    if ([type isEqualToString:@"video"]) {
+    if ([options[@"type"] isEqualToString:@"video"]) {
       inputURI = request.URL;
-      saveBlock();
+      saveWithOptions();
     } else {
       [self.bridge.imageLoader loadImageWithURLRequest:request callback:^(NSError *error, UIImage *image) {
         if (error) {
@@ -149,7 +183,7 @@ RCT_EXPORT_METHOD(saveToCameraRoll:(NSURLRequest *)request
         }
 
         inputImage = image;
-        saveBlock();
+        saveWithOptions();
       }];
     }
   };
