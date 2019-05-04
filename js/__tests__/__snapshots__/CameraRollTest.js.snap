@@ -26,7 +26,10 @@ exports[`CameraRoll Should call saveToCameraRoll 1`] = `
 Array [
   Array [
     "a tag",
-    "photo",
+    Object {
+      "album": "",
+      "type": "photo",
+    },
   ],
 ]
 `;
