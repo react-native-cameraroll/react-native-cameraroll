@@ -8,7 +8,7 @@
  * @format
  */
 'use strict';
-
+import{Platform}from 'react-native'
 import RNCCameraRoll from './nativeInterface';
 
 const invariant = require('fbjs/lib/invariant');
@@ -165,7 +165,7 @@ class CameraRoll {
     if (!params.assetType) {
       params.assetType = ASSET_TYPE_OPTIONS.All;
     }
-    if (!params.groupTypes) {
+    if (!params.groupTypes&&Platform.OS!=='android') {
       params.groupTypes = GROUP_TYPES_OPTIONS.All;
     }
     if (arguments.length > 1) {
