@@ -60,6 +60,10 @@ declare namespace CameraRoll {
     };
   }
 
+  type SaveToCameraRollOptions = {
+    type?: 'photo' | 'video' | 'auto',
+    album?: string,
+  };
 
     /**
      * `CameraRoll.saveImageWithTag()` is deprecated. Use `CameraRoll.saveToCameraRoll()` instead.
