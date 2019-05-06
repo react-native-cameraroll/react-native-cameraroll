@@ -81,7 +81,7 @@ export interface CameraRollStatic {
   /**
    * Saves the photo or video to the camera roll or photo library.
    */
-  static saveToCameraRoll(tag: string, options?: SaveToCameraRollOptions): Promise<string> 
+  saveToCameraRoll(tag: string, options?: SaveToCameraRollOptions): Promise<string> 
 
   /**
    * Returns a Promise with photo identifier objects from the local camera
@@ -90,6 +90,6 @@ export interface CameraRollStatic {
   getPhotos: (params: GetPhotosParams) => Promise<PhotoIdentifiersPage>;
 }
 
-let CameraRoll: CameraRollStatic;
+declare let CameraRoll: CameraRollStatic;
 
 export default CameraRoll;
