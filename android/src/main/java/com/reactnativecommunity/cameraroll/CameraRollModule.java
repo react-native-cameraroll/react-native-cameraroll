@@ -43,7 +43,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.URLConnection;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.List;
@@ -385,7 +384,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
       WritableMap edge = new WritableNativeMap();
       WritableMap node = new WritableNativeMap();
       boolean imageInfoSuccess =
-          putImageInfo(resolver, media, node, idIndex, widthIndex, heightIndex, dataIndex);
+          putImageInfo(resolver, media, node, idIndex, widthIndex, heightIndex, dataIndex, mimeTypeIndex);
       if (imageInfoSuccess) {
         putBasicNodeInfo(media, node, mimeTypeIndex, groupNameIndex, dateTakenIndex);
         putLocationInfo(media, node, longitudeIndex, latitudeIndex);
@@ -420,14 +419,15 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
       int idIndex,
       int widthIndex,
       int heightIndex,
-      int dataIndex) {
+      int dataIndex,
+      int mimeTypeIndex) {
     WritableMap image = new WritableNativeMap();
     Uri photoUri = Uri.parse("file://" + media.getString(dataIndex));
     image.putString("uri", photoUri.toString());
     float width = media.getInt(widthIndex);
     float height = media.getInt(heightIndex);
 
-    String mimeType = URLConnection.guessContentTypeFromName(photoUri.toString());
+    String mimeType = media.getString(mimeTypeIndex);
 
     if (mimeType != null
         && mimeType.startsWith("video")) {
