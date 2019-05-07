@@ -40,6 +40,7 @@ jobs:
     steps:
       - attach_workspace:
           at: .
+      - rn/yarn_install
       - run:
           name: Publish to NPM
           command: yarn ci:publish
