@@ -131,7 +131,7 @@ class CameraRoll {
    * Saves the photo or video to the camera roll or photo library.
    *
    */
-  static saveToCameraRoll(
+  static save(
     tag: string,
     options: SaveToCameraRollOptions = {},
   ): Promise<string> {
@@ -157,7 +157,9 @@ class CameraRoll {
     }
     return RNCCameraRoll.saveToCameraRoll(tag, {type, album});
   }
-
+  static saveToCameraRoll(tag: string, type?: photo | video) {
+    CameraRoll.save(tag, {type});
+  }
   /**
    * Returns a Promise with photo identifier objects from the local camera
    * roll of the device matching shape defined by `getPhotosReturnChecker`.
