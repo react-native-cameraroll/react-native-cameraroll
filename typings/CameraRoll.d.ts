@@ -82,6 +82,11 @@ declare namespace CameraRoll {
     function saveToCameraRoll(tag: string, type?: 'photo' | 'video'): Promise<string>;
 
     /**
+     * Saves the photo or video to the camera roll or photo library.
+     */
+    function save(tag: string, options?: SaveToCameraRollOptions): Promise<string> 
+
+    /**
      * Returns a Promise with photo identifier objects from the local camera
      * roll of the device matching shape defined by `getPhotosReturnChecker`.
      */
