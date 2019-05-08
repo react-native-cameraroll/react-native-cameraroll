@@ -8,7 +8,7 @@
  * @format
  */
 'use strict';
-import{Platform}from 'react-native'
+import {Platform} from 'react-native';
 import RNCCameraRoll from './nativeInterface';
 
 const invariant = require('fbjs/lib/invariant');
@@ -133,15 +133,18 @@ class CameraRoll {
    */
   static saveToCameraRoll(
     tag: string,
-    options: SaveToCameraRollOptions= {},
+    options: SaveToCameraRollOptions = {},
   ): Promise<string> {
-    let {type='auto', album=''} = options;
+    let {type = 'auto', album = ''} = options;
     invariant(
       typeof tag === 'string',
       'CameraRoll.saveToCameraRoll must be a valid string.',
     );
     invariant(
-      options.type === 'photo' || options.type === 'video' || options.type==='auto'||options.type === undefined,
+      options.type === 'photo' ||
+        options.type === 'video' ||
+        options.type === 'auto' ||
+        options.type === undefined,
       `The second argument to saveToCameraRoll must be 'photo' or 'video' or 'auto'. You passed ${type ||
         'unknown'}`,
     );
@@ -165,7 +168,7 @@ class CameraRoll {
     if (!params.assetType) {
       params.assetType = ASSET_TYPE_OPTIONS.All;
     }
-    if (!params.groupTypes&&Platform.OS!=='android') {
+    if (!params.groupTypes && Platform.OS !== 'android') {
       params.groupTypes = GROUP_TYPES_OPTIONS.All;
     }
     if (arguments.length > 1) {
