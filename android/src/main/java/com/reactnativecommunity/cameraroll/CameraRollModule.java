@@ -216,9 +216,6 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
     ReadableArray mimeTypes = params.hasKey("mimeTypes")
         ? params.getArray("mimeTypes")
         : null;
-    if (params.hasKey("groupTypes")) {
-      throw new JSApplicationIllegalArgumentException("groupTypes is not supported on Android");
-    }
 
     new GetMediaTask(
           getReactApplicationContext(),
