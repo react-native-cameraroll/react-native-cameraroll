@@ -140,7 +140,7 @@ class CameraRoll {
     invariant(
       type === 'photo' || type === 'video' || type === undefined,
       `The second argument to saveToCameraRoll must be 'photo' or 'video'. You passed ${type ||
-        'unknown'}`,
+        'unknown'}.`,
     );
 
     let mediaType = 'photo';
