@@ -39,6 +39,10 @@ build/
 local.properties
 *.iml
 
+**/.settings
+**/.classpath
+**/.project
+
 # BUCK
 buck-out/
 \.buckd/
