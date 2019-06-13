@@ -70,8 +70,8 @@ On Android permission is required to read the external storage. Add below line t
 
 ### Methods
 
-* [`saveToCameraRoll`](README.md#savetocameraroll)
-* [`getPhotos`](README.md#getphotos)
+* [`saveToCameraRoll`](#savetocameraroll)
+* [`getPhotos`](#getphotos)
 
 ---
 
