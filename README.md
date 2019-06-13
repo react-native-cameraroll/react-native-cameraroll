@@ -143,6 +143,7 @@ Returns a Promise which when resolved will be of the following shape:
     * `group_name`: {string}
     * `image`: {object} : An object with the following shape:
       * `uri`: {string}
+      * `filename`: {string}
       * `height`: {number}
       * `width`: {number}
       * `isStored`: {boolean}

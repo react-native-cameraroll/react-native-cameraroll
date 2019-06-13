@@ -401,7 +401,10 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
       int mimeTypeIndex) {
     WritableMap image = new WritableNativeMap();
     Uri photoUri = Uri.parse("file://" + media.getString(dataIndex));
+    File file = new File(media.getString(dataIndex));
+    String strFileName = file.getName();
     image.putString("uri", photoUri.toString());
+    image.putString("filename", strFileName);
     float width = media.getInt(widthIndex);
     float height = media.getInt(heightIndex);
 
