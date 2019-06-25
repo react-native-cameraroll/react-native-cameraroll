@@ -143,7 +143,7 @@ RCT_EXPORT_MODULE()
                                                                 MIMEType:(__bridge NSString *)(mimeType)
                                                    expectedContentLength:length
                                                         textEncodingName:nil];
-      CFRelease(mimeType);
+      if (mimeType) CFRelease(mimeType);
 
       [delegate URLRequest:cancellationBlock didReceiveResponse:response];
 
