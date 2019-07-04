@@ -101,7 +101,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
    */
   @ReactMethod
   public void saveToCameraRoll(String uri, ReadableMap options, Promise promise) {
-    new SaveToCameraRoll(getReactApplicationContext(), Uri.parse(uri),options, promise)
+    new SaveToCameraRoll(getReactApplicationContext(), Uri.parse(uri), options, promise)
         .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
   }
 
@@ -112,7 +112,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
     private final Promise mPromise;
     private final ReadableMap mOptions;
 
-    public SaveToCameraRoll(ReactContext context, Uri uri,ReadableMap options, Promise promise) {
+    public SaveToCameraRoll(ReactContext context, Uri uri, ReadableMap options, Promise promise) {
       super(context);
       mContext = context;
       mUri = uri;
@@ -126,22 +126,22 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
       FileChannel input = null, output = null;
       try {
         File environment;
-        if("mov".equals(mOptions.getString("type"))){
+        if ("mov".equals(mOptions.getString("type"))) {
           environment = Environment.getExternalStoragePublicDirectory(
                   Environment.DIRECTORY_MOVIES);
-        }else{
+        } else {
           environment = Environment.getExternalStoragePublicDirectory(
                   Environment.DIRECTORY_PICTURES);
         }
         File exportDir;
-        if(!"".equals(mOptions.getString("album"))){
+        if (!"".equals(mOptions.getString("album"))) {
           exportDir = new File(environment, mOptions.getString("album"));
-          if (!exportDir.exists()&&!exportDir.mkdirs()) {
+          if (!exportDir.exists() && !exportDir.mkdirs()) {
             mPromise.reject(ERROR_UNABLE_TO_LOAD, "Album Directory not created. Did you request WRITE_EXTERNAL_STORAGE?");
             return;
           }
-        }else{
-          exportDir=environment;
+        } else {
+          exportDir = environment;
         }
 
         if (!exportDir.isDirectory()) {

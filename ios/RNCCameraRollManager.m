@@ -26,16 +26,15 @@
 @implementation RCTConvert (PHAssetCollectionSubtype)
 
 RCT_ENUM_CONVERTER(PHAssetCollectionSubtype, (@{
-                                                @"album": @(PHAssetCollectionSubtypeAny),
-                                                @"all": @(PHAssetCollectionSubtypeSmartAlbumUserLibrary),
-                                                @"event": @(PHAssetCollectionSubtypeAlbumSyncedEvent),
-                                                @"faces": @(PHAssetCollectionSubtypeAlbumSyncedFaces),
-                                                @"library": @(PHAssetCollectionSubtypeSmartAlbumUserLibrary),
-                                                @"photo-stream": @(PHAssetCollectionSubtypeAlbumMyPhotoStream), // incorrect, but legacy
-                                                @"photostream": @(PHAssetCollectionSubtypeAlbumMyPhotoStream),
-                                                @"saved-photos": @(PHAssetCollectionSubtypeAny), // incorrect, but legacy
-                                                @"savedphotos": @(PHAssetCollectionSubtypeAny), // This was ALAssetsGroupSavedPhotos, seems to have no direct correspondence in PHAssetCollectionSubtype
-                                                }), PHAssetCollectionSubtypeAny, integerValue)
+   @"album": @(PHAssetCollectionSubtypeAny),
+   @"all": @(PHAssetCollectionSubtypeSmartAlbumUserLibrary),
+   @"event": @(PHAssetCollectionSubtypeAlbumSyncedEvent),
+   @"faces": @(PHAssetCollectionSubtypeAlbumSyncedFaces),
+   @"library": @(PHAssetCollectionSubtypeSmartAlbumUserLibrary),
+   @"photo-stream": @(PHAssetCollectionSubtypeAlbumMyPhotoStream), // incorrect, but legacy
+   @"photostream": @(PHAssetCollectionSubtypeAlbumMyPhotoStream),
+   @"saved-photos": @(PHAssetCollectionSubtypeAny), // incorrect, but legacy correspondence in PHAssetCollectionSubtype
+}), PHAssetCollectionSubtypeAny, integerValue)
 
 
 @end
@@ -111,13 +110,13 @@ RCT_EXPORT_METHOD(saveToCameraRoll:(NSURLRequest *)request
   __block PHFetchResult *photosAsset;
   __block PHAssetCollection *collection;
   __block PHObjectPlaceholder *placeholder;
-  
+
   void (^saveBlock)(void) = ^void() {
     // performChanges and the completionHandler are called on
     // arbitrary threads, not the main thread - this is safe
     // for now since all JS is queued and executed on a single thread.
     // We should reevaluate this if that assumption changes.
-    
+
     [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
       PHAssetChangeRequest *assetRequest ;
       if ([options[@"type"] isEqualToString:@"video"]) {
@@ -142,7 +141,7 @@ RCT_EXPORT_METHOD(saveToCameraRoll:(NSURLRequest *)request
   };
   void (^saveWithOptions)(void) = ^void() {
     if (![options[@"album"] isEqualToString:@""]) {
-      
+  
       PHFetchOptions *fetchOptions = [[PHFetchOptions alloc] init];
       fetchOptions.predicate = [NSPredicate predicateWithFormat:@"title = %@", options[@"album"] ];
       collection = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeAlbum
@@ -170,7 +169,7 @@ RCT_EXPORT_METHOD(saveToCameraRoll:(NSURLRequest *)request
       saveBlock();
     }
   };
-  
+
   void (^loadBlock)(void) = ^void() {
     if ([options[@"type"] isEqualToString:@"video"]) {
       inputURI = request.URL;
@@ -181,13 +180,13 @@ RCT_EXPORT_METHOD(saveToCameraRoll:(NSURLRequest *)request
           reject(kErrorUnableToLoad, nil, error);
           return;
         }
-        
+
         inputImage = image;
         saveWithOptions();
       }];
     }
   };
-  
+
   requestPhotoLibraryAccess(reject, loadBlock);
 }
 
@@ -219,7 +218,7 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
                   reject:(RCTPromiseRejectBlock)reject)
 {
   checkPhotoLibraryConfig();
-  
+
   NSUInteger const first = [RCTConvert NSInteger:params[@"first"]];
   NSString *const afterCursor = [RCTConvert NSString:params[@"after"]];
   NSString *const groupName = [RCTConvert NSString:params[@"groupName"]];
