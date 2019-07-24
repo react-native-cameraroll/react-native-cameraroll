@@ -541,7 +541,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
       ContentResolver resolver = mContext.getContentResolver();
 
       // Set up the projection (we only need the ID)
-      String[] projection = {MediaStore.Images.Media._ID};
+      String[] projection = { MediaStore.Images.Media._ID };
 
       // Match on the file path
       String innerWhere = "?";
@@ -560,17 +560,25 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
       }
 
       Cursor cursor = resolver.query(queryUri, projection, selection, selectionArgs, null);
+      int deletedCount = 0;
 
-      while(cursor.moveToNext()) {
-          long id = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID));
-          Uri deleteUri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id);
+      while (cursor.moveToNext()) {
+        long id = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID));
+        Uri deleteUri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id);
 
-          resolver.delete(deleteUri, null, null);
+        if (resolver.delete(deleteUri, null, null) == 1) {
+          deletedCount++;
+        }
       }
-      
+
       cursor.close();
 
-      mPromise.resolve(null);
+      if (deletedCount == mUris.size()) {
+        mPromise.resolve(null);
+      } else {
+        mPromise.reject(ERROR_UNABLE_TO_DELETE,
+            "Could not delete all media, only deleted " + deletedCount + " photos.");
+      }
     }
   }
 }
