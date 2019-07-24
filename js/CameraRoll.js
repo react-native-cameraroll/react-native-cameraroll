@@ -123,8 +123,13 @@ class CameraRoll {
     return this.saveToCameraRoll(tag, 'photo');
   }
 
-  static deletePhotos(photos: Array<string>) {
-    return RNCCameraRoll.deletePhotos(photos);
+  /**
+   * On iOS: requests deletion of a set of photos from the camera roll.
+   * On Android: Deletes a set of photos from the camera roll.
+   *
+   */
+  static deletePhotos(photoUris: Array<string>) {
+    return RNCCameraRoll.deletePhotos(photoUris);
   }
 
   /**

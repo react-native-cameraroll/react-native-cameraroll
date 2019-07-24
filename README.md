@@ -220,9 +220,9 @@ Requests deletion of photos in the camera roll.
 
 On Android, the uri must be a local image or video URI, such as `"file:///sdcard/img.png"`.
 
-On iOS, the uri can be any image URI (including local, remote asset-library and base64 data URIs) or a local video file URI. The user is presented with a dialog box that shows them the asset as asks them to confirm deletion. This is not able to be bypassed as per Apple Developer guidelines. 
+On iOS, the uri can be any image URI (including local, remote asset-library and base64 data URIs) or a local video file URI. The user is presented with a dialog box that shows them the asset(s) and asks them to confirm deletion. This is not able to be bypassed as per Apple Developer guidelines. 
 
-Returns a Promise which will resolve when the deletion request is completed. We cannot tell whether the deletion succeeded or not because the iOS API does not give us any feedback.
+Returns a Promise which will resolve when the deletion request is completed. We cannot tell whether the deletion succeeded or not in this operation because the iOS API does not give us any feedback.
 
 **Parameters:**
 
