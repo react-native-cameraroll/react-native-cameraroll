@@ -571,22 +571,6 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
       cursor.close();
 
       mPromise.resolve(null);
-
-      // for (int i = 0; i < mUris.size(); i++) {
-      //   Uri uri = Uri.parse(mUris.getString(i));
-      //   String[] selectionArgs = new String[]{uri.getPath()};
-
-      //   Cursor c = resolver.query(queryUri, projection, selection, selectionArgs, null);
-      //   if (c.moveToFirst()) {
-      //       // We found the ID. Deleting the item via the content provider will also remove the file
-      //       long id = c.getLong(c.getColumnIndexOrThrow(MediaStore.Images.Media._ID));
-      //       Uri deleteUri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id);
-      //       resolver.delete(deleteUri, null, null);
-      //   } else {
-      //       // File not found in media store DB
-      //   }
-      //   c.close();
-      // }
     }
   }
 }
