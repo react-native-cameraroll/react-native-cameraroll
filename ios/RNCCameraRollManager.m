@@ -125,16 +125,16 @@ RCT_EXPORT_METHOD(saveToCameraRoll:(NSURLRequest *)request
         assetRequest = [PHAssetChangeRequest creationRequestForAssetFromImage:inputImage];
       }
       placeholder = [assetRequest placeholderForCreatedAsset];
-      if(![options[@"album"] isEqualToString:@""]){
+      if (![options[@"album"] isEqualToString:@""]) {
         photosAsset = [PHAsset fetchAssetsInAssetCollection:collection options:nil];
         PHAssetCollectionChangeRequest *albumChangeRequest = [PHAssetCollectionChangeRequest changeRequestForAssetCollection:collection assets:photosAsset];
         [albumChangeRequest addAssets:@[placeholder]];
       }
     } completionHandler:^(BOOL success, NSError *error) {
-      if (success){
+      if (success) {
         NSString *uri = [NSString stringWithFormat:@"ph://%@", [placeholder localIdentifier]];
         resolve(uri);
-      }else{
+      } else {
         reject(kErrorUnableToSave, nil, error);
       }
     }];
@@ -148,24 +148,24 @@ RCT_EXPORT_METHOD(saveToCameraRoll:(NSURLRequest *)request
                                                             subtype:PHAssetCollectionSubtypeAny
                                                             options:fetchOptions].firstObject;
       // Create the album
-      if (!collection){
+      if (!collection) {
         [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
           PHAssetCollectionChangeRequest *createAlbum = [PHAssetCollectionChangeRequest creationRequestForAssetCollectionWithTitle:options[@"album"]];
           placeholder = [createAlbum placeholderForCreatedAssetCollection];
         } completionHandler:^(BOOL success, NSError *error) {
-          if (success){
+          if (success) {
             PHFetchResult *collectionFetchResult = [PHAssetCollection fetchAssetCollectionsWithLocalIdentifiers:@[placeholder.localIdentifier]
                                                                                                         options:nil];
             collection = collectionFetchResult.firstObject;
             saveBlock();
-          }else{
+          } else {
             reject(kErrorUnableToSave, nil, error);
           }
         }];
-      }else{
+      } else {
         saveBlock();
       }
-    }else{
+    } else {
       saveBlock();
     }
   };
