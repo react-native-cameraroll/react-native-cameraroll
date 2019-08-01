@@ -66,6 +66,9 @@
     "hooks": {
       "pre-commit": "pretty-quick --staged"
     }
+  },    
+  "resolutions": {
+    "lodash": "4.17.15"
   },
   "jest": {
     "preset": "react-native",
