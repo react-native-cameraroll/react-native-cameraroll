@@ -34,7 +34,7 @@ RCT_ENUM_CONVERTER(PHAssetCollectionSubtype, (@{
    @"photo-stream": @(PHAssetCollectionSubtypeAlbumMyPhotoStream), // incorrect, but legacy
    @"photostream": @(PHAssetCollectionSubtypeAlbumMyPhotoStream),
    @"saved-photos": @(PHAssetCollectionSubtypeAny), // incorrect, but legacy correspondence in PHAssetCollectionSubtype
-   @"savedphotos": @(PHAssetCollectionSubtypeAny),
+   @"savedphotos": @(PHAssetCollectionSubtypeAny), // This was ALAssetsGroupSavedPhotos, seems to have no direct correspondence in PHAssetCollectionSubtype
 }), PHAssetCollectionSubtypeAny, integerValue)
 
 
@@ -197,21 +197,21 @@ static void RCTResolvePromise(RCTPromiseResolveBlock resolve,
 {
   if (!assets.count) {
     resolve(@{
-              @"edges": assets,
-              @"page_info": @{
-                  @"has_next_page": @NO,
-                  }
-              });
+      @"edges": assets,
+      @"page_info": @{
+        @"has_next_page": @NO,
+      }
+    });
     return;
   }
   resolve(@{
-            @"edges": assets,
-            @"page_info": @{
-                @"start_cursor": assets[0][@"node"][@"image"][@"uri"],
-                @"end_cursor": assets[assets.count - 1][@"node"][@"image"][@"uri"],
-                @"has_next_page": @(hasNextPage),
-                }
-            });
+    @"edges": assets,
+    @"page_info": @{
+      @"start_cursor": assets[0][@"node"][@"image"][@"uri"],
+      @"end_cursor": assets[assets.count - 1][@"node"][@"image"][@"uri"],
+      @"has_next_page": @(hasNextPage),
+    }
+  });
 }
 
 RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
@@ -235,7 +235,7 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
   PHAssetCollectionSubtype const collectionSubtype = [RCTConvert PHAssetCollectionSubtype:groupTypes];
   
   // Predicate for fetching assets within a collection
-  PHFetchOptions *const assetFetchOptions = [RCTConvert PHFetchOptionsFromMediaType:mediaType];
+  PHFetchOptions *const assetFetchOptions = [RCTConvert PHFetcihOptionsFromMediaType:mediaType];
   assetFetchOptions.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:NO]];
   
   BOOL __block foundAfter = NO;
@@ -373,15 +373,15 @@ RCT_EXPORT_METHOD(deletePhotos:(NSArray<NSString *>*)assets
     [PHAsset fetchAssetsWithALAssetURLs:assets_ options:nil];
     [PHAssetChangeRequest deleteAssets:fetched];
   }
-                                    completionHandler:^(BOOL success, NSError *error) {
-                                      if (success == YES) {
-                                        resolve(@(success));
-                                      }
-                                      else {
-                                        reject(@"Couldn't delete", @"Couldn't delete assets", error);
-                                      }
-                                    }
-   ];
+  completionHandler:^(BOOL success, NSError *error) {
+    if (success == YES) {
+      resolve(@(success));
+    }
+    else {
+      reject(@"Couldn't delete", @"Couldn't delete assets", error);
+    }
+  }
+  ];
 }
 
 static void checkPhotoLibraryConfig()
