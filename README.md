@@ -82,7 +82,7 @@ On Android permission is required to read the external storage. Add below line t
 
 ### `save()`
 
-Saves the photo or video of a particular type to an album.
+Saves the photo or video of a particular type to an album. This function works the same as `saveToCameraRoll`, but it allows to specify a particular album you want to store the asset to.
 
 ```javascript
 CameraRoll.save(tag, { type, album })
