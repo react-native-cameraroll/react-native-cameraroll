@@ -8,7 +8,7 @@
  * @format
  */
 'use strict';
-
+import {Platform} from 'react-native';
 import RNCCameraRoll from './nativeInterface';
 
 const invariant = require('fbjs/lib/invariant');
@@ -100,7 +100,10 @@ export type PhotoIdentifiersPage = {
     end_cursor?: string,
   },
 };
-
+export type SaveToCameraRollOptions = {
+  type?: 'photo' | 'video' | 'auto',
+  album?: string,
+};
 /**
  * `CameraRoll` provides access to the local camera roll or photo library.
  *
@@ -117,7 +120,7 @@ class CameraRoll {
     console.warn(
       '`CameraRoll.saveImageWithTag()` is deprecated. Use `CameraRoll.saveToCameraRoll()` instead.',
     );
-    return this.saveToCameraRoll(tag, 'photo');
+    return this.saveToCameraRoll(tag, {type: 'photo'});
   }
 
   static deletePhotos(photos: Array<string>) {
@@ -128,31 +131,35 @@ class CameraRoll {
    * Saves the photo or video to the camera roll or photo library.
    *
    */
-  static saveToCameraRoll(
+  static save(
     tag: string,
-    type?: 'photo' | 'video',
+    options: SaveToCameraRollOptions = {},
   ): Promise<string> {
+    let {type = 'auto', album = ''} = options;
     invariant(
       typeof tag === 'string',
       'CameraRoll.saveToCameraRoll must be a valid string.',
     );
-
     invariant(
-      type === 'photo' || type === 'video' || type === undefined,
-      `The second argument to saveToCameraRoll must be 'photo' or 'video'. You passed ${type ||
+      options.type === 'photo' ||
+        options.type === 'video' ||
+        options.type === 'auto' ||
+        options.type === undefined,
+      `The second argument to saveToCameraRoll must be 'photo' or 'video' or 'auto'. You passed ${type ||
         'unknown'}`,
     );
-
-    let mediaType = 'photo';
-    if (type) {
-      mediaType = type;
-    } else if (['mov', 'mp4'].indexOf(tag.split('.').slice(-1)[0]) >= 0) {
-      mediaType = 'video';
+    if (type === 'auto') {
+      if (['mov', 'mp4'].indexOf(tag.split('.').slice(-1)[0]) >= 0) {
+        type = 'video';
+      } else {
+        type = 'photo';
+      }
     }
-
-    return RNCCameraRoll.saveToCameraRoll(tag, mediaType);
+    return RNCCameraRoll.saveToCameraRoll(tag, {type, album});
   }
-
+  static saveToCameraRoll(tag: string, type?: photo | video) {
+    CameraRoll.save(tag, {type});
+  }
   /**
    * Returns a Promise with photo identifier objects from the local camera
    * roll of the device matching shape defined by `getPhotosReturnChecker`.
@@ -163,7 +170,7 @@ class CameraRoll {
     if (!params.assetType) {
       params.assetType = ASSET_TYPE_OPTIONS.All;
     }
-    if (!params.groupTypes) {
+    if (!params.groupTypes && Platform.OS !== 'android') {
       params.groupTypes = GROUP_TYPES_OPTIONS.All;
     }
     if (arguments.length > 1) {

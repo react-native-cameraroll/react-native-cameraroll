@@ -25,6 +25,12 @@ describe('CameraRoll', () => {
     expect(NativeModule.saveToCameraRoll.mock.calls).toMatchSnapshot();
   });
 
+  it('Should call save', async () => {
+    await CameraRoll.save('a tag', {type:'photo'});
+    expect(NativeModule.saveToCameraRoll.mock.calls).toMatchSnapshot();
+  });
+
+
   it('Should call getPhotos', async () => {
     await CameraRoll.getPhotos({first: 0});
     expect(NativeModule.getPhotos.mock.calls).toMatchSnapshot();
