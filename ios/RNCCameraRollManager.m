@@ -34,6 +34,7 @@ RCT_ENUM_CONVERTER(PHAssetCollectionSubtype, (@{
    @"photo-stream": @(PHAssetCollectionSubtypeAlbumMyPhotoStream), // incorrect, but legacy
    @"photostream": @(PHAssetCollectionSubtypeAlbumMyPhotoStream),
    @"saved-photos": @(PHAssetCollectionSubtypeAny), // incorrect, but legacy correspondence in PHAssetCollectionSubtype
+   @"savedphotos": @(PHAssetCollectionSubtypeAny),
 }), PHAssetCollectionSubtypeAny, integerValue)
 
 
