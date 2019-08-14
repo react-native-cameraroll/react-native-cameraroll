@@ -120,7 +120,7 @@ class CameraRoll {
     console.warn(
       '`CameraRoll.saveImageWithTag()` is deprecated. Use `CameraRoll.saveToCameraRoll()` instead.',
     );
-    return this.saveToCameraRoll(tag, {type: 'photo'});
+    return this.saveToCameraRoll(tag, 'photo');
   }
 
   static deletePhotos(photos: Array<string>) {
@@ -157,8 +157,11 @@ class CameraRoll {
     }
     return RNCCameraRoll.saveToCameraRoll(tag, {type, album});
   }
-  static saveToCameraRoll(tag: string, type?: photo | video) {
-    CameraRoll.save(tag, {type});
+  static saveToCameraRoll(
+    tag: string,
+    type?: 'photo' | 'video' | 'auto',
+  ): Promise<string> {
+    return CameraRoll.save(tag, {type});
   }
   /**
    * Returns a Promise with photo identifier objects from the local camera
