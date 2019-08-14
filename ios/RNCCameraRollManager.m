@@ -235,7 +235,7 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
   PHAssetCollectionSubtype const collectionSubtype = [RCTConvert PHAssetCollectionSubtype:groupTypes];
   
   // Predicate for fetching assets within a collection
-  PHFetchOptions *const assetFetchOptions = [RCTConvert PHFetcihOptionsFromMediaType:mediaType];
+  PHFetchOptions *const assetFetchOptions = [RCTConvert PHFetchOptionsFromMediaType:mediaType];
   assetFetchOptions.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:NO]];
   
   BOOL __block foundAfter = NO;
