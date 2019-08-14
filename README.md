@@ -71,6 +71,7 @@ On Android permission is required to read the external storage. Add below line t
 ### Methods
 
 * [`saveToCameraRoll`](#savetocameraroll)
+* [`save`](#save)
 * [`getPhotos`](#getphotos)
 
 ---
@@ -79,13 +80,21 @@ On Android permission is required to read the external storage. Add below line t
 
 ## Methods
 
+### `save()`
+
+Saves the photo or video of a particular type to an album.
+
+```javascript
+CameraRoll.save(tag, { type, album })
+```
+
 ### `saveToCameraRoll()`
 
 ```javascript
 CameraRoll.saveToCameraRoll(tag, [type]);
 ```
 
-Saves the photo or video to the camera roll or photo library.
+Saves the photo or video to the photo library.
 
 On Android, the tag must be a local image or video URI, such as `"file:///sdcard/img.png"`.
 
