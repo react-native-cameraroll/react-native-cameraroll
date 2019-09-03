@@ -62,6 +62,10 @@
     "semantic-release": "15.13.3",
     "typescript": "^3.4.1"
   },
+  "rn-docs": {
+    "title": "CameraRoll",
+    "type": "API"
+  },
   "husky": {
     "hooks": {
       "pre-commit": "pretty-quick --staged"
