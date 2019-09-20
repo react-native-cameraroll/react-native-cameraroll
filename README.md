@@ -159,7 +159,7 @@ Returns a Promise which when resolved will be of the following shape:
       * `isStored`: {boolean}
       * `playableDuration`: {number}
     * `timestamp`: {number}
-    * `exifTimestamp?`: {number} // Android only. Optional because not all images are guaranteed to have an exif timestamp
+    * `exif_timestamp?`: {number} // Android only. Optional because not all images are guaranteed to have an exif timestamp
     * `location`: {object} : An object with the following shape:
       * `latitude`: {number}
       * `longitude`: {number}

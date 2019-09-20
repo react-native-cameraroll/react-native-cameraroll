@@ -42,6 +42,7 @@ declare namespace CameraRoll {
         playableDuration: number,
       },
       timestamp: number,
+      exif_timestamp?: number,
       location?: {
         latitude?: number,
         longitude?: number,
