@@ -26,6 +26,7 @@ declare namespace CameraRoll {
     groupName?: string;
     assetType?: AssetType;
     mimeTypes?: Array<string>;
+    includeExifTimestamp?: boolean;
   }
 
   interface PhotoIdentifier {
