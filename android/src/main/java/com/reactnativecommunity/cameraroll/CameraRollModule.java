@@ -235,6 +235,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
     int first = params.getInt("first");
     String after = params.hasKey("after") ? params.getString("after") : null;
     String groupName = params.hasKey("groupName") ? params.getString("groupName") : null;
+    Boolean includeExifTimestamp = params.hasKey("includeExifTimestamp");
     String assetType = params.hasKey("assetType") ? params.getString("assetType") : ASSET_TYPE_PHOTOS;
     ReadableArray mimeTypes = params.hasKey("mimeTypes")
         ? params.getArray("mimeTypes")
@@ -247,6 +248,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
           groupName,
           mimeTypes,
           assetType,
+          includeExifTimestamp
           promise)
           .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
   }
@@ -257,6 +259,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
     private final @Nullable String mAfter;
     private final @Nullable String mGroupName;
     private final @Nullable ReadableArray mMimeTypes;
+    private final mIncludeExifTimestamp;
     private final Promise mPromise;
     private final String mAssetType;
 
@@ -267,6 +270,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
         @Nullable String groupName,
         @Nullable ReadableArray mimeTypes,
         String assetType,
+        Boolean includeExifTimestamp,
         Promise promise) {
       super(context);
       mContext = context;
@@ -276,6 +280,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
       mMimeTypes = mimeTypes;
       mPromise = promise;
       mAssetType = assetType;
+      mIncludeExifTimestamp = includeExifTimestamp;
     }
 
     @Override
@@ -336,7 +341,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
           mPromise.reject(ERROR_UNABLE_TO_LOAD, "Could not get media");
         } else {
           try {
-            putEdges(resolver, media, response, mFirst);
+            putEdges(resolver, media, response, mFirst, mIncludeExifTimestamp);
             putPageInfo(media, response, mFirst);
           } finally {
             media.close();
@@ -368,7 +373,8 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
       ContentResolver resolver,
       Cursor media,
       WritableMap response,
-      int limit) {
+      int limit,
+      Boolean includeExifTimestamp) {
     WritableArray edges = new WritableNativeArray();
     media.moveToFirst();
     int idIndex = media.getColumnIndex(Images.Media._ID);
@@ -385,7 +391,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
       WritableMap edge = new WritableNativeMap();
       WritableMap node = new WritableNativeMap();
       boolean imageInfoSuccess =
-          putImageInfo(resolver, media, node, idIndex, widthIndex, heightIndex, dataIndex, mimeTypeIndex);
+          putImageInfo(resolver, media, node, idIndex, widthIndex, heightIndex, dataIndex, mimeTypeIndex, includeExifTimestamp);
       if (imageInfoSuccess) {
         putBasicNodeInfo(media, node, mimeTypeIndex, groupNameIndex, dateTakenIndex);
         putLocationInfo(media, node, longitudeIndex, latitudeIndex);
@@ -421,7 +427,8 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
       int widthIndex,
       int heightIndex,
       int dataIndex,
-      int mimeTypeIndex) {
+      int mimeTypeIndex,
+      Boolean includeExifTimestamp) {
     WritableMap image = new WritableNativeMap();
     Uri photoUri = Uri.parse("file://" + media.getString(dataIndex));
     File file = new File(media.getString(dataIndex));
