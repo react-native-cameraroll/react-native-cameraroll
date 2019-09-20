@@ -248,7 +248,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
           groupName,
           mimeTypes,
           assetType,
-          includeExifTimestamp
+          includeExifTimestamp,
           promise)
           .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
   }
@@ -259,7 +259,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
     private final @Nullable String mAfter;
     private final @Nullable String mGroupName;
     private final @Nullable ReadableArray mMimeTypes;
-    private final mIncludeExifTimestamp;
+    private final Boolean mIncludeExifTimestamp;
     private final Promise mPromise;
     private final String mAssetType;
 
