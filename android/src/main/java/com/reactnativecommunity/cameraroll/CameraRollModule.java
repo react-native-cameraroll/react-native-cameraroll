@@ -490,7 +490,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
     if (includeExifTimestamp) {
       try {
         ExifInterface exif = new ExifInterface(file.getPath());
-        String exifTimestampString = exif.getAttribute("DateTimeDigitized");
+        String exifTimestampString = exif.getAttribute("DateTime");
         if (exifTimestampString != null) {
           SimpleDateFormat sdf = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss");
           Date d = sdf.parse(exifTimestampString);
