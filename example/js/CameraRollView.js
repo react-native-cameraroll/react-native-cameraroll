@@ -25,8 +25,19 @@ const {
 
 import CameraRoll from '../../js/CameraRoll';
 
-const groupByEveryN = require('groupByEveryN');
-const logError = require('logError');
+const groupByEveryN = function groupByEveryN(num) {
+  const n = num;
+  return arrayArg => {
+    const array = [...arrayArg];
+    const result = [];
+    while (array.length > 0) {
+      const groupByNumber = array.length >= n ? n : array.length;
+      result.push(array.splice(0, groupByNumber));
+    }
+    return result;
+  };
+};
+const logError = console.error;
 
 import type {
   PhotoIdentifier,
@@ -144,7 +155,7 @@ class CameraRollView extends React.Component<Props, State> {
       }
     }
 
-    const fetchParams: GetPhotosParams = {
+    const fetchParams = {
       first: this.props.batchSize,
       groupTypes: this.props.groupTypes,
       assetType: this.props.assetType,
