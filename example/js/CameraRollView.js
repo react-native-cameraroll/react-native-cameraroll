@@ -39,73 +39,13 @@ const groupByEveryN = function groupByEveryN(num) {
 };
 const logError = console.error;
 
-import type {
-  PhotoIdentifier,
-  PhotoIdentifiersPage,
-  GetPhotosParams,
-} from '../../js/CameraRoll';
-
-type Props = $ReadOnly<{|
-  /**
-   * The group where the photos will be fetched from. Possible
-   * values are 'Album', 'All', 'Event', 'Faces', 'Library', 'PhotoStream'
-   * and SavedPhotos.
-   */
-  groupTypes:
-    | 'Album'
-    | 'All'
-    | 'Event'
-    | 'Faces'
-    | 'Library'
-    | 'PhotoStream'
-    | 'SavedPhotos',
-
-  /**
-   * Number of images that will be fetched in one page.
-   */
-  batchSize: number,
-
-  /**
-   * A function that takes a single image as a parameter and renders it.
-   */
-  renderImage: PhotoIdentifier => React.Node,
-
-  /**
-   * imagesPerRow: Number of images to be shown in each row.
-   */
-  imagesPerRow: number,
-
-  /**
-   * A boolean that indicates if we should render large or small images.
-   */
-  bigImages?: boolean,
-
-  /**
-   * The asset type, one of 'Photos', 'Videos' or 'All'
-   */
-  assetType: 'Photos' | 'Videos' | 'All',
-|}>;
-
-type State = {|
-  assets: Array<PhotoIdentifier>,
-  data: Array<Array<?PhotoIdentifier>>,
-  seen: Set<string>,
-  lastCursor: ?string,
-  noMore: boolean,
-  loadingMore: boolean,
-|};
-
-type Row = {
-  item: Array<?PhotoIdentifier>,
-};
-
-class CameraRollView extends React.Component<Props, State> {
+class CameraRollView extends React.Component {
   static defaultProps = {
     groupTypes: 'All',
     batchSize: 5,
     imagesPerRow: 1,
     assetType: 'Photos',
-    renderImage: function(asset: PhotoIdentifier) {
+    renderImage: function(asset) {
       const imageSize = 150;
       const imageStyle = [styles.image, {width: imageSize, height: imageSize}];
       return <Image source={asset.node.image} style={imageStyle} />;
@@ -129,13 +69,13 @@ class CameraRollView extends React.Component<Props, State> {
     this.fetch();
   }
 
-  UNSAFE_componentWillReceiveProps(nextProps: Props) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     if (this.props.groupTypes !== nextProps.groupTypes) {
       this.fetch(true);
     }
   }
 
-  async _fetch(clear?: boolean) {
+  async _fetch(clear) {
     if (clear) {
       this.setState(this.getInitialState(), this.fetch);
       return;
@@ -181,7 +121,7 @@ class CameraRollView extends React.Component<Props, State> {
    * Fetches more images from the camera roll. If clear is set to true, it will
    * set the component to its initial state and re-fetch the images.
    */
-  fetch = (clear?: boolean) => {
+  fetch = clear => {
     if (!this.state.loadingMore) {
       this.setState({loadingMore: true}, () => {
         this._fetch(clear);
@@ -190,6 +130,7 @@ class CameraRollView extends React.Component<Props, State> {
   };
 
   render() {
+    console.log({data: this.state.data});
     return (
       <FlatList
         keyExtractor={(_, idx) => String(idx)}
@@ -211,17 +152,18 @@ class CameraRollView extends React.Component<Props, State> {
     return null;
   };
 
-  _renderItem = (row: Row) => {
+  _renderItem = ({item}) => {
+    console.log({item});
     return (
       <View style={styles.row}>
-        {row.item.map(image => (image ? this.props.renderImage(image) : null))}
+        {item.map(image => (image ? this.props.renderImage(image) : null))}
       </View>
     );
   };
 
-  _appendAssets(data: PhotoIdentifiersPage) {
+  _appendAssets(data) {
     const assets = data.edges;
-    const newState: $Shape<State> = {loadingMore: false};
+    const newState = {loadingMore: false};
 
     if (!data.page_info.has_next_page) {
       newState.noMore = true;
@@ -245,10 +187,7 @@ class CameraRollView extends React.Component<Props, State> {
       }
 
       newState.assets = this.state.assets.concat(uniqAssets);
-      newState.data = groupByEveryN<PhotoIdentifier>(
-        newState.assets,
-        this.props.imagesPerRow,
-      );
+      newState.data = groupByEveryN(this.props.imagesPerRow)(newState.assets);
     }
 
     this.setState(newState);
