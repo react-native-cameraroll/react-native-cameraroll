@@ -504,7 +504,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
         if (exifTimestampString != null) {
           SimpleDateFormat sdf = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss");
           Date d = sdf.parse(exifTimestampString);
-          node.putDouble("exif_timestamp", d.getTime() / 1000d);
+          node.putDouble("exif_timestamp", d.getTime());
         }
       } catch (IOException e) {
         FLog.e(ReactConstants.TAG, "Could not get exifTimestamp for " + photoUri.toString(), e);
