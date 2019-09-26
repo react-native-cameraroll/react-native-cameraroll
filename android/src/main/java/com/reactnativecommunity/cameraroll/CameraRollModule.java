@@ -235,7 +235,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
     int first = params.getInt("first");
     String after = params.hasKey("after") ? params.getString("after") : null;
     String groupName = params.hasKey("groupName") ? params.getString("groupName") : null;
-    Boolean includeExifTimestamp = params.hasKey("includeExifTimestamp");
+    Boolean includeExifTimestamp = params.hasKey("includeExifTimestamp") ? params.getString("includeExifTimestamp") == "true" : null;
     String assetType = params.hasKey("assetType") ? params.getString("assetType") : ASSET_TYPE_PHOTOS;
     ReadableArray mimeTypes = params.hasKey("mimeTypes")
         ? params.getArray("mimeTypes")
