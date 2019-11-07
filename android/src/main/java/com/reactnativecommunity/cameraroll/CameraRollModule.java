@@ -8,6 +8,7 @@
 package com.reactnativecommunity.cameraroll;
 
 import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
@@ -61,6 +62,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
   private static final String ERROR_UNABLE_TO_LOAD = "E_UNABLE_TO_LOAD";
   private static final String ERROR_UNABLE_TO_LOAD_PERMISSION = "E_UNABLE_TO_LOAD_PERMISSION";
   private static final String ERROR_UNABLE_TO_SAVE = "E_UNABLE_TO_SAVE";
+  private static final String ERROR_UNABLE_TO_DELETE = "E_UNABLE_TO_DELETE";
   private static final String ERROR_UNABLE_TO_FILTER = "E_UNABLE_TO_FILTER";
 
   private static final String ASSET_TYPE_PHOTOS = "Photos";
@@ -502,6 +504,81 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
       location.putDouble("longitude", longitude);
       location.putDouble("latitude", latitude);
       node.putMap("location", location);
+    }
+  }
+
+  /**
+   * Delete a set of images.
+   *
+   * @param uris array of file:// URIs of the images to delete
+   * @param promise to be resolved
+   */
+  @ReactMethod
+  public void deletePhotos(ReadableArray uris, Promise promise) {
+    if (uris.size() == 0) {
+      promise.reject(ERROR_UNABLE_TO_DELETE, "Need at least one URI to delete");
+    } else {
+      new DeletePhotos(getReactApplicationContext(), uris, promise)
+          .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+  }
+
+  private static class DeletePhotos extends GuardedAsyncTask<Void, Void> {
+
+    private final Context mContext;
+    private final ReadableArray mUris;
+    private final Promise mPromise;
+
+    public DeletePhotos(ReactContext context, ReadableArray uris, Promise promise) {
+      super(context);
+      mContext = context;
+      mUris = uris;
+      mPromise = promise;
+    }
+
+    @Override
+    protected void doInBackgroundGuarded(Void... params) {
+      ContentResolver resolver = mContext.getContentResolver();
+
+      // Set up the projection (we only need the ID)
+      String[] projection = { MediaStore.Images.Media._ID };
+
+      // Match on the file path
+      String innerWhere = "?";
+      for (int i = 1; i < mUris.size(); i++) {
+        innerWhere += ", ?";
+      }
+
+      String selection = MediaStore.Images.Media.DATA + " IN (" + innerWhere + ")";
+      // Query for the ID of the media matching the file path
+      Uri queryUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+
+      String[] selectionArgs = new String[mUris.size()];
+      for (int i = 0; i < mUris.size(); i++) {
+        Uri uri = Uri.parse(mUris.getString(i));
+        selectionArgs[i] = uri.getPath();
+      }
+
+      Cursor cursor = resolver.query(queryUri, projection, selection, selectionArgs, null);
+      int deletedCount = 0;
+
+      while (cursor.moveToNext()) {
+        long id = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID));
+        Uri deleteUri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id);
+
+        if (resolver.delete(deleteUri, null, null) == 1) {
+          deletedCount++;
+        }
+      }
+
+      cursor.close();
+
+      if (deletedCount == mUris.size()) {
+        mPromise.resolve(null);
+      } else {
+        mPromise.reject(ERROR_UNABLE_TO_DELETE,
+            "Could not delete all media, only deleted " + deletedCount + " photos.");
+      }
     }
   }
 }
