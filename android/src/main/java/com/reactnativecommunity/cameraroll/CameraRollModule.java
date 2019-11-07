@@ -328,7 +328,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
             PROJECTION,
             selection.toString(),
             selectionArgs.toArray(new String[selectionArgs.size()]),
-            Images.Media.DATE_TAKEN + " DESC, " + Images.Media.DATE_MODIFIED + " DESC LIMIT " +
+            Images.Media.DATE_ADDED + " DESC, " + Images.Media.DATE_MODIFIED + " DESC LIMIT " +
                 (mFirst + 1)); // set LIMIT to first + 1 so that we know how to populate page_info
         if (media == null) {
           mPromise.reject(ERROR_UNABLE_TO_LOAD, "Could not get media");
