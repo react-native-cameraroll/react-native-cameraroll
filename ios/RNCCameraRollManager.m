@@ -17,7 +17,7 @@
 
 #import <React/RCTBridge.h>
 #import <React/RCTConvert.h>
-#import <React/RCTImageLoader.h>
+#import <React/RCTImageLoaderProtocol.h>
 #import <React/RCTLog.h>
 #import <React/RCTUtils.h>
 
@@ -176,7 +176,7 @@ RCT_EXPORT_METHOD(saveToCameraRoll:(NSURLRequest *)request
       inputURI = request.URL;
       saveWithOptions();
     } else {
-      [[self->_bridge moduleForClass:[RCTImageLoader class]] loadImageWithURLRequest:request callback:^(NSError *error, UIImage *image) {
+      [[self.bridge moduleForName:@"ImageLoader" lazilyLoadIfNecessary:YES] loadImageWithURLRequest:request callback:^(NSError *error, UIImage *image) {
         if (error) {
           reject(kErrorUnableToLoad, nil, error);
           return;
