@@ -386,7 +386,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
           putImageInfo(resolver, media, node, idIndex, widthIndex, heightIndex, dataIndex, mimeTypeIndex);
       if (imageInfoSuccess) {
         putBasicNodeInfo(media, node, mimeTypeIndex, groupNameIndex, dateTakenIndex);
-        putLocationInfo(media, node, longitudeIndex, latitudeIndex);
+        putLocationInfo(media, node, longitudeIndex, latitudeIndex, dataIndex);
 
         edge.putMap("node", node);
         edges.pushMap(edge);
@@ -496,15 +496,34 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
       Cursor media,
       WritableMap node,
       int longitudeIndex,
-      int latitudeIndex) {
-    double longitude = media.getDouble(longitudeIndex);
-    double latitude = media.getDouble(latitudeIndex);
-    if (longitude > 0 || latitude > 0) {
-      WritableMap location = new WritableNativeMap();
-      location.putDouble("longitude", longitude);
-      location.putDouble("latitude", latitude);
-      node.putMap("location", location);
+      int latitudeIndex,
+      int dataIndex) {
+      try {
+        final ExifInterface exif = new ExifInterface(media.getString(dataIndex));
+        float[] latLng = new float[2];
+        boolean hasLatLong = exif.getLatLong(latLng);
+        if (hasLatLong) {
+          Log.d("SYED", "putImageInfo: " + latLng[0]);
+          double longitude = latLng[1];
+          double latitude = latLng[0];
+          if (longitude > 0 || latitude > 0) {
+            WritableMap location = new WritableNativeMap();
+            location.putDouble("longitude", longitude);
+            location.putDouble("latitude", latitude);
+            node.putMap("location", location);
+          }
+        }
+    }catch (IOException e){
+      Log.d("SYED", "putLocationInfo: "+e);
     }
+    // double longitude = media.getDouble(longitudeIndex);
+    // double latitude = media.getDouble(latitudeIndex);
+    // if (longitude > 0 || latitude > 0) {
+    //   WritableMap location = new WritableNativeMap();
+    //   location.putDouble("longitude", longitude);
+    //   location.putDouble("latitude", latitude);
+    //   node.putMap("location", location);
+    // }
   }
 
   /**
