@@ -504,7 +504,6 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
         float[] latLng = new float[2];
         boolean hasLatLong = exif.getLatLong(latLng);
         if (hasLatLong) {
-          Log.d("SYED", "putImageInfo: " + latLng[0]);
           double longitude = latLng[1];
           double latitude = latLng[0];
           if (longitude > 0 || latitude > 0) {
@@ -515,7 +514,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
           }
         }
     }catch (IOException e){
-      Log.d("SYED", "putLocationInfo: "+e);
+      FLog.e(ReactConstants.TAG, "Could read the metadata", e);
     }
     // double longitude = media.getDouble(longitudeIndex);
     // double latitude = media.getDouble(latitudeIndex);
