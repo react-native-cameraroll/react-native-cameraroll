@@ -20,6 +20,7 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.provider.MediaStore.Images;
 import android.text.TextUtils;
+import android.media.ExifInterface;
 
 import com.facebook.common.logging.FLog;
 import com.facebook.react.bridge.GuardedAsyncTask;
@@ -373,8 +374,6 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
     int dateTakenIndex = media.getColumnIndex(Images.Media.DATE_TAKEN);
     int widthIndex = media.getColumnIndex(MediaStore.MediaColumns.WIDTH);
     int heightIndex = media.getColumnIndex(MediaStore.MediaColumns.HEIGHT);
-    int longitudeIndex = media.getColumnIndex(Images.Media.LONGITUDE);
-    int latitudeIndex = media.getColumnIndex(Images.Media.LATITUDE);
     int dataIndex = media.getColumnIndex(MediaStore.MediaColumns.DATA);
 
     for (int i = 0; i < limit && !media.isAfterLast(); i++) {
@@ -384,7 +383,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
           putImageInfo(resolver, media, node, idIndex, widthIndex, heightIndex, dataIndex, mimeTypeIndex);
       if (imageInfoSuccess) {
         putBasicNodeInfo(media, node, mimeTypeIndex, groupNameIndex, dateTakenIndex);
-        putLocationInfo(media, node, longitudeIndex, latitudeIndex);
+        putLocationInfo(media, node, dataIndex);
 
         edge.putMap("node", node);
         edges.pushMap(edge);
@@ -491,17 +490,26 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
   }
 
   private static void putLocationInfo(
-      Cursor media,
-      WritableMap node,
-      int longitudeIndex,
-      int latitudeIndex) {
-    double longitude = media.getDouble(longitudeIndex);
-    double latitude = media.getDouble(latitudeIndex);
-    if (longitude > 0 || latitude > 0) {
-      WritableMap location = new WritableNativeMap();
-      location.putDouble("longitude", longitude);
-      location.putDouble("latitude", latitude);
-      node.putMap("location", location);
+    Cursor media,
+    WritableMap node,
+    int dataIndex) {
+      try {
+        // location details are no longer indexed for privacy reasons using string Media.LATITUDE, Media.LONGITUDE
+        // we manually obtain location metadata using ExifInterface#getLatLong(float[]).
+        // ExifInterface is added in API level 5
+        final ExifInterface exif = new ExifInterface(media.getString(dataIndex));
+        float[] imageCoordinates = new float[2];
+        boolean hasCoordinates = exif.getLatLong(imageCoordinates);
+        if (hasCoordinates) {
+          double longitude = imageCoordinates[1];
+          double latitude = imageCoordinates[0];
+          WritableMap location = new WritableNativeMap();
+          location.putDouble("longitude", longitude);
+          location.putDouble("latitude", latitude);
+          node.putMap("location", location);
+        }
+    }catch (IOException e){
+      FLog.e(ReactConstants.TAG, "Could read the metadata", e);
     }
   }
 }
