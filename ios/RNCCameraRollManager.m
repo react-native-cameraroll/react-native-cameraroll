@@ -225,6 +225,8 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
   NSString *const groupName = [RCTConvert NSString:params[@"groupName"]];
   NSString *const groupTypes = [[RCTConvert NSString:params[@"groupTypes"]] lowercaseString];
   NSString *const mediaType = [RCTConvert NSString:params[@"assetType"]];
+  NSUInteger const fromTime = [RCTConvert NSInteger:params[@"fromTime"]];
+  NSUInteger const toTime = [RCTConvert NSInteger:params[@"toTime"]];
   NSArray<NSString *> *const mimeTypes = [RCTConvert NSStringArray:params[@"mimeTypes"]];
   
   // If groupTypes is "all", we want to fetch the SmartAlbum "all photos". Otherwise, all
@@ -236,6 +238,18 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
   
   // Predicate for fetching assets within a collection
   PHFetchOptions *const assetFetchOptions = [RCTConvert PHFetchOptionsFromMediaType:mediaType];
+  NSString* predicateFormat = assetFetchOptions.predicate.predicateFormat;
+  if (fromTime > 0) {
+    NSDate* fromDate = [NSDate dateWithTimeIntervalSince1970:fromTime/1000];
+    NSPredicate* predicate = [NSPredicate predicateWithFormat:@"creationDate > %@", fromDate];
+    predicateFormat = [NSString stringWithFormat:@"%@ AND %@", predicateFormat, predicate.predicateFormat];
+  }
+  if (toTime > 0) {
+    NSDate* toDate = [NSDate dateWithTimeIntervalSince1970:toTime/1000];
+    NSPredicate* predicate = [NSPredicate predicateWithFormat:@"creationDate < %@", toDate];
+    predicateFormat = [NSString stringWithFormat:@"%@ AND %@", predicateFormat, predicate.predicateFormat];
+  }
+  assetFetchOptions.predicate = [NSPredicate predicateWithFormat:predicateFormat];
   assetFetchOptions.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:NO]];
   
   BOOL __block foundAfter = NO;
