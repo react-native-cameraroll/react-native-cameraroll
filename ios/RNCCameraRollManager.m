@@ -43,27 +43,42 @@ RCT_ENUM_CONVERTER(PHAssetCollectionSubtype, (@{
 @implementation RCTConvert (PHFetchOptions)
 
 + (PHFetchOptions *)PHFetchOptionsFromMediaType:(NSString *)mediaType
+                                       fromTime:(NSUInteger)fromTime
+                                         toTime:(NSUInteger)toTime
 {
   // This is not exhaustive in terms of supported media type predicates; more can be added in the future
   NSString *const lowercase = [mediaType lowercaseString];
+  NSMutableArray *format = [NSMutableArray new];
+  NSMutableArray *arguments = [NSMutableArray new];
   
   if ([lowercase isEqualToString:@"photos"]) {
-    PHFetchOptions *const options = [PHFetchOptions new];
-    options.predicate = [NSPredicate predicateWithFormat:@"mediaType = %d", PHAssetMediaTypeImage];
-    return options;
+    [format addObject:@"mediaType = %d"];
+    [arguments addObject:[NSNumber numberWithInteger:PHAssetMediaTypeImage]];
   } else if ([lowercase isEqualToString:@"videos"]) {
-    PHFetchOptions *const options = [PHFetchOptions new];
-    options.predicate = [NSPredicate predicateWithFormat:@"mediaType = %d", PHAssetMediaTypeVideo];
-    return options;
+    [format addObject:@"mediaType = %d"];
+    [arguments addObject:[NSNumber numberWithInteger:PHAssetMediaTypeVideo]];
   } else {
     if (![lowercase isEqualToString:@"all"]) {
       RCTLogError(@"Invalid filter option: '%@'. Expected one of 'photos',"
                   "'videos' or 'all'.", mediaType);
     }
-    // This case includes the "all" mediatype
-    PHFetchOptions *const options = [PHFetchOptions new];
-    return options;
   }
+  
+  if (fromTime > 0) {
+    NSDate* fromDate = [NSDate dateWithTimeIntervalSince1970:fromTime/1000];
+    [format addObject:@"creationDate > %@"];
+    [arguments addObject:fromDate];
+  }
+  if (toTime > 0) {
+    NSDate* toDate = [NSDate dateWithTimeIntervalSince1970:toTime/1000];
+    [format addObject:@"creationDate < %@"];
+    [arguments addObject:toDate];
+  }
+  
+  // This case includes the "all" mediatype
+  PHFetchOptions *const options = [PHFetchOptions new];
+  options.predicate = [NSPredicate predicateWithFormat:[format componentsJoinedByString:@" AND "] argumentArray:arguments];
+  return options;
 }
 
 @end
@@ -237,19 +252,7 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
   PHAssetCollectionSubtype const collectionSubtype = [RCTConvert PHAssetCollectionSubtype:groupTypes];
   
   // Predicate for fetching assets within a collection
-  PHFetchOptions *const assetFetchOptions = [RCTConvert PHFetchOptionsFromMediaType:mediaType];
-  NSString* predicateFormat = assetFetchOptions.predicate.predicateFormat;
-  if (fromTime > 0) {
-    NSDate* fromDate = [NSDate dateWithTimeIntervalSince1970:fromTime/1000];
-    NSPredicate* predicate = [NSPredicate predicateWithFormat:@"creationDate > %@", fromDate];
-    predicateFormat = [NSString stringWithFormat:@"%@ AND %@", predicateFormat, predicate.predicateFormat];
-  }
-  if (toTime > 0) {
-    NSDate* toDate = [NSDate dateWithTimeIntervalSince1970:toTime/1000];
-    NSPredicate* predicate = [NSPredicate predicateWithFormat:@"creationDate < %@", toDate];
-    predicateFormat = [NSString stringWithFormat:@"%@ AND %@", predicateFormat, predicate.predicateFormat];
-  }
-  assetFetchOptions.predicate = [NSPredicate predicateWithFormat:predicateFormat];
+  PHFetchOptions *const assetFetchOptions = [RCTConvert PHFetchOptionsFromMediaType:mediaType fromTime:fromTime toTime:toTime];
   assetFetchOptions.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:NO]];
   
   BOOL __block foundAfter = NO;
