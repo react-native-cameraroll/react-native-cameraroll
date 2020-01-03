@@ -234,8 +234,8 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
     String after = params.hasKey("after") ? params.getString("after") : null;
     String groupName = params.hasKey("groupName") ? params.getString("groupName") : null;
     String assetType = params.hasKey("assetType") ? params.getString("assetType") : ASSET_TYPE_PHOTOS;
-    int fromTime = params.hasKey("fromTime") ? params.getInt("fromTime") : 0;
-    int toTime = params.hasKey("toTime") ? params.getInt("toTime") : 0;
+    long fromTime = params.hasKey("fromTime") ? (long) params.getDouble("fromTime") : 0;
+    long toTime = params.hasKey("toTime") ? (long) params.getDouble("toTime") : 0;
     ReadableArray mimeTypes = params.hasKey("mimeTypes")
         ? params.getArray("mimeTypes")
         : null;
@@ -261,8 +261,8 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
     private final @Nullable ReadableArray mMimeTypes;
     private final Promise mPromise;
     private final String mAssetType;
-    private final int mFromTime;
-    private final int mToTime;
+    private final long mFromTime;
+    private final long mToTime;
 
     private GetMediaTask(
         ReactContext context,
@@ -271,8 +271,8 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
         @Nullable String groupName,
         @Nullable ReadableArray mimeTypes,
         String assetType,
-        int fromTime,
-        int toTime,
+        long fromTime,
+        long toTime,
         Promise promise) {
       super(context);
       mContext = context;
@@ -290,10 +290,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
     protected void doInBackgroundGuarded(Void... params) {
       StringBuilder selection = new StringBuilder("1");
       List<String> selectionArgs = new ArrayList<>();
-      if (!TextUtils.isEmpty(mAfter)) {
-        selection.append(" AND " + SELECTION_DATE_TAKEN);
-        selectionArgs.add(mAfter);
-      }
+
       if (!TextUtils.isEmpty(mGroupName)) {
         selection.append(" AND " + SELECTION_BUCKET);
         selectionArgs.add(mGroupName);
@@ -329,13 +326,18 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
       }
 
       if (mFromTime > 0) {
-        selection.append(" AND " + Images.Media.DATE_ADDED + " > ?" );
+        selection.append(" AND " + Images.Media.DATE_TAKEN + " > ?");
         selectionArgs.add(mFromTime + "");
       }
-      if (mToTime > 0) {
-        selection.append(" AND " + Images.Media.DATE_ADDED + " < ?" );
-        selectionArgs.add(mToTime + "");
+      long toTime = mToTime;
+      if (!TextUtils.isEmpty(mAfter)) {
+        toTime = Long.parseLong(mAfter);
       }
+      if (toTime > 0) {
+        selection.append(" AND " + SELECTION_DATE_TAKEN);
+        selectionArgs.add(toTime + "");
+      }
+      
       WritableMap response = new WritableNativeMap();
       ContentResolver resolver = mContext.getContentResolver();
       // using LIMIT in the sortOrder is not explicitly supported by the SDK (which does not support
