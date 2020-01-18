@@ -77,7 +77,9 @@ RCT_ENUM_CONVERTER(PHAssetCollectionSubtype, (@{
   
   // This case includes the "all" mediatype
   PHFetchOptions *const options = [PHFetchOptions new];
-  options.predicate = [NSPredicate predicateWithFormat:[format componentsJoinedByString:@" AND "] argumentArray:arguments];
+  if ([format count] > 0) {
+    options.predicate = [NSPredicate predicateWithFormat:[format componentsJoinedByString:@" AND "] argumentArray:arguments];
+  }
   return options;
 }
 
