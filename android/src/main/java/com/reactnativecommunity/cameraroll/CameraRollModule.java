@@ -278,10 +278,6 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
     protected void doInBackgroundGuarded(Void... params) {
       StringBuilder selection = new StringBuilder("1");
       List<String> selectionArgs = new ArrayList<>();
-      if (!TextUtils.isEmpty(mAfter)) {
-        selection.append(" AND " + SELECTION_DATE_TAKEN);
-        selectionArgs.add(mAfter);
-      }
       if (!TextUtils.isEmpty(mGroupName)) {
         selection.append(" AND " + SELECTION_BUCKET);
         selectionArgs.add(mGroupName);
@@ -315,25 +311,30 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
         }
         selection.replace(selection.length() - 1, selection.length(), ")");
       }
+
       WritableMap response = new WritableNativeMap();
       ContentResolver resolver = mContext.getContentResolver();
-      // using LIMIT in the sortOrder is not explicitly supported by the SDK (which does not support
-      // setting a limit at all), but it works because this specific ContentProvider is backed by
-      // an SQLite DB and forwards parameters to it without doing any parsing / validation.
+      
       try {
+        // set LIMIT to first + 1 so that we know how to populate page_info
+        String limit = "limit=" + (mFirst + 1);
+
+        if (!TextUtils.isEmpty(mAfter)) {
+          limit = "limit=" + mAfter + "," + (mFirst + 1);
+        }
+
         Cursor media = resolver.query(
-            MediaStore.Files.getContentUri("external"),
+            MediaStore.Files.getContentUri("external").buildUpon().encodedQuery(limit).build(),
             PROJECTION,
             selection.toString(),
             selectionArgs.toArray(new String[selectionArgs.size()]),
-            Images.Media.DATE_TAKEN + " DESC, " + Images.Media.DATE_MODIFIED + " DESC LIMIT " +
-                (mFirst + 1)); // set LIMIT to first + 1 so that we know how to populate page_info
+            Images.Media.DATE_TAKEN + " DESC, " + Images.Media.DATE_MODIFIED + " DESC");
         if (media == null) {
           mPromise.reject(ERROR_UNABLE_TO_LOAD, "Could not get media");
         } else {
           try {
             putEdges(resolver, media, response, mFirst);
-            putPageInfo(media, response, mFirst);
+            putPageInfo(media, response, mFirst, !TextUtils.isEmpty(mAfter) ? Integer.parseInt(mAfter) : 0);
           } finally {
             media.close();
             mPromise.resolve(response);
@@ -348,14 +349,14 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
     }
   }
 
-  private static void putPageInfo(Cursor media, WritableMap response, int limit) {
+  private static void putPageInfo(Cursor media, WritableMap response, int limit, int offset) {
     WritableMap pageInfo = new WritableNativeMap();
     pageInfo.putBoolean("has_next_page", limit < media.getCount());
     if (limit < media.getCount()) {
-      media.moveToPosition(limit - 1);
       pageInfo.putString(
-          "end_cursor",
-          media.getString(media.getColumnIndex(Images.Media.DATE_TAKEN)));
+        "end_cursor",
+        Integer.toString(offset + limit)
+      );
     }
     response.putMap("page_info", pageInfo);
   }
