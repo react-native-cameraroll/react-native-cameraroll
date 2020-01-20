@@ -71,11 +71,10 @@ declare namespace CameraRoll {
     function saveImageWithTag(tag: string): Promise<string>;
 
     /**
-     * Delete a photo from the camera roll or media library. photos is an array of photo uri's.
+     * Delete a photo from the camera roll or media library. photoUris is an array of photo uri's.
      */
-    function deletePhotos(photos: Array<string>): void;
-    // deletePhotos: (photos: Array<string>) => void;
-
+    function deletePhotos(photoUris: Array<string>): void;
+    
     /**
      * Saves the photo or video to the camera roll or photo library.
      */

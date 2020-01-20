@@ -17,7 +17,7 @@
 
 #import <React/RCTBridge.h>
 #import <React/RCTConvert.h>
-#import <React/RCTImageLoader.h>
+#import <React/RCTImageLoaderProtocol.h>
 #import <React/RCTLog.h>
 #import <React/RCTUtils.h>
 
@@ -176,7 +176,7 @@ RCT_EXPORT_METHOD(saveToCameraRoll:(NSURLRequest *)request
       inputURI = request.URL;
       saveWithOptions();
     } else {
-      [self.bridge.imageLoader loadImageWithURLRequest:request callback:^(NSError *error, UIImage *image) {
+      [[self.bridge moduleForName:@"ImageLoader" lazilyLoadIfNecessary:YES] loadImageWithURLRequest:request callback:^(NSError *error, UIImage *image) {
         if (error) {
           reject(kErrorUnableToLoad, nil, error);
           return;
@@ -367,12 +367,17 @@ RCT_EXPORT_METHOD(deletePhotos:(NSArray<NSString *>*)assets
                   resolve:(RCTPromiseResolveBlock)resolve
                   reject:(RCTPromiseRejectBlock)reject)
 {
-  NSArray<NSURL *> *assets_ = [RCTConvert NSURLArray:assets];
-  [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
-    PHFetchResult<PHAsset *> *fetched =
-    [PHAsset fetchAssetsWithALAssetURLs:assets_ options:nil];
-    [PHAssetChangeRequest deleteAssets:fetched];
+  NSMutableArray *convertedAssets = [NSMutableArray array];
+  
+  for (NSString *asset in assets) {
+    [convertedAssets addObject: [asset stringByReplacingOccurrencesOfString:@"ph://" withString:@""]];
   }
+
+  [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
+      PHFetchResult<PHAsset *> *fetched =
+        [PHAsset fetchAssetsWithLocalIdentifiers:convertedAssets options:nil];
+      [PHAssetChangeRequest deleteAssets:fetched];
+    }
   completionHandler:^(BOOL success, NSError *error) {
     if (success == YES) {
       resolve(@(success));
