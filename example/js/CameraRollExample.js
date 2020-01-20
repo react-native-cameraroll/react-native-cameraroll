@@ -111,7 +111,7 @@ export default class CameraRollExample extends React.Component<Props, State> {
             <Text style={styles.url}>{asset.node.image.uri}</Text>
             <Text>{locationStr}</Text>
             <Text>{asset.node.group_name}</Text>
-            <Text>{new Date(asset.node.timestamp).toString()}</Text>
+            <Text>{new Date(asset.node.timestamp * 1000).toString()}</Text>
           </View>
         </View>
       </TouchableOpacity>
