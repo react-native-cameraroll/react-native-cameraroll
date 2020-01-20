@@ -127,14 +127,8 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
       File source = new File(mUri.getPath());
       FileChannel input = null, output = null;
       try {
-        File environment;
-        if ("mov".equals(mOptions.getString("type"))) {
-          environment = Environment.getExternalStoragePublicDirectory(
-                  Environment.DIRECTORY_MOVIES);
-        } else {
-          environment = Environment.getExternalStoragePublicDirectory(
-                  Environment.DIRECTORY_PICTURES);
-        }
+        File environment = Environment.getExternalStoragePublicDirectory(
+          Environment.DIRECTORY_DCIM);
         File exportDir;
         if (!"".equals(mOptions.getString("album"))) {
           exportDir = new File(environment, mOptions.getString("album"));
