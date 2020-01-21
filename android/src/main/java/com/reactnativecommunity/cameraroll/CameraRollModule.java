@@ -328,13 +328,9 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
         selection.append(" AND " + Images.Media.DATE_TAKEN + " > ?");
         selectionArgs.add(mFromTime + "");
       }
-      long toTime = mToTime;
-      if (!TextUtils.isEmpty(mAfter)) {
-        toTime = Long.parseLong(mAfter);
-      }
-      if (toTime > 0) {
-        selection.append(" AND " + SELECTION_DATE_TAKEN);
-        selectionArgs.add(toTime + "");
+      if (mToTime > 0) {
+        selection.append(" AND " + Images.Media.DATE_TAKEN + " <= ?");
+        selectionArgs.add(mToTime + "");
       }
       
       WritableMap response = new WritableNativeMap();

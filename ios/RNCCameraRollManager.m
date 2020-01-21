@@ -53,10 +53,10 @@ RCT_ENUM_CONVERTER(PHAssetCollectionSubtype, (@{
   
   if ([lowercase isEqualToString:@"photos"]) {
     [format addObject:@"mediaType = %d"];
-    [arguments addObject:[NSNumber numberWithInteger:PHAssetMediaTypeImage]];
+    [arguments addObject:@(PHAssetMediaTypeImage)];
   } else if ([lowercase isEqualToString:@"videos"]) {
     [format addObject:@"mediaType = %d"];
-    [arguments addObject:[NSNumber numberWithInteger:PHAssetMediaTypeVideo]];
+    [arguments addObject:@(PHAssetMediaTypeVideo)];
   } else {
     if (![lowercase isEqualToString:@"all"]) {
       RCTLogError(@"Invalid filter option: '%@'. Expected one of 'photos',"
