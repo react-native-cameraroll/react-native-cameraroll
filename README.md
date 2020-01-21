@@ -1,6 +1,9 @@
 # `@react-native-community/cameraroll`
 
-[![CircleCI Status](https://img.shields.io/circleci/project/github/react-native-community/react-native-cameraroll/master.svg)](https://circleci.com/gh/react-native-community/workflows/react-native-cameraroll/tree/master) ![Supports Android and iOS](https://img.shields.io/badge/platforms-android%20|%20ios-lightgrey.svg) ![MIT License](https://img.shields.io/npm/l/@react-native-community/cameraroll.svg)
+[![CircleCI Status][circle-ci-badge]][circle-ci]
+![Supports Android and iOS][supported-os-badge]
+![MIT License][license-badge]
+[![Lean Core Badge][lean-core-badge]][lean-core-issue]
 
 ## Getting started
 
@@ -231,3 +234,11 @@ Returns a Promise which will resolve when the deletion request is completed, or 
 | Name | Type                   | Required | Description                                                |
 | ---- | ---------------------- | -------- | ---------------------------------------------------------- |
 | uri  | string                 | Yes      | See above.                                                 |
+
+
+[circle-ci-badge]:https://img.shields.io/circleci/project/github/react-native-community/react-native-cameraroll/master.svg?style=flat-square
+[circle-ci]:https://circleci.com/gh/react-native-community/workflows/react-native-cameraroll/tree/master
+[supported-os-badge]:https://img.shields.io/badge/platforms-android%20|%20ios-lightgrey.svg?style=flat-square
+[license-badge]:https://img.shields.io/npm/l/@react-native-community/cameraroll.svg?style=flat-square
+[lean-core-badge]: https://img.shields.io/badge/Lean%20Core-Extracted-brightgreen.svg?style=flat-square
+[lean-core-issue]: https://github.com/facebook/react-native/issues/23313
