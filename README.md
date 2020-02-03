@@ -75,6 +75,7 @@ On Android permission is required to read the external storage. Add below line t
 
 * [`saveToCameraRoll`](#savetocameraroll)
 * [`save`](#save)
+* [`getAlbums`](#getalbums)
 * [`getPhotos`](#getphotos)
 * [`deletePhotos`](#deletephotos)
 
@@ -114,6 +115,27 @@ Returns a Promise which will resolve with the new URI.
 | ---- | ---------------------- | -------- | ---------------------------------------------------------- |
 | tag  | string                 | Yes      | See above.                                                 |
 | type | enum('photo', 'video') | No       | Overrides automatic detection based on the file extension. |
+
+---
+### `getAlbums()`
+
+```javascript
+CameraRoll.getAlbums(params);
+```
+Returns a Promise with a list of albums
+
+**Parameters:**
+
+* `assetType` : {string} : Specifies filter on asset type. Valid values are:
+  * `All` // default
+  * `Videos`
+  * `Photos`
+
+**Returns:**
+
+Array of `Album` object
+  * title: {string}
+  * count: {number}
 
 ---
 

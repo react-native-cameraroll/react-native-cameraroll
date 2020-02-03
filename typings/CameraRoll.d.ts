@@ -60,6 +60,15 @@ declare namespace CameraRoll {
     };
   }
 
+  interface GetAlbumsParams {
+    assetType?: AssetType;
+  }
+
+  interface Album {
+    title: string;
+    count: number;
+  }
+
   type SaveToCameraRollOptions = {
     type?: 'photo' | 'video' | 'auto',
     album?: string,
@@ -90,6 +99,8 @@ declare namespace CameraRoll {
      * roll of the device matching shape defined by `getPhotosReturnChecker`.
      */
     function getPhotos(params: GetPhotosParams): Promise<PhotoIdentifiersPage>;
+
+    function getAlbums(params: GetAlbumsParams): Promise<Album[]>;
 }
 
 export = CameraRoll;
