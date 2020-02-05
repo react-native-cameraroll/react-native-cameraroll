@@ -43,27 +43,44 @@ RCT_ENUM_CONVERTER(PHAssetCollectionSubtype, (@{
 @implementation RCTConvert (PHFetchOptions)
 
 + (PHFetchOptions *)PHFetchOptionsFromMediaType:(NSString *)mediaType
+                                       fromTime:(NSUInteger)fromTime
+                                         toTime:(NSUInteger)toTime
 {
   // This is not exhaustive in terms of supported media type predicates; more can be added in the future
   NSString *const lowercase = [mediaType lowercaseString];
+  NSMutableArray *format = [NSMutableArray new];
+  NSMutableArray *arguments = [NSMutableArray new];
   
   if ([lowercase isEqualToString:@"photos"]) {
-    PHFetchOptions *const options = [PHFetchOptions new];
-    options.predicate = [NSPredicate predicateWithFormat:@"mediaType = %d", PHAssetMediaTypeImage];
-    return options;
+    [format addObject:@"mediaType = %d"];
+    [arguments addObject:@(PHAssetMediaTypeImage)];
   } else if ([lowercase isEqualToString:@"videos"]) {
-    PHFetchOptions *const options = [PHFetchOptions new];
-    options.predicate = [NSPredicate predicateWithFormat:@"mediaType = %d", PHAssetMediaTypeVideo];
-    return options;
+    [format addObject:@"mediaType = %d"];
+    [arguments addObject:@(PHAssetMediaTypeVideo)];
   } else {
     if (![lowercase isEqualToString:@"all"]) {
       RCTLogError(@"Invalid filter option: '%@'. Expected one of 'photos',"
                   "'videos' or 'all'.", mediaType);
     }
-    // This case includes the "all" mediatype
-    PHFetchOptions *const options = [PHFetchOptions new];
-    return options;
   }
+  
+  if (fromTime > 0) {
+    NSDate* fromDate = [NSDate dateWithTimeIntervalSince1970:fromTime/1000];
+    [format addObject:@"creationDate > %@"];
+    [arguments addObject:fromDate];
+  }
+  if (toTime > 0) {
+    NSDate* toDate = [NSDate dateWithTimeIntervalSince1970:toTime/1000];
+    [format addObject:@"creationDate < %@"];
+    [arguments addObject:toDate];
+  }
+  
+  // This case includes the "all" mediatype
+  PHFetchOptions *const options = [PHFetchOptions new];
+  if ([format count] > 0) {
+    options.predicate = [NSPredicate predicateWithFormat:[format componentsJoinedByString:@" AND "] argumentArray:arguments];
+  }
+  return options;
 }
 
 @end
@@ -225,6 +242,8 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
   NSString *const groupName = [RCTConvert NSString:params[@"groupName"]];
   NSString *const groupTypes = [[RCTConvert NSString:params[@"groupTypes"]] lowercaseString];
   NSString *const mediaType = [RCTConvert NSString:params[@"assetType"]];
+  NSUInteger const fromTime = [RCTConvert NSInteger:params[@"fromTime"]];
+  NSUInteger const toTime = [RCTConvert NSInteger:params[@"toTime"]];
   NSArray<NSString *> *const mimeTypes = [RCTConvert NSStringArray:params[@"mimeTypes"]];
   
   // If groupTypes is "all", we want to fetch the SmartAlbum "all photos". Otherwise, all
@@ -235,7 +254,7 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
   PHAssetCollectionSubtype const collectionSubtype = [RCTConvert PHAssetCollectionSubtype:groupTypes];
   
   // Predicate for fetching assets within a collection
-  PHFetchOptions *const assetFetchOptions = [RCTConvert PHFetchOptionsFromMediaType:mediaType];
+  PHFetchOptions *const assetFetchOptions = [RCTConvert PHFetchOptionsFromMediaType:mediaType fromTime:fromTime toTime:toTime];
   assetFetchOptions.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:NO]];
   
   BOOL __block foundAfter = NO;

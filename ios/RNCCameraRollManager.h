@@ -12,7 +12,9 @@
 
 @interface RCTConvert (PHFetchOptions)
 
-+ (PHFetchOptions *)PHFetchOptionsFromMediaType:(NSString *)mediaType;
++ (PHFetchOptions *)PHFetchOptionsFromMediaType:(NSString *)mediaType
+                                       fromTime:(NSUInteger)fromTime
+                                         toTime:(NSUInteger)toTime;
 
 @end
 

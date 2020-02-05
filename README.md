@@ -147,6 +147,8 @@ Returns a Promise with photo identifier objects from the local camera roll of th
   * `Videos`
   * `Photos` // default
 * `mimeTypes` : {Array} : Filter by mimetype (e.g. image/jpeg).
+* `fromTime` : {timestamp} : Filter from date added.
+* `toTime` : {timestamp} : Filter to date added.
 
 Returns a Promise which when resolved will be of the following shape:
 
