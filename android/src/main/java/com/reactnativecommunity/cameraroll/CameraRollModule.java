@@ -594,7 +594,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
       cursor.close();
 
       if (deletedCount == mUris.size()) {
-        mPromise.resolve(null);
+        mPromise.resolve(true);
       } else {
         mPromise.reject(ERROR_UNABLE_TO_DELETE,
             "Could not delete all media, only deleted " + deletedCount + " photos.");

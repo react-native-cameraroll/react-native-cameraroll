@@ -75,7 +75,7 @@ declare namespace CameraRoll {
     /**
      * Delete a photo from the camera roll or media library. photoUris is an array of photo uri's.
      */
-    function deletePhotos(photoUris: Array<string>): void;
+    function deletePhotos(photoUris: Array<string>): Promise<boolean>;
     
     /**
      * Saves the photo or video to the camera roll or photo library.
