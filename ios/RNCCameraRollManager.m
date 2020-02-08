@@ -172,8 +172,8 @@ RCT_EXPORT_METHOD(saveToCameraRoll:(NSURLRequest *)request
   };
 
   void (^loadBlock)(void) = ^void() {
-      inputURI = request.URL;
-      saveWithOptions();
+    inputURI = request.URL;
+    saveWithOptions();
   };
 
   requestPhotoLibraryAccess(reject, loadBlock);
