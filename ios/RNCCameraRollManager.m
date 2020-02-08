@@ -140,7 +140,7 @@ RCT_EXPORT_METHOD(saveToCameraRoll:(NSURLRequest *)request
       if ([options[@"type"] isEqualToString:@"video"]) {
         assetRequest = [PHAssetChangeRequest creationRequestForAssetFromVideoAtFileURL:inputURI];
       } else {
-        assetRequest = [PHAssetChangeRequest creationRequestForAssetFromImage:inputImage];
+        assetRequest = [PHAssetChangeRequest creationRequestForAssetFromImageAtFileURL:inputURI];
       }
       placeholder = [assetRequest placeholderForCreatedAsset];
       if (![options[@"album"] isEqualToString:@""]) {
@@ -189,20 +189,8 @@ RCT_EXPORT_METHOD(saveToCameraRoll:(NSURLRequest *)request
   };
 
   void (^loadBlock)(void) = ^void() {
-    if ([options[@"type"] isEqualToString:@"video"]) {
-      inputURI = request.URL;
-      saveWithOptions();
-    } else {
-      [[self.bridge moduleForName:@"ImageLoader" lazilyLoadIfNecessary:YES] loadImageWithURLRequest:request callback:^(NSError *error, UIImage *image) {
-        if (error) {
-          reject(kErrorUnableToLoad, nil, error);
-          return;
-        }
-
-        inputImage = image;
-        saveWithOptions();
-      }];
-    }
+    inputURI = request.URL;
+    saveWithOptions();
   };
 
   requestPhotoLibraryAccess(reject, loadBlock);
