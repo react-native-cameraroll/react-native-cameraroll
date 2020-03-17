@@ -107,12 +107,12 @@ export type SaveToCameraRollOptions = {
 
 export type GetAlbumsParams = {
   assetType?: $Keys<typeof ASSET_TYPE_OPTIONS>,
-}
+};
 
 export type Album = {
   title: string,
   count: number,
-}
+};
 /**
  * `CameraRoll` provides access to the local camera roll or photo library.
  *
@@ -177,7 +177,9 @@ class CameraRoll {
   ): Promise<string> {
     return CameraRoll.save(tag, {type});
   }
-  static getAlbums(params?: GetAlbumsParams = { assetType: ASSET_TYPE_OPTIONS.All }): Promise<Album[]> {
+  static getAlbums(
+    params?: GetAlbumsParams = {assetType: ASSET_TYPE_OPTIONS.All},
+  ): Promise<Album[]> {
     return RNCCameraRoll.getAlbums(params);
   }
   /**
