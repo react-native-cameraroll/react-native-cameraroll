@@ -115,7 +115,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
     private final ReadableMap mOptions;
 
     public SaveToCameraRoll(ReactContext context, Uri uri, ReadableMap options, Promise promise) {
-      super(context);
+      super(context.getExceptionHandler());
       mContext = context;
       mUri = uri;
       mPromise = promise;
@@ -274,7 +274,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
         long fromTime,
         long toTime,
         Promise promise) {
-      super(context);
+      super(context.getExceptionHandler());
       mContext = context;
       mFirst = first;
       mAfter = after;
@@ -612,7 +612,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
     private final Promise mPromise;
 
     public DeletePhotos(ReactContext context, ReadableArray uris, Promise promise) {
-      super(context);
+      super(context.getExceptionHandler());
       mContext = context;
       mUris = uris;
       mPromise = promise;
