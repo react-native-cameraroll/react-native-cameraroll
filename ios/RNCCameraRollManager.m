@@ -123,7 +123,6 @@ RCT_EXPORT_METHOD(saveToCameraRoll:(NSURLRequest *)request
   // URLs, `data:` URIs, etc. Video URLs are passed directly through for now; it may be nice to support
   // more ways of loading videos in the future.
   __block NSURL *inputURI = nil;
-  __block UIImage *inputImage = nil;
   __block PHFetchResult *photosAsset;
   __block PHAssetCollection *collection;
   __block PHObjectPlaceholder *placeholder;
