@@ -11,7 +11,7 @@ Pod::Spec.new do |s|
   # s.license      = { :type => "MIT", :file => "FILE_LICENSE" }
   s.author             = { "author" => "author@domain.cn" }
   s.platform     = :ios, "7.0"
-  s.source       = { :git => "https://github.com/author/RNCCameraroll.git", :tag => "master" }
+  s.source       = { :git => "https://github.com/react-native-community/react-native-cameraroll.git", :tag => "master" }
   s.source_files  = "RNCCameraroll/**/*.{h,m}"
   s.requires_arc = true
 
