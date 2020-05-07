@@ -17,6 +17,7 @@ import android.media.MediaMetadataRetriever;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.provider.MediaStore.Images;
@@ -47,6 +48,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -69,18 +71,6 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
   private static final String ASSET_TYPE_PHOTOS = "Photos";
   private static final String ASSET_TYPE_VIDEOS = "Videos";
   private static final String ASSET_TYPE_ALL = "All";
-
-  private static final String[] PROJECTION = {
-    Images.Media._ID,
-    Images.Media.MIME_TYPE,
-    Images.Media.BUCKET_DISPLAY_NAME,
-    Images.Media.DATE_TAKEN,
-    MediaStore.MediaColumns.WIDTH,
-    MediaStore.MediaColumns.HEIGHT,
-    Images.Media.LONGITUDE,
-    Images.Media.LATITUDE,
-    MediaStore.MediaColumns.DATA
-  };
 
   private static final String SELECTION_BUCKET = Images.Media.BUCKET_DISPLAY_NAME + " = ?";
   private static final String SELECTION_DATE_TAKEN = Images.Media.DATE_TAKEN + " < ?";
@@ -333,10 +323,10 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
         selection.append(" AND " + Images.Media.DATE_TAKEN + " <= ?");
         selectionArgs.add(mToTime + "");
       }
-      
+
       WritableMap response = new WritableNativeMap();
       ContentResolver resolver = mContext.getContentResolver();
-      
+
       try {
         // set LIMIT to first + 1 so that we know how to populate page_info
         String limit = "limit=" + (mFirst + 1);
@@ -345,9 +335,28 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
           limit = "limit=" + mAfter + "," + (mFirst + 1);
         }
 
+
+        ArrayList<String> projectionList = new ArrayList<String>(
+          Arrays.asList(
+            Images.Media._ID,
+            Images.Media.MIME_TYPE,
+            Images.Media.BUCKET_DISPLAY_NAME,
+            Images.Media.DATE_TAKEN,
+            MediaStore.MediaColumns.WIDTH,
+            MediaStore.MediaColumns.HEIGHT,
+            MediaStore.MediaColumns.DATA
+          ));
+
+        if (Build.VERSION.SDK_INT < 29) {
+          projectionList.add(Images.Media.LONGITUDE);
+          projectionList.add(Images.Media.LATITUDE);
+        }
+
+        String[] projection = projectionList.toArray(new String[0]);
+
         Cursor media = resolver.query(
             MediaStore.Files.getContentUri("external").buildUpon().encodedQuery(limit).build(),
-            PROJECTION,
+            projection,
             selection.toString(),
             selectionArgs.toArray(new String[selectionArgs.size()]),
             Images.Media.DATE_ADDED + " DESC, " + Images.Media.DATE_MODIFIED + " DESC");
