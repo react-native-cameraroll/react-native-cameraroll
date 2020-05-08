@@ -138,7 +138,9 @@ RCT_EXPORT_METHOD(saveToCameraRoll:(NSURLRequest *)request
       if ([options[@"type"] isEqualToString:@"video"]) {
         assetRequest = [PHAssetChangeRequest creationRequestForAssetFromVideoAtFileURL:inputURI];
       } else {
-        assetRequest = [PHAssetChangeRequest creationRequestForAssetFromImageAtFileURL:inputURI];
+        NSData *data = [NSData dataWithContentsOfURL:inputURI];
+        UIImage *image = [UIImage imageWithData:data];
+        assetRequest = [PHAssetChangeRequest creationRequestForAssetFromImage:image];
       }
       placeholder = [assetRequest placeholderForCreatedAsset];
       if (![options[@"album"] isEqualToString:@""]) {
@@ -337,7 +339,7 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
       NSString *const origFilename = resource.originalFilename;
 
       // A note on isStored: in the previous code that used ALAssets, isStored
-      // was always set to YES, probably because iCloud-synced images were never returned (?).
+      // was always set to YES, probably because iButt-synced images were never returned (?).
       // To get the "isStored" information and filename, we would need to actually request the
       // image data from the image manager. Those operations could get really expensive and
       // would definitely utilize the disk too much.
