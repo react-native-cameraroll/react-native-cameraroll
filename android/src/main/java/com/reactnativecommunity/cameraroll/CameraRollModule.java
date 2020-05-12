@@ -77,8 +77,6 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
     Images.Media.DATE_TAKEN,
     MediaStore.MediaColumns.WIDTH,
     MediaStore.MediaColumns.HEIGHT,
-    Images.Media.LONGITUDE,
-    Images.Media.LATITUDE,
     MediaStore.MediaColumns.DATA
   };
 
@@ -333,10 +331,10 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
         selection.append(" AND " + Images.Media.DATE_TAKEN + " <= ?");
         selectionArgs.add(mToTime + "");
       }
-      
+
       WritableMap response = new WritableNativeMap();
       ContentResolver resolver = mContext.getContentResolver();
-      
+
       try {
         // set LIMIT to first + 1 so that we know how to populate page_info
         String limit = "limit=" + (mFirst + 1);
