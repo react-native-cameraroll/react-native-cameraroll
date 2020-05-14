@@ -11,7 +11,7 @@
 
 ### Mostly automatic installation
 
-`$ react-native link @react-native-community/cameraroll && cd ios && pod install`
+`$ react-native link @react-native-community/cameraroll && npx pod-install`
 
 ### Manual installation
 
