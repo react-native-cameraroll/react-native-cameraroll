@@ -79,8 +79,8 @@ import com.android.build.OutputFile
 
 project.ext.react = [
     // Start added for this project (react-native-cameraroll)
-    cliPath: "../../../node_modules/react-native/local-cli/cli.js",
-    entryFile: "./example/index.js",
+    cliPath: "node_modules/react-native/local-cli/cli.js",
+    entryFile: "example/index.js",
     root: "../../../",
     // End added
     enableHermes: false,  // clean and rebuild if changing
