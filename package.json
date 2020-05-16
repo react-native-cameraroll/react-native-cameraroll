@@ -8,6 +8,8 @@
   "types": "./typings/CameraRoll.d.ts",
   "scripts": {
     "start": "react-native start",
+    "start:android": "react-native run-android --root example/",
+    "start:ios": "react-native run-ios --project-path example/ios",
     "test": "yarn validate:eslint && yarn validate:flow && yarn validate:typescript && yarn test:jest",
     "validate:eslint": "eslint 'js/**/*.js' 'example/**/*.js'",
     "validate:flow": "flow check",
@@ -40,24 +42,25 @@
     "react-native": ">=0.57 <=0.62"
   },
   "devDependencies": {
-    "@babel/core": "^7.4.3",
-    "@react-native-community/eslint-config": "^0.0.7",
+    "@babel/core": "^7.9.6",
+    "@babel/runtime": "^7.9.6",
+    "@react-native-community/eslint-config": "^1.1.0",
     "@semantic-release/git": "7.0.8",
     "babel-core": "^7.0.0-bridge.0",
-    "babel-jest": "^24.7.0",
+    "babel-jest": "^26.0.1",
     "babel-plugin-module-resolver": "^3.2.0",
-    "detox": "^12.1.2",
-    "eslint": "^5.16.0",
+    "detox": "^16.5.0",
+    "eslint": "^7.0.0",
     "eslint-plugin-prettier": "^3.0.1",
-    "flow-bin": "^0.86.0",
+    "flow-bin": "^0.113.0",
     "husky": "^2.2.0",
-    "jest": "24.7.0",
-    "metro-react-native-babel-preset": "0.51.1",
+    "jest": "^26.0.1",
+    "metro-react-native-babel-preset": "^0.59.0",
     "prettier": "^1.17.0",
     "pretty-quick": "^1.10.0",
-    "react": "16.6.3",
-    "react-native": "0.58.4",
-    "react-test-renderer": "16.6.3",
+    "react": "16.11.0",
+    "react-native": "0.62.2",
+    "react-test-renderer": "16.11.0",
     "rimraf": "^2.6.3",
     "semantic-release": "15.13.3",
     "typescript": "^3.4.1"
@@ -72,7 +75,8 @@
     }
   },
   "resolutions": {
-    "lodash": "4.17.15"
+    "lodash": "4.17.15",
+    "@react-native-community/cli-platform-android": "~4.3.0"
   },
   "jest": {
     "preset": "react-native",
@@ -86,27 +90,35 @@
     "configurations": {
       "ios.sim.debug": {
         "binaryPath": "example/ios/build/Build/Products/Debug-iphonesimulator/CameraRollExample.app",
-        "build": "export RCT_NO_LAUNCH_PACKAGER=true && xcodebuild -project example/ios/CameraRollExample.xcodeproj -destination 'platform=iOS Simulator,name=iPhone X' -scheme CameraRollExample -parallelizeTargets -configuration Debug -derivedDataPath example/ios/build  -UseModernBuildSystem=YES | xcpretty -k",
+        "build": "xcodebuild -workspace example/ios/CameraRollExample.xcworkspace -configuration Debug -scheme CameraRollExample -sdk iphonesimulator -derivedDataPath example/ios/build | xcpretty -k",
         "type": "ios.simulator",
-        "name": "iPhone X"
+        "device": {
+          "type": "iPhone X"
+        }
       },
       "ios.sim.release": {
         "binaryPath": "example/ios/build/Build/Products/Release-iphonesimulator/CameraRollExample.app",
-        "build": "export RCT_NO_LAUNCH_PACKAGER=true && xcodebuild -project example/ios/CameraRollExample.xcodeproj -destination 'platform=iOS Simulator,name=iPhone X' -scheme CameraRollExample -parallelizeTargets -configuration Release -derivedDataPath example/ios/build  -UseModernBuildSystem=YES | xcpretty -k",
+        "build": "xcodebuild -workspace example/ios/CameraRollExample.xcworkspace -configuration Release -scheme CameraRollExample -sdk iphonesimulator -derivedDataPath example/ios/build | xcpretty -k",
         "type": "ios.simulator",
-        "name": "iPhone X"
+        "device": {
+          "type": "iPhone X"
+        }
       },
       "android.emu.debug": {
         "binaryPath": "example/android/app/build/outputs/apk/debug/app-debug.apk",
-        "build": "export RCT_NO_LAUNCH_PACKAGER=true && pushd example/android && ./gradlew assembleDebug assembleAndroidTest -DtestBuildType=debug && popd",
+        "build": "pushd example/android && ./gradlew assembleDebug assembleAndroidTest -DtestBuildType=debug && popd",
         "type": "android.emulator",
-        "name": "TestingAVD"
+        "device": {
+          "avdName": "TestingAVD"
+        }
       },
       "android.emu.release": {
         "binaryPath": "example/android/app/build/outputs/apk/release/app-release.apk",
-        "build": "export RCT_NO_LAUNCH_PACKAGER=true && pushd example/android && ./gradlew assembleRelease assembleAndroidTest -DtestBuildType=release && popd",
+        "build": "pushd example/android && ./gradlew assembleRelease assembleAndroidTest -DtestBuildType=release && popd",
         "type": "android.emulator",
-        "name": "TestingAVD"
+        "device": {
+          "avdName": "TestingAVD"
+        }
       }
     }
   },

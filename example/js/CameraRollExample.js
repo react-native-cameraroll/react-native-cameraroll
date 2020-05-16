@@ -106,7 +106,7 @@ export default class CameraRollExample extends React.Component<Props, State> {
         key={asset.node.image.uri}
         onPress={this.loadAsset.bind(this, asset)}>
         <View style={styles.row}>
-          <Image source={asset.node.image} style={imageStyle} />
+          <Image source={{uri: asset.node.image.uri}} style={imageStyle} />
           <View style={styles.info}>
             <Text style={styles.url}>{asset.node.image.uri}</Text>
             <Text>{locationStr}</Text>

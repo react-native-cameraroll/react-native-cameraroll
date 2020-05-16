@@ -1,12 +1,9 @@
 rootProject.name = 'CameraRollExample'
-
-include ':react-native-cameraroll'
-project(':react-native-cameraroll').projectDir = new File(rootProject.projectDir, '../../android')
-// For your application the line above will most likely be:
-// project(':react-native-cameraroll').projectDir = new File(rootProject.projectDir, '../node_modules/!react-native-community/cameraroll/android')
-
-// e2e tests
-include ':detox'
-project(':detox').projectDir = new File(rootProject.projectDir, '../../node_modules/detox/android/detox')
+apply from: file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesSettingsGradle(settings)
 
 include ':app'
+
+// Start added for this project (react-native-cameraroll)
+include ':react-native-cameraroll'
+project(':react-native-cameraroll').projectDir = new File(rootProject.projectDir, '../../android')
+// End added
