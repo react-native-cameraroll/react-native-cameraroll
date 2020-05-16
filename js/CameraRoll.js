@@ -32,20 +32,14 @@ const ASSET_TYPE_OPTIONS = {
 export type GroupTypes = $Keys<typeof GROUP_TYPES_OPTIONS>;
 
 /**
- * Shape of the param arg for the `getPhotos` function.
+ * Shape of the param arg for the `getPhotosFast` function.
  */
-export type GetPhotosParams = {
+export type GetPhotosFastParams = {
   /**
    * The number of photos wanted in reverse order of the photo application
    * (i.e. most recent first).
    */
   first: number,
-
-  /**
-   * A cursor that matches `page_info { end_cursor }` returned from a previous
-   * call to `getPhotos`
-   */
-  after?: string,
 
   /**
    * Specifies which group types to filter the results to.
@@ -64,9 +58,44 @@ export type GetPhotosParams = {
   assetType?: $Keys<typeof ASSET_TYPE_OPTIONS>,
 
   /**
+   * Earliest time to get photos from. A timestamp in milliseconds. Exclusive.
+   */
+  fromTime?: number,
+
+  /**
+   * Latest time to get photos from. A timestamp in milliseconds. Inclusive.
+   */
+  toTime?: Number,
+};
+
+/**
+ * Shape of the param arg for the `getPhotos` function. This has a few more
+ * parameters than the `getPhotosFast` params, at the cost of some
+ * performance on iOS.
+ */
+export type GetPhotosParams = GetPhotosFastParams & {
+  /**
+   * A cursor that matches `page_info { end_cursor }` returned from a previous
+   * call to `getPhotos`
+   */
+  after?: string,
+
+  /**
    * Filter by mimetype (e.g. image/jpeg).
    */
   mimeTypes?: Array<string>,
+};
+
+/**
+ * Params for the native `getPhotos` function, as implemented in the
+ * RNCCameraRoll module.
+ */
+export type GetPhotosNativeParams = GetPhotosParams & {
+  /**
+   * If provided, it's OK for the output to have empty filenames. This can
+   * improve performance on iOS when used by `getPhotosFast`.
+   */
+  allowEmptyFilenames?: boolean,
 };
 
 export type PhotoIdentifier = {
@@ -186,6 +215,17 @@ class CameraRoll {
   ): Promise<Album[]> {
     return RNCCameraRoll.getAlbums(params);
   }
+
+  static getParamsWithDefaults<T: GetPhotosFastParams>(params: T): T {
+    const newParams = {...params};
+    if (!newParams.assetType) {
+      newParams.assetType = ASSET_TYPE_OPTIONS.All;
+    }
+    if (!newParams.groupTypes && Platform.OS !== 'android') {
+      newParams.groupTypes = GROUP_TYPES_OPTIONS.All;
+    }
+    return newParams;
+  }
   /**
    * Returns a Promise with photo identifier objects from the local camera
    * roll of the device matching shape defined by `getPhotosReturnChecker`.
@@ -193,12 +233,7 @@ class CameraRoll {
    * See https://facebook.github.io/react-native/docs/cameraroll.html#getphotos
    */
   static getPhotos(params: GetPhotosParams): Promise<PhotoIdentifiersPage> {
-    if (!params.assetType) {
-      params.assetType = ASSET_TYPE_OPTIONS.All;
-    }
-    if (!params.groupTypes && Platform.OS !== 'android') {
-      params.groupTypes = GROUP_TYPES_OPTIONS.All;
-    }
+    params = CameraRoll.getParamsWithDefaults(params);
     if (arguments.length > 1) {
       console.warn(
         'CameraRoll.getPhotos(tag, success, error) is deprecated.  Use the returned Promise instead',
@@ -208,6 +243,23 @@ class CameraRoll {
       RNCCameraRoll.getPhotos(params).then(successCallback, errorCallback);
     }
     return RNCCameraRoll.getPhotos(params);
+  }
+
+  /**
+   * Returns a Promise with photo identifier objects from the local camera
+   * roll of the device matching shape defined by `getPhotosReturnChecker`.
+   *
+   * This is the same as `getPhotos` on Android, but is much faster on iOS.
+   * For 1000 photos, it can save 4.8 out of 5 seconds. It does this by
+   * not using cursor and mimetype filters, and by omitting the filename in
+   * the returned object.
+   */
+  static getPhotosFast(
+    params: GetPhotosFastParams,
+  ): Promise<PhotoIdentifiersPage> {
+    params = CameraRoll.getParamsWithDefaults(params);
+    const nativeParams = {...params, allowEmptyFilename: true};
+    return RNCCameraRoll.getPhotos(nativeParams);
   }
 }
 

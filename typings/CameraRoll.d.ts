@@ -3,8 +3,6 @@
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
- *
- * @format
  */
 
 declare namespace CameraRoll {
@@ -19,15 +17,71 @@ declare namespace CameraRoll {
 
   type AssetType = 'All' | 'Videos' | 'Photos';
 
-  interface GetPhotosParams {
+  /**
+   * Shape of the param arg for the `getPhotosFast` function.
+   */
+  interface GetPhotosFastParams {
+    /**
+     * The number of photos wanted in reverse order of the photo application
+     * (i.e. most recent first).
+     */
     first: number;
-    after?: string;
+
+    /**
+     * Specifies which group types to filter the results to.
+     */
     groupTypes?: GroupType;
+
+    /**
+     * Specifies filter on group names, like 'Recent Photos' or custom album
+     * titles.
+     */
     groupName?: string;
+
+    /**
+     * Specifies filter on asset type
+     */
     assetType?: AssetType;
-    mimeTypes?: Array<string>;
-    fromTime?: number;
+
+    /**
+     * Earliest time to get photos from. A timestamp in milliseconds. Exclusive.
+     */
+    fromTime?: number,
+
+    /**
+     * Latest time to get photos from. A timestamp in milliseconds. Inclusive.
+     */
     toTime?: number;
+  }
+
+  /**
+   * Shape of the param arg for the `getPhotos` function. This has a few more
+   * parameters than the `getPhotosFast` params, at the cost of some
+   * performance on iOS.
+   */
+  interface GetPhotosParams extends GetPhotosFastParams {
+    /**
+     * A cursor that matches `page_info { end_cursor }` returned from a previous
+     * call to `getPhotos`
+     */
+    after?: string;
+
+    /**
+     * Filter by mimetype (e.g. image/jpeg).
+     */
+    mimeTypes?: Array<string>;
+  }
+
+  /**
+   * Params for the native `getPhotos` function, as implemented in the
+   * RNCCameraRoll module.
+   */
+  interface GetPhotosNativeParams extends GetPhotosParams {
+    /**
+     * If provided, it's OK for the output to have empty filenames. This can
+     * improve performance on iOS when used by `getPhotosFast`.
+     */
+    allowEmptyFilenames?: boolean,
   }
 
   interface PhotoIdentifier {
@@ -102,6 +156,17 @@ declare namespace CameraRoll {
      * roll of the device matching shape defined by `getPhotosReturnChecker`.
      */
     function getPhotos(params: GetPhotosParams): Promise<PhotoIdentifiersPage>;
+
+    /**
+     * Returns a Promise with photo identifier objects from the local camera
+     * roll of the device matching shape defined by `getPhotosReturnChecker`.
+     *
+     * This is the same as `getPhotos` on Android, but is much faster on iOS.
+     * For 1000 photos, it can save 4.8 out of 5 seconds. It does this by
+     * not using cursor and mimetype filters, and by omitting the filename in
+     * the returned object.
+     */
+    function getPhotosFast(params: GetPhotosFastParams): Promise<PhotoIdentifiersPage>;
 
     function getAlbums(params: GetAlbumsParams): Promise<Album[]>;
 }

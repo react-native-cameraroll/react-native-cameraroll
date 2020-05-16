@@ -76,6 +76,7 @@ On Android permission is required to read the external storage. Add below line t
 * [`save`](#save)
 * [`getAlbums`](#getalbums)
 * [`getPhotos`](#getphotos)
+* [`getPhotosFast`](#getphotosfast)
 * [`deletePhotos`](#deletephotos)
 
 ---
@@ -230,7 +231,38 @@ render() {
    </View>
  );
 }
-```  
+```
+
+---
+
+### `getPhotosFast()`
+
+```javascript
+CameraRoll.getPhotosFast(params);
+```
+
+This function is largely the same as the [`getPhotos`](#getphotos) function, but does not return the filename on iOS. As a result, it can be much faster there. On a Camera Roll of 1000 photos, it will take 0.2 instead of 5.0 seconds.
+
+The `mimeTypes` and `after` parameters in `getPhotos` are also unavailable.
+
+**Parameters:**
+
+| Name   | Type   | Required | Description                                      |
+| ------ | ------ | -------- | ------------------------------------------------ |
+| params | object | Yes      | Expects a params with the shape described below. |
+
+All parameters have the same types and arguments as the parameters of the same names in [`getPhotos`](#getphotos).
+
+* `first` : {number}
+* `after` : {string}
+* `groupTypes` : {string}
+* `groupName` : {string}
+* `assetType` : {string}
+* `fromTime` : {timestamp}
+* `toTime` : {timestamp}
+
+Returns a Promise which resolves with the same object as [`getPhotos`](#getphotos).
+
 ---
 ### `deletePhotos()`
 

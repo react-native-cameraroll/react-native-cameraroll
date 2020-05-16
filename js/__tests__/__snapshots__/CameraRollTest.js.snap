@@ -22,6 +22,19 @@ Array [
 ]
 `;
 
+exports[`CameraRoll Should call getPhotosFast 1`] = `
+Array [
+  Array [
+    Object {
+      "allowEmptyFilename": true,
+      "assetType": "All",
+      "first": 0,
+      "groupTypes": "All",
+    },
+  ],
+]
+`;
+
 exports[`CameraRoll Should call save 1`] = `
 Array [
   Array [
