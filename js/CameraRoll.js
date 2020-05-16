@@ -143,6 +143,10 @@ export type Album = {
   title: string,
   count: number,
 };
+
+// Based on https://github.com/facebook/flow/issues/2405#issuecomment-256339492
+type Exact<T> = T & $Shape<T>;
+
 /**
  * `CameraRoll` provides access to the local camera roll or photo library.
  *
@@ -258,7 +262,10 @@ class CameraRoll {
     params: GetPhotosFastParams,
   ): Promise<PhotoIdentifiersPage> {
     params = CameraRoll.getParamsWithDefaults(params);
-    const nativeParams = {...params, allowEmptyFilename: true};
+    const nativeParams: Exact<GetPhotosNativeParams> = {
+      ...params,
+      allowEmptyFilenames: true,
+    };
     return RNCCameraRoll.getPhotos(nativeParams);
   }
 }
