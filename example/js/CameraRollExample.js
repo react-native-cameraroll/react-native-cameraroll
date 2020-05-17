@@ -57,7 +57,7 @@ export default class CameraRollExample extends React.Component<Props, State> {
 
   render() {
     return (
-      <View>
+      <View style={styles.flex1}>
         <View style={styles.header}>
           <Switch
             onValueChange={this._onSwitchChange}
@@ -135,7 +135,6 @@ export default class CameraRollExample extends React.Component<Props, State> {
 
 const styles = StyleSheet.create({
   header: {
-    marginTop: 44,
     padding: 20,
     width: Dimensions.get('window').width,
   },
@@ -150,7 +149,7 @@ const styles = StyleSheet.create({
   image: {
     margin: 4,
   },
-  info: {
+  flex1: {
     flex: 1,
   },
 });

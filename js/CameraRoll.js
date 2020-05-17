@@ -95,7 +95,7 @@ export type GetPhotosNativeParams = GetPhotosParams & {
    * If provided, it's OK for the output to have empty filenames. This can
    * improve performance on iOS when used by `getPhotosFast`.
    */
-  allowEmptyFilenames?: boolean,
+  skipGettingFilenames?: boolean,
 };
 
 export type PhotoIdentifier = {
@@ -264,7 +264,7 @@ class CameraRoll {
     params = CameraRoll.getParamsWithDefaults(params);
     const nativeParams: Exact<GetPhotosNativeParams> = {
       ...params,
-      allowEmptyFilenames: true,
+      skipGettingFilenames: true,
     };
     return RNCCameraRoll.getPhotos(nativeParams);
   }

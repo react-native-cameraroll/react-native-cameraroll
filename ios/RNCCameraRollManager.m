@@ -255,7 +255,7 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
   NSUInteger const fromTime = [RCTConvert NSInteger:params[@"fromTime"]];
   NSUInteger const toTime = [RCTConvert NSInteger:params[@"toTime"]];
   NSArray<NSString *> *const mimeTypes = [RCTConvert NSStringArray:params[@"mimeTypes"]];
-  BOOL const allowEmptyFilenames = [RCTConvert BOOL:params[@"allowEmptyFilenames"]];
+  BOOL const skipGettingFilenames = [RCTConvert BOOL:params[@"skipGettingFilenames"]];
   
   // If groupTypes is "all", we want to fetch the SmartAlbum "all photos". Otherwise, all
   // other groupTypes values require the "album" collection type.
@@ -295,7 +295,7 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
       NSString *origFilename = @"";
       PHAssetResource *_Nullable resource = NULL;
       
-      if (!allowEmptyFilenames || [mimeTypes count] > 0) {
+      if (!skipGettingFilenames || [mimeTypes count] > 0) {
         // Get underlying resources of an asset - this includes files as well as details about edited PHAssets
         // This is required for the filename and mimeType filtering
         NSArray<PHAssetResource *> *const assetResources = [PHAssetResource assetResourcesForAsset:asset];
