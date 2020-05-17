@@ -254,7 +254,6 @@ The `mimeTypes` and `after` parameters in `getPhotos` are also unavailable.
 All parameters have the same types and arguments as the parameters of the same names in [`getPhotos`](#getphotos).
 
 * `first` : {number}
-* `after` : {string}
 * `groupTypes` : {string}
 * `groupName` : {string}
 * `assetType` : {string}
