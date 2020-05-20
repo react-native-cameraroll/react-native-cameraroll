@@ -183,6 +183,7 @@ Returns a Promise which when resolved will be of the following shape:
       * `filename`: {string}
       * `height`: {number}
       * `width`: {number}
+      * `fileSize`: {number}
       * `isStored`: {boolean}
       * `playableDuration`: {number}
     * `timestamp`: {number}

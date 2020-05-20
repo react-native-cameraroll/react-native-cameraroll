@@ -39,6 +39,7 @@ declare namespace CameraRoll {
         uri: string,
         height: number,
         width: number,
+        fileSize: number,
         isStored?: boolean,
         playableDuration: number,
       },
