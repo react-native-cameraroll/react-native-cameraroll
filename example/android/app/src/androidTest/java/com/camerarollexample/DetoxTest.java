@@ -1,8 +1,8 @@
 package com.camerarollexample;
 
-import android.support.test.filters.LargeTest;
+import androidx.test.filters.LargeTest;
 import androidx.test.rule.ActivityTestRule;
-import android.support.test.runner.AndroidJUnit4;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.wix.detox.Detox;
 

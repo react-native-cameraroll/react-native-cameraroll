@@ -14,7 +14,7 @@ const React = require('react');
 const ReactNative = require('react-native');
 const {Image, StyleSheet, View, ScrollView} = ReactNative;
 
-import type {PhotoIdentifier} from 'CameraRoll';
+import type {PhotoIdentifier} from '../../js/CameraRoll';
 
 type Props = $ReadOnly<{|
   asset: PhotoIdentifier,
@@ -31,19 +31,20 @@ class AssetScaledImageExample extends React.Component<Props, State> {
 
   render() {
     const image = this.state.asset.node.image;
+    const source = {uri: image.uri};
     return (
       <ScrollView>
         <View style={styles.row}>
-          <Image source={image} style={styles.imageWide} />
+          <Image source={source} style={styles.imageWide} />
         </View>
         <View style={styles.row}>
-          <Image source={image} style={styles.imageThumb} />
-          <Image source={image} style={styles.imageThumb} />
-          <Image source={image} style={styles.imageThumb} />
+          <Image source={source} style={styles.imageThumb} />
+          <Image source={source} style={styles.imageThumb} />
+          <Image source={source} style={styles.imageThumb} />
         </View>
         <View style={styles.row}>
-          <Image source={image} style={styles.imageT1} />
-          <Image source={image} style={styles.imageT2} />
+          <Image source={source} style={styles.imageT1} />
+          <Image source={source} style={styles.imageT2} />
         </View>
       </ScrollView>
     );
