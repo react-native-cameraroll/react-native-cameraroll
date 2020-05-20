@@ -237,3 +237,17 @@ task copyDownloadableDepsToLibs(type: Copy) {
 }
 
 apply from: file("../../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesAppBuildGradle(project)
+
+// Added for react-native-circleci-orb from https://github.com/react-native-community/react-native-circleci-orb/tree/v4.4.2#android
+task downloadDependencies() {
+  description 'Download all dependencies to the Gradle cache'
+  doLast {
+    configurations.findAll().each { config ->
+      if (config.name.contains("minReactNative") && config.canBeResolved) {
+        print config.name
+        print '\n'
+        config.files
+      }
+    }
+  }
+}
