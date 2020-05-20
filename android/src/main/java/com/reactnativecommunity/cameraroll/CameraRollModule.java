@@ -77,6 +77,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
     Images.Media.DATE_TAKEN,
     MediaStore.MediaColumns.WIDTH,
     MediaStore.MediaColumns.HEIGHT,
+    MediaStore.MediaColumns.SIZE,
     MediaStore.MediaColumns.DATA
   };
 
@@ -456,13 +457,14 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
     int dateTakenIndex = media.getColumnIndex(Images.Media.DATE_TAKEN);
     int widthIndex = media.getColumnIndex(MediaStore.MediaColumns.WIDTH);
     int heightIndex = media.getColumnIndex(MediaStore.MediaColumns.HEIGHT);
+    int sizeIndex = media.getColumnIndex(MediaStore.MediaColumns.SIZE);
     int dataIndex = media.getColumnIndex(MediaStore.MediaColumns.DATA);
 
     for (int i = 0; i < limit && !media.isAfterLast(); i++) {
       WritableMap edge = new WritableNativeMap();
       WritableMap node = new WritableNativeMap();
       boolean imageInfoSuccess =
-          putImageInfo(resolver, media, node, idIndex, widthIndex, heightIndex, dataIndex, mimeTypeIndex);
+          putImageInfo(resolver, media, node, idIndex, widthIndex, heightIndex, sizeIndex, dataIndex, mimeTypeIndex);
       if (imageInfoSuccess) {
         putBasicNodeInfo(media, node, mimeTypeIndex, groupNameIndex, dateTakenIndex);
         putLocationInfo(media, node, dataIndex);
@@ -497,6 +499,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
       int idIndex,
       int widthIndex,
       int heightIndex,
+      int sizeIndex,
       int dataIndex,
       int mimeTypeIndex) {
     WritableMap image = new WritableNativeMap();
@@ -507,6 +510,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
     image.putString("filename", strFileName);
     float width = media.getInt(widthIndex);
     float height = media.getInt(heightIndex);
+    long fileSize = media.getLong(sizeIndex);
 
     String mimeType = media.getString(mimeTypeIndex);
 
@@ -566,6 +570,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
     }
     image.putDouble("width", width);
     image.putDouble("height", height);
+    image.putDouble("fileSize", fileSize);
     node.putMap("image", image);
 
     return true;

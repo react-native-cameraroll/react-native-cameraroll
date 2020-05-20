@@ -78,6 +78,7 @@ export type PhotoIdentifier = {
       uri: string,
       height: number,
       width: number,
+      fileSize: number,
       isStored?: boolean,
       playableDuration: number,
     },

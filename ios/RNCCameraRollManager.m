@@ -354,6 +354,7 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
               @"filename": origFilename,
               @"height": @([asset pixelHeight]),
               @"width": @([asset pixelWidth]),
+              @"fileSize": [resource valueForKey:@"fileSize"],
               @"isStored": @YES, // this field doesn't seem to exist on android
               @"playableDuration": @([asset duration]) // fractional seconds
           },
