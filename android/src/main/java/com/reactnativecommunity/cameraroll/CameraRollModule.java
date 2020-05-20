@@ -48,6 +48,8 @@ import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 import javax.annotation.Nullable;
 
@@ -374,14 +376,12 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
     String assetType = params.hasKey("assetType") ? params.getString("assetType") : ASSET_TYPE_ALL;
     StringBuilder selection = new StringBuilder("1");
     List<String> selectionArgs = new ArrayList<>();
-    String bucketDisplayName = MediaStore.Images.ImageColumns.BUCKET_DISPLAY_NAME;
     if (assetType.equals(ASSET_TYPE_PHOTOS)) {
       selection.append(" AND " + MediaStore.Files.FileColumns.MEDIA_TYPE + " = "
               + MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE);
     } else if (assetType.equals(ASSET_TYPE_VIDEOS)) {
       selection.append(" AND " + MediaStore.Files.FileColumns.MEDIA_TYPE + " = "
               + MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO);
-      bucketDisplayName = MediaStore.Video.VideoColumns.BUCKET_DISPLAY_NAME;
     } else if (assetType.equals(ASSET_TYPE_ALL)) {
       selection.append(" AND " + MediaStore.Files.FileColumns.MEDIA_TYPE + " IN ("
               + MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO + ","
@@ -394,15 +394,12 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
       );
       return;
     }
-    selection.append(") GROUP BY (").append(bucketDisplayName);
-    String[] projection = new String[]{
-            "COUNT(*) as count",
-            bucketDisplayName,
-            MediaStore.Images.ImageColumns.DATA
-    };
+
+    final String[] projection = {MediaStore.Images.ImageColumns.BUCKET_DISPLAY_NAME};
+
     try {
       Cursor media = getReactApplicationContext().getContentResolver().query(
-              MediaStore.Files.getContentUri("external").buildUpon().build(),
+              MediaStore.Files.getContentUri("external"),
               projection,
               selection.toString(),
               selectionArgs.toArray(new String[selectionArgs.size()]),
@@ -413,22 +410,34 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
         WritableArray response = new WritableNativeArray();
         try {
           if (media.moveToFirst()) {
+            Map<String, Integer> albums = new HashMap<>();
             do {
-              String albumName = media.getString(media.getColumnIndex(bucketDisplayName));
-              int count = media.getInt(media.getColumnIndex("count"));
-              WritableMap album = new WritableNativeMap();
-              album.putString("title", albumName);
-              album.putInt("count", count);
-              response.pushMap(album);
+              String albumName = media.getString(media.getColumnIndex(MediaStore.Images.ImageColumns.BUCKET_DISPLAY_NAME));
+              if (albumName != null) {
+                Integer albumCount = albums.get(albumName);
+                if (albumCount == null) {
+                  albums.put(albumName, 1);
+                } else {
+                  albums.put(albumName, albumCount + 1);
+                }
+              }
             } while (media.moveToNext());
+
+            for (Map.Entry<String, Integer> albumEntry : albums.entrySet()) {
+              WritableMap album = new WritableNativeMap();
+              album.putString("title", albumEntry.getKey());
+              album.putInt("count", albumEntry.getValue());
+              response.pushMap(album);
+            }
           }
         } finally {
           media.close();
           promise.resolve(response);
         }
       }
-    } catch (Exception e) {}
-
+    } catch (Exception e) {
+      promise.reject(ERROR_UNABLE_TO_LOAD, "Could not get media", e);
+    }
   }
 
   private static void putPageInfo(Cursor media, WritableMap response, int limit, int offset) {
