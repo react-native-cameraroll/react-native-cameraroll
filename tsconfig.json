@@ -18,7 +18,8 @@
     "emitDecoratorMetadata": true,
     "lib": ["es2015", "es2016", "esnext", "dom"],
     "allowSyntheticDefaultImports": true,
-    "noEmit": true
+    "noEmit": true,
+    "resolveJsonModule": true
   },
   "exclude": ["node_modules", "**/*.spec.ts"]
 }
