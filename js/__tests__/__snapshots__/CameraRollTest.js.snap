@@ -22,19 +22,6 @@ Array [
 ]
 `;
 
-exports[`CameraRoll Should call native modules getPhotos when calling getPhotosFast 1`] = `
-Array [
-  Array [
-    Object {
-      "assetType": "All",
-      "first": 0,
-      "groupTypes": "All",
-      "skipGettingFilenames": true,
-    },
-  ],
-]
-`;
-
 exports[`CameraRoll Should call save 1`] = `
 Array [
   Array [

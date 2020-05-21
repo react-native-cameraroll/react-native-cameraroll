@@ -31,7 +31,7 @@ const ASSET_TYPE_OPTIONS = {
 
 export type GroupTypes = $Keys<typeof GROUP_TYPES_OPTIONS>;
 
-export type Include = 'filename' | 'location';
+export type Include = 'filename' | 'fileSize' | 'location';
 
 /**
  * Shape of the param arg for the `getPhotos` function.
@@ -133,9 +133,6 @@ export type Album = {
   count: number,
 };
 
-// Based on https://github.com/facebook/flow/issues/2405#issuecomment-256339492
-type Exact<T> = T & $Shape<T>;
-
 /**
  * `CameraRoll` provides access to the local camera roll or photo library.
  *
@@ -209,7 +206,7 @@ class CameraRoll {
     return RNCCameraRoll.getAlbums(params);
   }
 
-  static getParamsWithDefaults<T: GetPhotosFastParams>(params: T): T {
+  static getParamsWithDefaults(params: GetPhotosParams): GetPhotosParams {
     const newParams = {...params};
     if (!newParams.assetType) {
       newParams.assetType = ASSET_TYPE_OPTIONS.All;
@@ -219,6 +216,7 @@ class CameraRoll {
     }
     return newParams;
   }
+
   /**
    * Returns a Promise with photo identifier objects from the local camera
    * roll of the device matching shape defined by `getPhotosReturnChecker`.
@@ -232,8 +230,9 @@ class CameraRoll {
       );
       let successCallback = arguments[1];
       const errorCallback = arguments[2] || (() => {});
-      RNCCameraRoll.getPhotos(params).then(successCallback, errorCallback);
-      return;
+      const promise = RNCCameraRoll.getPhotos(params);
+      promise.then(successCallback, errorCallback);
+      return promise;
     }
 
     params = CameraRoll.getParamsWithDefaults(params);

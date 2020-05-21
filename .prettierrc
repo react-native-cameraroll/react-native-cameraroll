@@ -1,8 +1,9 @@
 {
-  "requirePragma": true,
   "singleQuote": true,
   "trailingComma": "all",
   "bracketSpacing": false,
   "jsxBracketSameLine": true,
-  "parser": "flow"
+  "overrides": [
+    {"files": ["*.js"], "options": {"parser": "flow", "requirePragma": true}}
+  ]
 }

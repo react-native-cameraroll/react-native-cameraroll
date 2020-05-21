@@ -252,6 +252,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
           assetType,
           fromTime,
           toTime,
+          include,
           promise)
           .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
   }
@@ -290,19 +291,6 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
       mFromTime = fromTime;
       mToTime = toTime;
       mInclude = include;
-    }
-
-    private boolean includeArrayContains(String value) {
-      if (mInclude == null) {
-        return false;
-      }
-
-      for (int i = 0; i < mInclude.size(); i++) {
-        if (mInclude.getString(i) == value) {
-          return true;
-        }
-      }
-      return false;
     }
 
     @Override
@@ -373,7 +361,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
           mPromise.reject(ERROR_UNABLE_TO_LOAD, "Could not get media");
         } else {
           try {
-            putEdges(resolver, media, response, mFirst);
+            putEdges(resolver, media, response, mFirst, mInclude);
             putPageInfo(media, response, mFirst, !TextUtils.isEmpty(mAfter) ? Integer.parseInt(mAfter) : 0);
           } finally {
             media.close();
@@ -474,7 +462,8 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
       ContentResolver resolver,
       Cursor media,
       WritableMap response,
-      int limit) {
+      int limit,
+      @Nullable ReadableArray includeArray) {
     WritableArray edges = new WritableNativeArray();
     media.moveToFirst();
     int idIndex = media.getColumnIndex(Images.Media._ID);
@@ -486,7 +475,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
     int sizeIndex = media.getColumnIndex(MediaStore.MediaColumns.SIZE);
     int dataIndex = media.getColumnIndex(MediaStore.MediaColumns.DATA);
 
-    boolean shouldGetLocationInfo = includeArrayContains("location");
+    boolean shouldGetLocationInfo = includeArrayContains(includeArray, "location");
 
     for (int i = 0; i < limit && !media.isAfterLast(); i++) {
       WritableMap edge = new WritableNativeMap();
@@ -509,6 +498,19 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
       media.moveToNext();
     }
     response.putArray("edges", edges);
+  }
+
+  private static boolean includeArrayContains(@Nullable ReadableArray includeArray, String value) {
+    if (includeArray == null) {
+      return false;
+    }
+
+    for (int i = 0; i < includeArray.size(); i++) {
+      if (includeArray.getString(i).equals(value)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   private static void putBasicNodeInfo(

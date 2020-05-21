@@ -34,9 +34,4 @@ describe('CameraRoll', () => {
     await CameraRoll.getPhotos({first: 0});
     expect(NativeModule.getPhotos.mock.calls).toMatchSnapshot();
   });
-
-  it('Should call native modules getPhotos when calling getPhotosFast', async () => {
-    await CameraRoll.getPhotosFast({first: 0});
-    expect(NativeModule.getPhotos.mock.calls).toMatchSnapshot();
-  });
 });

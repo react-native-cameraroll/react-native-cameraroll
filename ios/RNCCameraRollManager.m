@@ -256,7 +256,9 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
   NSUInteger const toTime = [RCTConvert NSInteger:params[@"toTime"]];
   NSArray<NSString *> *const mimeTypes = [RCTConvert NSStringArray:params[@"mimeTypes"]];
   NSArray<NSString *> *const include = [RCTConvert NSStringArray:params[@"include"]];
-  BOOL __block skipGettingFilenames = [include indexOfObject:@"filename"] > 0;
+
+  BOOL __block includeFilename = [include indexOfObject:@"filename"] != NSNotFound;
+  BOOL __block includeFileSize = [include indexOfObject:@"fileSize"] != NSNotFound;
   
   // If groupTypes is "all", we want to fetch the SmartAlbum "all photos". Otherwise, all
   // other groupTypes values require the "album" collection type.
@@ -295,13 +297,15 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
       NSString *const uri = [NSString stringWithFormat:@"ph://%@", [asset localIdentifier]];
       NSString *origFilename = @"";
       PHAssetResource *_Nullable resource = NULL;
+      NSNumber* fileSize = [NSNumber numberWithInt:0];
       
-      if (!skipGettingFilenames || [mimeTypes count] > 0) {
+      if (includeFilename || includeFileSize || [mimeTypes count] > 0) {
         // Get underlying resources of an asset - this includes files as well as details about edited PHAssets
         // This is required for the filename and mimeType filtering
         NSArray<PHAssetResource *> *const assetResources = [PHAssetResource assetResourcesForAsset:asset];
         resource = [assetResources firstObject];
         origFilename = resource.originalFilename;
+        fileSize = [resource valueForKey:@"fileSize"];
       }
       
       // WARNING: If you add any code to `collectAsset` that may skip adding an
@@ -371,7 +375,7 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
               @"filename": origFilename,
               @"height": @([asset pixelHeight]),
               @"width": @([asset pixelWidth]),
-              @"fileSize": [resource valueForKey:@"fileSize"],
+              @"fileSize": fileSize,
               @"isStored": @YES, // this field doesn't seem to exist on android
               @"playableDuration": @([asset duration]) // fractional seconds
           },
