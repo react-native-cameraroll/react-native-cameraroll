@@ -176,6 +176,9 @@ class CameraRoll {
     tag: string,
     type?: 'photo' | 'video' | 'auto',
   ): Promise<string> {
+    console.warn(
+      'CameraRoll.saveToCameraRoll(tag, type) is deprecated.  Use the save function instead',
+    );
     return CameraRoll.save(tag, {type});
   }
   static getAlbums(
