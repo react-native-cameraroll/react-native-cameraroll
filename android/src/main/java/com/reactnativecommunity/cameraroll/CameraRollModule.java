@@ -241,6 +241,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
     ReadableArray mimeTypes = params.hasKey("mimeTypes")
         ? params.getArray("mimeTypes")
         : null;
+    ReadableArray include = params.hasKey("include") ? params.getArray("include") : null;
 
     new GetMediaTask(
           getReactApplicationContext(),
@@ -265,6 +266,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
     private final String mAssetType;
     private final long mFromTime;
     private final long mToTime;
+    private final @Nullable ReadableArray mInclude;
 
     private GetMediaTask(
         ReactContext context,
@@ -275,6 +277,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
         String assetType,
         long fromTime,
         long toTime,
+        @Nullable ReadableArray include,
         Promise promise) {
       super(context);
       mContext = context;
@@ -286,6 +289,20 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
       mAssetType = assetType;
       mFromTime = fromTime;
       mToTime = toTime;
+      mInclude = include;
+    }
+
+    private boolean includeArrayContains(String value) {
+      if (mInclude == null) {
+        return false;
+      }
+
+      for (int i = 0; i < mInclude.size(); i++) {
+        if (mInclude.getString(i) == value) {
+          return true;
+        }
+      }
+      return false;
     }
 
     @Override
@@ -469,6 +486,8 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
     int sizeIndex = media.getColumnIndex(MediaStore.MediaColumns.SIZE);
     int dataIndex = media.getColumnIndex(MediaStore.MediaColumns.DATA);
 
+    boolean shouldGetLocationInfo = includeArrayContains("location");
+
     for (int i = 0; i < limit && !media.isAfterLast(); i++) {
       WritableMap edge = new WritableNativeMap();
       WritableMap node = new WritableNativeMap();
@@ -476,7 +495,9 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
           putImageInfo(resolver, media, node, idIndex, widthIndex, heightIndex, sizeIndex, dataIndex, mimeTypeIndex);
       if (imageInfoSuccess) {
         putBasicNodeInfo(media, node, mimeTypeIndex, groupNameIndex, dateTakenIndex);
-        putLocationInfo(media, node, dataIndex);
+        if (shouldGetLocationInfo) {
+          putLocationInfo(media, node, dataIndex);
+        }
 
         edge.putMap("node", node);
         edges.pushMap(edge);

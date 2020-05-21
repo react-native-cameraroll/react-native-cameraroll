@@ -255,7 +255,8 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
   NSUInteger const fromTime = [RCTConvert NSInteger:params[@"fromTime"]];
   NSUInteger const toTime = [RCTConvert NSInteger:params[@"toTime"]];
   NSArray<NSString *> *const mimeTypes = [RCTConvert NSStringArray:params[@"mimeTypes"]];
-  BOOL const skipGettingFilenames = [RCTConvert BOOL:params[@"skipGettingFilenames"]];
+  NSArray<NSString *> *const include = [RCTConvert NSStringArray:params[@"include"]];
+  BOOL __block skipGettingFilenames = [include indexOfObject:@"filename"] > 0;
   
   // If groupTypes is "all", we want to fetch the SmartAlbum "all photos". Otherwise, all
   // other groupTypes values require the "album" collection type.

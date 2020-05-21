@@ -149,7 +149,7 @@ Returns a Promise with photo identifier objects from the local camera roll of th
 | params | object | Yes      | Expects a params with the shape described below. |
 
 * `first` : {number} : The number of photos wanted in reverse order of the photo application (i.e. most recent first for SavedPhotos). Required.
-* `after` : {string} : A cursor that matches `page_info { end_cursor }` returned from a previous call to `getPhotos`.
+* `after` : {string} : A cursor that matches `page_info { end_cursor }` returned from a previous call to `getPhotos`. Note that using this will reduce performance slightly on iOS. An alternative is just using the `fromTime` and `toTime` filters, which have no such impact.
 * `groupTypes` : {string} : Specifies which group types to filter the results to. Valid values are:
   * `Album`
   * `All` // default
@@ -163,9 +163,12 @@ Returns a Promise with photo identifier objects from the local camera roll of th
   * `All`
   * `Videos`
   * `Photos` // default
-* `mimeTypes` : {Array} : Filter by mimetype (e.g. image/jpeg).
+* `mimeTypes` : {Array} : Filter by mimetype (e.g. image/jpeg). Note that using this will reduce performance slightly on iOS.
 * `fromTime` : {timestamp} : Filter from date added.
 * `toTime` : {timestamp} : Filter to date added.
+* `include` : {Array} : Whether to include some fields that are slower to fetch
+  * `filename` : Ensures `image.filename` is available in each node. This has a large performance impact on iOS.
+  * `location`: Ensures `location` is available in each node. This has a large performance impact on Android.
 
 Returns a Promise which when resolved will be of the following shape:
 
@@ -235,34 +238,6 @@ render() {
 
 ---
 
-### `getPhotosFast()`
-
-```javascript
-CameraRoll.getPhotosFast(params);
-```
-
-This function is largely the same as the [`getPhotos`](#getphotos) function, but does not return the filename on iOS. As a result, it can be much faster there. On a Camera Roll of 1000 photos, it will take 0.2 instead of 5.0 seconds.
-
-The `mimeTypes` and `after` parameters in `getPhotos` are also unavailable.
-
-**Parameters:**
-
-| Name   | Type   | Required | Description                                      |
-| ------ | ------ | -------- | ------------------------------------------------ |
-| params | object | Yes      | Expects a params with the shape described below. |
-
-All parameters have the same types and arguments as the parameters of the same names in [`getPhotos`](#getphotos).
-
-* `first` : {number}
-* `groupTypes` : {string}
-* `groupName` : {string}
-* `assetType` : {string}
-* `fromTime` : {timestamp}
-* `toTime` : {timestamp}
-
-Returns a Promise which resolves with the same object as [`getPhotos`](#getphotos).
-
----
 ### `deletePhotos()`
 
 ```javascript

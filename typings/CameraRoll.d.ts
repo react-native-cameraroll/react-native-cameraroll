@@ -17,6 +17,13 @@ declare namespace CameraRoll {
 
   type AssetType = 'All' | 'Videos' | 'Photos';
 
+  enum Include {
+    /** Ensures the filename is included. Has a large performance hit on iOS */
+    filename = 'filename',
+    /** Ensures the location is included. Has a large performance hit on Android */
+    location = 'location',
+  }
+
   /**
    * Shape of the param arg for the `getPhotosFast` function.
    */
@@ -26,6 +33,12 @@ declare namespace CameraRoll {
      * (i.e. most recent first).
      */
     first: number;
+
+    /**
+     * A cursor that matches `page_info { end_cursor }` returned from a previous
+     * call to `getPhotos`
+     */
+    after?: string;
 
     /**
      * Specifies which group types to filter the results to.
@@ -52,24 +65,17 @@ declare namespace CameraRoll {
      * Latest time to get photos from. A timestamp in milliseconds. Inclusive.
      */
     toTime?: number;
-  }
-
-  /**
-   * Shape of the param arg for the `getPhotos` function. This has a few more
-   * parameters than the `getPhotosFast` params, at the cost of some
-   * performance on iOS.
-   */
-  interface GetPhotosParams extends GetPhotosFastParams {
-    /**
-     * A cursor that matches `page_info { end_cursor }` returned from a previous
-     * call to `getPhotos`
-     */
-    after?: string;
 
     /**
      * Filter by mimetype (e.g. image/jpeg).
      */
     mimeTypes?: Array<string>;
+
+    /**
+     * Specific fields in the output that we want to include, even though they
+     * might have some performance impact.
+     */
+    include?: Include[];
   }
 
   /**
@@ -156,17 +162,6 @@ declare namespace CameraRoll {
      * roll of the device matching shape defined by `getPhotosReturnChecker`.
      */
     function getPhotos(params: GetPhotosParams): Promise<PhotoIdentifiersPage>;
-
-    /**
-     * Returns a Promise with photo identifier objects from the local camera
-     * roll of the device matching shape defined by `getPhotosReturnChecker`.
-     *
-     * This is the same as `getPhotos` on Android, but is much faster on iOS.
-     * For 1000 photos, it can save 4.8 out of 5 seconds. It does this by
-     * not using cursor and mimetype filters, and by omitting the filename in
-     * the returned object.
-     */
-    function getPhotosFast(params: GetPhotosFastParams): Promise<PhotoIdentifiersPage>;
 
     function getAlbums(params: GetAlbumsParams): Promise<Album[]>;
 }
