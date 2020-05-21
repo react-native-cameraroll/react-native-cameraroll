@@ -1,4 +1,3 @@
-<!-- prettier-ignore -->
 # `@react-native-community/cameraroll`
 
 [![CircleCI Status][circle-ci-badge]][circle-ci]
@@ -16,6 +15,7 @@
 
 ### Manual installation
 
+
 #### iOS
 
 1. In XCode, in the project navigator, right click `Libraries` ➜ `Add Files to [your project's name]`
@@ -26,32 +26,29 @@
 #### Android
 
 1. Open up `android/app/src/main/java/[...]/MainApplication.java`
-
-- Add `import com.reactnativecommunity.cameraroll.CameraRollPackage;` to the imports at the top of the file
-- Add `new CameraRollPackage()` to the list returned by the `getPackages()` method
-
+  - Add `import com.reactnativecommunity.cameraroll.CameraRollPackage;` to the imports at the top of the file
+  - Add `new CameraRollPackage()` to the list returned by the `getPackages()` method
 2. Append the following lines to `android/settings.gradle`:
-   ```
-   include ':@react-native-community_cameraroll'
-   project(':@react-native-community_cameraroll').projectDir = new File(rootProject.projectDir, 	'../node_modules/@react-native-community/cameraroll/android')
-   ```
+  	```
+  	include ':@react-native-community_cameraroll'
+  	project(':@react-native-community_cameraroll').projectDir = new File(rootProject.projectDir, 	'../node_modules/@react-native-community/cameraroll/android')
+  	```
 3. Insert the following lines inside the dependencies block in `android/app/build.gradle`:
-   ```
-     compile project(':@react-native-community_cameraroll')
-   ```
+  	```
+      compile project(':@react-native-community_cameraroll')
+  	```
 
 ## Migrating from the core `react-native` module
-
 This module was created when the CameraRoll was split out from the core of React Native. To migrate to this module you need to follow the installation instructions above and then change you imports from:
 
 ```javascript
-import {CameraRoll} from 'react-native';
+import { CameraRoll } from "react-native";
 ```
 
 to:
 
 ```javascript
-import CameraRoll from '@react-native-community/cameraroll';
+import CameraRoll from "@react-native-community/cameraroll";
 ```
 
 ## Usage
@@ -76,10 +73,10 @@ On Android permission is required to read the external storage. Add below line t
 
 ### Methods
 
-- [`save`](#save)
-- [`getAlbums`](#getalbums)
-- [`getPhotos`](#getphotos)
-- [`deletePhotos`](#deletephotos)
+* [`save`](#save)
+* [`getAlbums`](#getalbums)
+* [`getPhotos`](#getphotos)
+* [`deletePhotos`](#deletephotos)
 
 ---
 
@@ -90,7 +87,7 @@ On Android permission is required to read the external storage. Add below line t
 ### `save()`
 
 ```javascript
-CameraRoll.save(tag, {type, album});
+CameraRoll.save(tag, { type, album })
 ```
 
 Saves the photo or video to the photo library.
@@ -107,35 +104,32 @@ Returns a Promise which will resolve with the new URI.
 
 **Parameters:**
 
-| Name  | Type                   | Required | Description                                                |
-| ----- | ---------------------- | -------- | ---------------------------------------------------------- |
-| tag   | string                 | Yes      | See above.                                                 |
-| type  | enum('photo', 'video') | No       | Overrides automatic detection based on the file extension. |
-| album | string                 | No       | The album to save to                                       |
+| Name | Type                   | Required | Description                                                |
+| ---- | ---------------------- | -------- | ---------------------------------------------------------- |
+| tag  | string                 | Yes      | See above.                                                 |
+| type | enum('photo', 'video') | No       | Overrides automatic detection based on the file extension. |
+| album | string                | No       | The album to save to |
 
 ---
-
 ### `getAlbums()`
 
 ```javascript
 CameraRoll.getAlbums(params);
 ```
-
 Returns a Promise with a list of albums
 
 **Parameters:**
 
-- `assetType` : {string} : Specifies filter on asset type. Valid values are:
-  - `All` // default
-  - `Videos`
-  - `Photos`
+* `assetType` : {string} : Specifies filter on asset type. Valid values are:
+  * `All` // default
+  * `Videos`
+  * `Photos`
 
 **Returns:**
 
 Array of `Album` object
-
-- title: {string}
-- count: {number}
+  * title: {string}
+  * count: {number}
 
 ---
 
@@ -153,54 +147,54 @@ Returns a Promise with photo identifier objects from the local camera roll of th
 | ------ | ------ | -------- | ------------------------------------------------ |
 | params | object | Yes      | Expects a params with the shape described below. |
 
-- `first` : {number} : The number of photos wanted in reverse order of the photo application (i.e. most recent first for SavedPhotos). Required.
-- `after` : {string} : A cursor that matches `page_info { end_cursor }` returned from a previous call to `getPhotos`. Note that using this will reduce performance slightly on iOS. An alternative is just using the `fromTime` and `toTime` filters, which have no such impact.
-- `groupTypes` : {string} : Specifies which group types to filter the results to. Valid values are:
-  - `Album`
-  - `All` // default
-  - `Event`
-  - `Faces`
-  - `Library`
-  - `PhotoStream`
-  - `SavedPhotos`
-- `groupName` : {string} : Specifies filter on group names, like 'Recent Photos' or custom album titles.
-- `assetType` : {string} : Specifies filter on asset type. Valid values are:
-  - `All`
-  - `Videos`
-  - `Photos` // default
-- `mimeTypes` : {Array} : Filter by mimetype (e.g. image/jpeg). Note that using this will reduce performance slightly on iOS.
-- `fromTime` : {timestamp} : Filter from date added.
-- `toTime` : {timestamp} : Filter to date added.
-- `include` : {Array} : Whether to include some fields that are slower to fetch
-  - `filename` : Ensures `image.filename` is available in each node. This has a large performance impact on iOS.
-  - `fileSize` : Ensures `image.fileSize` is available in each node. This has a large performance impact on iOS.
-  - `location`: Ensures `location` is available in each node. This has a medium performance impact on Android.
+* `first` : {number} : The number of photos wanted in reverse order of the photo application (i.e. most recent first for SavedPhotos). Required.
+* `after` : {string} : A cursor that matches `page_info { end_cursor }` returned from a previous call to `getPhotos`. Note that using this will reduce performance slightly on iOS. An alternative is just using the `fromTime` and `toTime` filters, which have no such impact.
+* `groupTypes` : {string} : Specifies which group types to filter the results to. Valid values are:
+  * `Album`
+  * `All` // default
+  * `Event`
+  * `Faces`
+  * `Library`
+  * `PhotoStream`
+  * `SavedPhotos`
+* `groupName` : {string} : Specifies filter on group names, like 'Recent Photos' or custom album titles.
+* `assetType` : {string} : Specifies filter on asset type. Valid values are:
+  * `All`
+  * `Videos`
+  * `Photos` // default
+* `mimeTypes` : {Array} : Filter by mimetype (e.g. image/jpeg). Note that using this will reduce performance slightly on iOS.
+* `fromTime` : {timestamp} : Filter from date added.
+* `toTime` : {timestamp} : Filter to date added.
+* `include` : {Array} : Whether to include some fields that are slower to fetch
+  * `filename` : Ensures `image.filename` is available in each node. This has a large performance impact on iOS.
+  * `fileSize` : Ensures `image.fileSize` is available in each node. This has a large performance impact on iOS.
+  * `location`: Ensures `location` is available in each node. This has a large performance impact on Android.
 
 Returns a Promise which when resolved will be of the following shape:
 
-- `edges` : {Array<node>} An array of node objects
-  - `node`: {object} An object with the following shape:
-    - `type`: {string}
-    - `group_name`: {string}
-    - `image`: {object} : An object with the following shape:
-      - `uri`: {string}
-      - `filename`: {string}
-      - `height`: {number}
-      - `width`: {number}
-      - `fileSize`: {number}
-      - `isStored`: {boolean}
-      - `playableDuration`: {number}
-    - `timestamp`: {number}
-    - `location`: {object} : An object with the following shape:
-      - `latitude`: {number}
-      - `longitude`: {number}
-      - `altitude`: {number}
-      - `heading`: {number}
-      - `speed`: {number}
-- `page_info` : {object} : An object with the following shape:
-  - `has_next_page`: {boolean}
-  - `start_cursor`: {string}
-  - `end_cursor`: {string}
+* `edges` : {Array<node>} An array of node objects
+  * `node`: {object} An object with the following shape:
+    * `type`: {string}
+    * `group_name`: {string}
+    * `image`: {object} : An object with the following shape:
+      * `uri`: {string}
+      * `filename`: {string}
+      * `height`: {number}
+      * `width`: {number}
+      * `fileSize`: {number}
+      * `isStored`: {boolean}
+      * `playableDuration`: {number}
+    * `timestamp`: {number}
+    * `location`: {object} : An object with the following shape:
+      * `latitude`: {number}
+      * `longitude`: {number}
+      * `altitude`: {number}
+      * `heading`: {number}
+      * `speed`: {number}
+* `page_info` : {object} : An object with the following shape:
+  * `has_next_page`: {boolean}
+  * `start_cursor`: {string}
+  * `end_cursor`: {string}
 
 #### Example
 
@@ -254,19 +248,20 @@ Requests deletion of photos in the camera roll.
 
 On Android, the uri must be a local image or video URI, such as `"file:///sdcard/img.png"`.
 
-On iOS, the uri can be any image URI (including local, remote asset-library and base64 data URIs) or a local video file URI. The user is presented with a dialog box that shows them the asset(s) and asks them to confirm deletion. This is not able to be bypassed as per Apple Developer guidelines.
+On iOS, the uri can be any image URI (including local, remote asset-library and base64 data URIs) or a local video file URI. The user is presented with a dialog box that shows them the asset(s) and asks them to confirm deletion. This is not able to be bypassed as per Apple Developer guidelines. 
 
 Returns a Promise which will resolve when the deletion request is completed, or reject if there is a problem during the deletion. On iOS the user is able to cancel the deletion request, which causes a rejection, while on Android the rejection will be due to a system error.
 
 **Parameters:**
 
-| Name | Type   | Required | Description |
-| ---- | ------ | -------- | ----------- |
-| uri  | string | Yes      | See above.  |
+| Name | Type                   | Required | Description                                                |
+| ---- | ---------------------- | -------- | ---------------------------------------------------------- |
+| uri  | string                 | Yes      | See above.                                                 |
 
-[circle-ci-badge]: https://img.shields.io/circleci/project/github/react-native-community/react-native-cameraroll/master.svg?style=flat-square
-[circle-ci]: https://circleci.com/gh/react-native-community/workflows/react-native-cameraroll/tree/master
-[supported-os-badge]: https://img.shields.io/badge/platforms-android%20|%20ios-lightgrey.svg?style=flat-square
-[license-badge]: https://img.shields.io/npm/l/@react-native-community/cameraroll.svg?style=flat-square
+
+[circle-ci-badge]:https://img.shields.io/circleci/project/github/react-native-community/react-native-cameraroll/master.svg?style=flat-square
+[circle-ci]:https://circleci.com/gh/react-native-community/workflows/react-native-cameraroll/tree/master
+[supported-os-badge]:https://img.shields.io/badge/platforms-android%20|%20ios-lightgrey.svg?style=flat-square
+[license-badge]:https://img.shields.io/npm/l/@react-native-community/cameraroll.svg?style=flat-square
 [lean-core-badge]: https://img.shields.io/badge/Lean%20Core-Extracted-brightgreen.svg?style=flat-square
 [lean-core-issue]: https://github.com/facebook/react-native/issues/23313
