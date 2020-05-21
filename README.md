@@ -73,7 +73,6 @@ On Android permission is required to read the external storage. Add below line t
 
 ### Methods
 
-* [`saveToCameraRoll`](#savetocameraroll)
 * [`save`](#save)
 * [`getAlbums`](#getalbums)
 * [`getPhotos`](#getphotos)
@@ -87,16 +86,8 @@ On Android permission is required to read the external storage. Add below line t
 
 ### `save()`
 
-Saves the photo or video of a particular type to an album. This function works the same as `saveToCameraRoll`, but it allows to specify a particular album you want to store the asset to.
-
 ```javascript
 CameraRoll.save(tag, { type, album })
-```
-
-### `saveToCameraRoll()`
-
-```javascript
-CameraRoll.saveToCameraRoll(tag, [type]);
 ```
 
 Saves the photo or video to the photo library.
@@ -107,6 +98,8 @@ On iOS, the tag can be any image URI (including local, remote asset-library and 
 
 If the tag has a file extension of .mov or .mp4, it will be inferred as a video. Otherwise it will be treated as a photo. To override the automatic choice, you can pass an optional `type` parameter that must be one of 'photo' or 'video'.
 
+It allows to specify a particular album you want to store the asset to.
+
 Returns a Promise which will resolve with the new URI.
 
 **Parameters:**
@@ -115,6 +108,7 @@ Returns a Promise which will resolve with the new URI.
 | ---- | ---------------------- | -------- | ---------------------------------------------------------- |
 | tag  | string                 | Yes      | See above.                                                 |
 | type | enum('photo', 'video') | No       | Overrides automatic detection based on the file extension. |
+| album | string                | No       | The album to save to |
 
 ---
 ### `getAlbums()`
