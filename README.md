@@ -178,14 +178,14 @@ Returns a Promise which when resolved will be of the following shape:
     * `group_name`: {string}
     * `image`: {object} : An object with the following shape:
       * `uri`: {string}
-      * `filename`: {string} : Note that this may be an empty string if the `include` parameter doesn't contain `filename`
+      * `filename`: {string | null} : Only set if the `include` parameter contains `filename`
       * `height`: {number}
       * `width`: {number}
-      * `fileSize`: {number} : Note that this may be 0 if the `include` parameter doesn't contain `fileSize`
+      * `fileSize`: {number | null} : Only set if the `include` parameter contains `fileSize`
       * `isStored`: {boolean}
       * `playableDuration`: {number}
     * `timestamp`: {number}
-    * `location`: {object} : Note that this may be undefined if the `include` parameter doesn't contain `location`. An object with the following shape:
+    * `location`: {object | null} : Only set if the `include` parameter contains `location`. An object with the following shape:
       * `latitude`: {number}
       * `longitude`: {number}
       * `altitude`: {number}

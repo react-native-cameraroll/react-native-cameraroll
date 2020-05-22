@@ -92,22 +92,22 @@ export type PhotoIdentifier = {
     type: string,
     group_name: string,
     image: {
-      filename: string,
+      filename: string | null,
       uri: string,
       height: number,
       width: number,
-      fileSize: number,
+      fileSize: number | null,
       isStored?: boolean,
       playableDuration: number,
     },
     timestamp: number,
-    location?: {
+    location: {
       latitude?: number,
       longitude?: number,
       altitude?: number,
       heading?: number,
       speed?: number,
-    },
+    } | null,
   },
 };
 
