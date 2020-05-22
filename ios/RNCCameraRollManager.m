@@ -259,6 +259,7 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
 
   BOOL __block includeFilename = [include indexOfObject:@"filename"] != NSNotFound;
   BOOL __block includeFileSize = [include indexOfObject:@"fileSize"] != NSNotFound;
+  BOOL __block includeLocation = [include indexOfObject:@"location"] != NSNotFound;
   
   // If groupTypes is "all", we want to fetch the SmartAlbum "all photos". Otherwise, all
   // other groupTypes values require the "album" collection type.
@@ -295,7 +296,7 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
   requestPhotoLibraryAccess(reject, ^{
     void (^collectAsset)(PHAsset*, NSUInteger, BOOL*) = ^(PHAsset * _Nonnull asset, NSUInteger assetIdx, BOOL * _Nonnull stopAssets) {
       NSString *const uri = [NSString stringWithFormat:@"ph://%@", [asset localIdentifier]];
-      NSString *origFilename = @"";
+      NSString *_Nullable originalFilename = NULL;
       PHAssetResource *_Nullable resource = NULL;
       NSNumber* fileSize = [NSNumber numberWithInt:0];
       
@@ -304,7 +305,7 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
         // This is required for the filename and mimeType filtering
         NSArray<PHAssetResource *> *const assetResources = [PHAssetResource assetResourcesForAsset:asset];
         resource = [assetResources firstObject];
-        origFilename = resource.originalFilename;
+        originalFilename = resource.originalFilename;
         fileSize = [resource valueForKey:@"fileSize"];
       }
       
@@ -372,21 +373,21 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
           @"group_name": currentCollectionName,
           @"image": @{
               @"uri": uri,
-              @"filename": origFilename,
+              @"filename": (includeFilename && originalFilename ? originalFilename : [NSNull null]),
               @"height": @([asset pixelHeight]),
               @"width": @([asset pixelWidth]),
-              @"fileSize": fileSize,
+              @"fileSize": (includeFileSize ? fileSize : [NSNull null]),
               @"isStored": @YES, // this field doesn't seem to exist on android
               @"playableDuration": @([asset duration]) // fractional seconds
           },
           @"timestamp": @(asset.creationDate.timeIntervalSince1970),
-          @"location": (loc ? @{
+          @"location": (includeLocation && loc ? @{
               @"latitude": @(loc.coordinate.latitude),
               @"longitude": @(loc.coordinate.longitude),
               @"altitude": @(loc.altitude),
               @"heading": @(loc.course),
               @"speed": @(loc.speed), // speed in m/s
-            } : @{})
+            } : [NSNull null])
           }
       }];
     };

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {StyleSheet, View, Button, Text, TextInput, Switch} from 'react-native';
+import {StyleSheet, View, Button, Text, Switch, ScrollView} from 'react-native';
 // @ts-ignore: CameraRollExample has no typings in same folder
 import CameraRoll from '../../js/CameraRoll';
 
@@ -88,11 +88,14 @@ export default class GetPhotosPerformanceExample extends React.PureComponent<
         <View>
           <Text>Output</Text>
         </View>
-        <TextInput
-          style={styles.textInput}
-          multiline
-          value={JSON.stringify(output, null, 2)}
-        />
+        <ScrollView style={styles.outputBox}>
+          <Text
+            // Setting numberOfLines to a higher number on iOS (like 10000)
+            // causes the box to show nothing
+            numberOfLines={1000}>
+            {JSON.stringify(output, null, 2)}
+          </Text>
+        </ScrollView>
       </View>
     );
   }
@@ -104,7 +107,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
-  textInput: {
+  outputBox: {
     flex: 1,
     borderColor: '#ccc',
     borderWidth: 1,

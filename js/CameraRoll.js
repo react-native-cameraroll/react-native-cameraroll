@@ -224,19 +224,19 @@ class CameraRoll {
    * See https://facebook.github.io/react-native/docs/cameraroll.html#getphotos
    */
   static getPhotos(params: GetPhotosParams): Promise<PhotoIdentifiersPage> {
+    params = CameraRoll.getParamsWithDefaults(params);
+    const promise = RNCCameraRoll.getPhotos(params);
+
     if (arguments.length > 1) {
       console.warn(
         'CameraRoll.getPhotos(tag, success, error) is deprecated.  Use the returned Promise instead',
       );
       let successCallback = arguments[1];
       const errorCallback = arguments[2] || (() => {});
-      const promise = RNCCameraRoll.getPhotos(params);
       promise.then(successCallback, errorCallback);
-      return promise;
     }
 
-    params = CameraRoll.getParamsWithDefaults(params);
-    return RNCCameraRoll.getPhotos(params);
+    return promise;
   }
 }
 
