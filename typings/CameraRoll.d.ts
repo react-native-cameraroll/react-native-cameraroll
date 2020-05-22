@@ -28,7 +28,7 @@ declare namespace CameraRoll {
   /**
    * Shape of the param arg for the `getPhotosFast` function.
    */
-  interface GetPhotosFastParams {
+  interface GetPhotosParams {
     /**
      * The number of photos wanted in reverse order of the photo application
      * (i.e. most recent first).
@@ -77,18 +77,6 @@ declare namespace CameraRoll {
      * might have some performance impact.
      */
     include?: Include[];
-  }
-
-  /**
-   * Params for the native `getPhotos` function, as implemented in the
-   * RNCCameraRoll module.
-   */
-  interface GetPhotosNativeParams extends GetPhotosParams {
-    /**
-     * If provided, it's OK for the output to have empty filenames. This can
-     * improve performance on iOS when used by `getPhotosFast`.
-     */
-    allowEmptyFilenames?: boolean;
   }
 
   interface PhotoIdentifier {
