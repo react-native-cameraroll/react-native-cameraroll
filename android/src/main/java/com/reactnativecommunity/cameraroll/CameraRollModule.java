@@ -129,16 +129,22 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
       File source = new File(mUri.getPath());
       FileChannel input = null, output = null;
       try {
-        File environment;
-        if ("mov".equals(mOptions.getString("type"))) {
-          environment = Environment.getExternalStoragePublicDirectory(
-                  Environment.DIRECTORY_MOVIES);
+        boolean isAlbumPresent = !"".equals(mOptions.getString("album"));
+        
+        final File environment;
+        // Media is not saved into an album when using Environment.DIRECTORY_DCIM.
+        if (isAlbumPresent) {
+          if ("video".equals(mOptions.getString("type"))) {
+            environment = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES);
+          } else {
+            environment = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+          }
         } else {
-          environment = Environment.getExternalStoragePublicDirectory(
-                  Environment.DIRECTORY_PICTURES);
+          environment = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
         }
+
         File exportDir;
-        if (!"".equals(mOptions.getString("album"))) {
+        if (isAlbumPresent) {
           exportDir = new File(environment, mOptions.getString("album"));
           if (!exportDir.exists() && !exportDir.mkdirs()) {
             mPromise.reject(ERROR_UNABLE_TO_LOAD, "Album Directory not created. Did you request WRITE_EXTERNAL_STORAGE?");

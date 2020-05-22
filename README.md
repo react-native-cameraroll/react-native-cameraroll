@@ -62,11 +62,13 @@ The user's permission is required in order to access the Camera Roll on devices 
 If you are targeting devices running iOS 11 or later, you will also need to add the `NSPhotoLibraryAddUsageDescription` key in your `Info.plist`. Use this key to define a string that describes how your app will use this data. By adding this key to your `Info.plist`, you will be able to request write-only access permission from the user. If you try to save to the camera roll without this permission, your app will exit.
 
 On Android permission is required to read the external storage. Add below line to your manifest to request this permission on app install.
+On Android permission is required to write in the external storage when saving to camera roll. Add below line to your manifest to request this permission on app install.
 
 ```
 <manifest>
 ...
 <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 ...
 <application>
 ```
@@ -98,7 +100,8 @@ On iOS, the tag can be any image URI (including local, remote asset-library and 
 
 If the tag has a file extension of .mov or .mp4, it will be inferred as a video. Otherwise it will be treated as a photo. To override the automatic choice, you can pass an optional `type` parameter that must be one of 'photo' or 'video'.
 
-It allows to specify a particular album you want to store the asset to.
+It allows to specify a particular album you want to store the asset to when the param `album` is provided.
+On Android, if no album is provided, DCIM directory is used, otherwise PICTURE or MOVIES directory is used depending on the `type` provided.
 
 Returns a Promise which will resolve with the new URI.
 
