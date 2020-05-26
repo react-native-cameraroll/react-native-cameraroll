@@ -163,8 +163,8 @@ Returns a Promise with photo identifier objects from the local camera roll of th
   * `Videos`
   * `Photos` // default
 * `mimeTypes` : {Array} : Filter by mimetype (e.g. image/jpeg). Note that using this will reduce performance slightly on iOS.
-* `fromTime` : {timestamp} : Filter from date added.
-* `toTime` : {timestamp} : Filter to date added.
+* `fromTime` : {number} : Filter by creation time with a timestamp in milliseconds. This time is exclusive, so we'll select all photos with `timestamp > fromTime`.
+* `toTime` : {number} : Filter by creation time with a timestamp in milliseconds. This time is inclusive, so we'll select all photos with `timestamp <= toTime`.
 * `include` : {Array} : Whether to include some fields that are slower to fetch
   * `filename` : Ensures `image.filename` is available in each node. This has a large performance impact on iOS.
   * `fileSize` : Ensures `image.fileSize` is available in each node. This has a large performance impact on iOS.
@@ -178,13 +178,13 @@ Returns a Promise which when resolved will be of the following shape:
     * `group_name`: {string}
     * `image`: {object} : An object with the following shape:
       * `uri`: {string}
-      * `filename`: {string | null} : Only set if the `include` parameter contains `filename`
+      * `filename`: {string | null} : Only set if the `include` parameter contains `filename`.
       * `height`: {number}
       * `width`: {number}
-      * `fileSize`: {number | null} : Only set if the `include` parameter contains `fileSize`
+      * `fileSize`: {number | null} : Only set if the `include` parameter contains `fileSize`.
       * `isStored`: {boolean}
       * `playableDuration`: {number}
-    * `timestamp`: {number}
+    * `timestamp`: {number} : Timestamp in seconds.
     * `location`: {object | null} : Only set if the `include` parameter contains `location`. An object with the following shape:
       * `latitude`: {number}
       * `longitude`: {number}

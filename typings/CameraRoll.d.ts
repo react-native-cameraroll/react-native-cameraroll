@@ -37,7 +37,9 @@ declare namespace CameraRoll {
 
     /**
      * A cursor that matches `page_info { end_cursor }` returned from a previous
-     * call to `getPhotos`
+     * call to `getPhotos`. Note that using this will reduce performance
+     * slightly on iOS. An alternative is just using the `fromTime` and `toTime`
+     * filters, which have no such impact.
      */
     after?: string;
 
@@ -58,17 +60,20 @@ declare namespace CameraRoll {
     assetType?: AssetType;
 
     /**
-     * Earliest time to get photos from. A timestamp in milliseconds. Exclusive.
+     * Filter by creation time with a timestamp in milliseconds. This time is
+     * exclusive, so we'll select all photos with `timestamp > fromTime`.
      */
     fromTime?: number;
 
     /**
-     * Latest time to get photos from. A timestamp in milliseconds. Inclusive.
+     * Filter by creation time with a timestamp in milliseconds. This time is
+     * inclusive, so we'll select all photos with `timestamp <= toTime`.
      */
     toTime?: number;
 
     /**
-     * Filter by mimetype (e.g. image/jpeg).
+     * Filter by mimetype (e.g. image/jpeg). Note that using this will reduce
+     * performance slightly on iOS.
      */
     mimeTypes?: Array<string>;
 
@@ -84,15 +89,19 @@ declare namespace CameraRoll {
       type: string;
       group_name: string;
       image: {
+        /** Only set if the `include` parameter contains `filename`. */
         filename: string | null;
         uri: string;
         height: number;
         width: number;
+        /** Only set if the `include` parameter contains `fileSize`. */
         fileSize: number | null;
         isStored?: boolean;
         playableDuration: number;
       };
+      /** Timestamp in seconds. */
       timestamp: number;
+      /** Only set if the `include` parameter contains `location`. */
       location: {
         latitude?: number;
         longitude?: number;
