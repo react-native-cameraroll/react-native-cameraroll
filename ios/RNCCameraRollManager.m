@@ -274,7 +274,13 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
   // added to the output array within the `collectAsset` block
   BOOL collectAssetMayOmitAsset = !!afterCursor || [mimeTypes count] > 0;
   if (!collectAssetMayOmitAsset) {
-    assetFetchOptions.fetchLimit = first;
+    // We set the fetchLimit to first + 1 so that `hasNextPage` will be set
+    // correctly:
+    // - If the user set `first: 10` and there are 11 photos, `hasNextPage`
+    //   will be set to true below inside of `collectAsset`
+    // - If the user set `first: 10` and there are 10 photos, `hasNextPage`
+    //   will not be set, as expected
+    assetFetchOptions.fetchLimit = first + 1;
   }
   assetFetchOptions.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:NO]];
   

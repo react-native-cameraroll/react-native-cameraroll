@@ -1,5 +1,13 @@
 import * as React from 'react';
-import {StyleSheet, View, Button, Text, Switch, ScrollView} from 'react-native';
+import {
+  StyleSheet,
+  View,
+  Button,
+  Text,
+  Switch,
+  TextInput,
+  Keyboard,
+} from 'react-native';
 // @ts-ignore: CameraRollExample has no typings in same folder
 import CameraRoll from '../../js/CameraRoll';
 
@@ -8,6 +16,13 @@ interface State {
   timeTakenMillis: number | null;
   output: CameraRoll.PhotoIdentifiersPage | null;
   include: CameraRoll.Include[];
+  /**
+   * `first` argument passed into `getPhotos`, but as a string. Validate it
+   * with `this.first()` before using.
+   */
+  firstStr: string;
+  /** `after` passed into `getPhotos`. Not passed if empty */
+  after: string;
 }
 
 const includeValues: CameraRoll.Include[] = [
@@ -29,12 +44,27 @@ export default class GetPhotosPerformanceExample extends React.PureComponent<
     timeTakenMillis: null,
     output: null,
     include: [],
+    firstStr: '1000',
+    after: '',
+  };
+
+  first = () => {
+    const first = parseInt(this.state.firstStr, 10);
+    if (first < 0 || !Number.isInteger(first)) {
+      return null;
+    }
+    return first;
   };
 
   startFetchingPhotos = async () => {
     const {include} = this.state;
+    const first = this.first();
+    if (first === null) {
+      return;
+    }
     this.setState({fetchingPhotos: true});
-    const params: CameraRoll.GetPhotosParams = {first: 1000, include};
+    Keyboard.dismiss();
+    const params: CameraRoll.GetPhotosParams = {first, include};
     const startTime = Date.now();
     const output: CameraRoll.PhotoIdentifiersPage = await CameraRoll.getPhotos(
       params,
@@ -63,11 +93,19 @@ export default class GetPhotosPerformanceExample extends React.PureComponent<
   };
 
   render() {
-    const {fetchingPhotos, timeTakenMillis, output, include} = this.state;
+    const {
+      fetchingPhotos,
+      timeTakenMillis,
+      output,
+      include,
+      firstStr,
+    } = this.state;
+    const first = this.first();
+
     return (
-      <View style={styles.flex1}>
+      <View style={styles.container}>
         {includeValues.map(includeValue => (
-          <View key={includeValue} style={styles.switchRow}>
+          <View key={includeValue} style={styles.inputRow}>
             <Text>{includeValue}</Text>
             <Switch
               value={include.includes(includeValue)}
@@ -77,9 +115,22 @@ export default class GetPhotosPerformanceExample extends React.PureComponent<
             />
           </View>
         ))}
+        <View style={styles.inputRow}>
+          <Text>
+            first
+            {first === null && (
+              <Text style={styles.error}> (enter a positive number)</Text>
+            )}
+          </Text>
+          <TextInput
+            value={firstStr}
+            onChangeText={(text: string) => this.setState({firstStr: text})}
+            style={[styles.textInput, first === null && styles.textInputError]}
+          />
+        </View>
         <Button
           disabled={fetchingPhotos}
-          title="Run getPhotos on 1000 photos"
+          title={`Run getPhotos on ${first} photos`}
           onPress={this.startFetchingPhotos}
         />
         {timeTakenMillis !== null && (
@@ -88,29 +139,37 @@ export default class GetPhotosPerformanceExample extends React.PureComponent<
         <View>
           <Text>Output</Text>
         </View>
-        <ScrollView style={styles.outputBox}>
-          <Text
-            // Setting numberOfLines to a higher number on iOS (like 10000)
-            // causes the box to show nothing
-            numberOfLines={1000}>
-            {JSON.stringify(output, null, 2)}
-          </Text>
-        </ScrollView>
+        <TextInput
+          value={JSON.stringify(output, null, 2)}
+          multiline
+          style={styles.outputBox}
+        />
       </View>
     );
   }
 }
 
 const styles = StyleSheet.create({
-  flex1: {flex: 1, padding: 10},
-  switchRow: {
+  container: {flex: 1, padding: 8},
+  inputRow: {
     flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'space-between',
+    paddingVertical: 2,
   },
+  textInput: {
+    borderColor: '#ccc',
+    borderWidth: 1,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    width: 150,
+  },
+  error: {color: '#f00'},
+  textInputError: {borderColor: '#f00'},
   outputBox: {
     flex: 1,
     borderColor: '#ccc',
     borderWidth: 1,
-    padding: 10,
+    padding: 8,
   },
 });
