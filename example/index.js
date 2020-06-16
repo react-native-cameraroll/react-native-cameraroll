@@ -5,6 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  *
  * @format
+ * @flow
  */
 import {AppRegistry} from 'react-native';
 import App from './App';
