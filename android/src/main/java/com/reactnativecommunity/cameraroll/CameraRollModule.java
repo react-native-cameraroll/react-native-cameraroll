@@ -47,9 +47,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Set;
 
 import javax.annotation.Nullable;
 
@@ -71,6 +73,10 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
   private static final String ASSET_TYPE_PHOTOS = "Photos";
   private static final String ASSET_TYPE_VIDEOS = "Videos";
   private static final String ASSET_TYPE_ALL = "All";
+
+  private static final String INCLUDE_FILENAME = "filename";
+  private static final String INCLUDE_FILE_SIZE = "fileSize";
+  private static final String INCLUDE_LOCATION = "location";
 
   private static final String[] PROJECTION = {
     Images.Media._ID,
@@ -247,6 +253,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
     ReadableArray mimeTypes = params.hasKey("mimeTypes")
         ? params.getArray("mimeTypes")
         : null;
+    ReadableArray include = params.hasKey("include") ? params.getArray("include") : null;
 
     new GetMediaTask(
           getReactApplicationContext(),
@@ -257,6 +264,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
           assetType,
           fromTime,
           toTime,
+          include,
           promise)
           .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
   }
@@ -271,6 +279,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
     private final String mAssetType;
     private final long mFromTime;
     private final long mToTime;
+    private final Set<String> mInclude;
 
     private GetMediaTask(
         ReactContext context,
@@ -281,6 +290,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
         String assetType,
         long fromTime,
         long toTime,
+        @Nullable ReadableArray include,
         Promise promise) {
       super(context);
       mContext = context;
@@ -292,6 +302,24 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
       mAssetType = assetType;
       mFromTime = fromTime;
       mToTime = toTime;
+      mInclude = createSetFromIncludeArray(include);
+    }
+
+    private static Set<String> createSetFromIncludeArray(@Nullable ReadableArray includeArray) {
+      Set<String> includeSet = new HashSet<>();
+
+      if (includeArray == null) {
+        return includeSet;
+      }
+
+      for (int i = 0; i < includeArray.size(); i++) {
+        @Nullable String includeItem = includeArray.getString(i);
+        if (includeItem != null) {
+          includeSet.add(includeItem);
+        }
+      }
+
+      return includeSet;
     }
 
     @Override
@@ -362,7 +390,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
           mPromise.reject(ERROR_UNABLE_TO_LOAD, "Could not get media");
         } else {
           try {
-            putEdges(resolver, media, response, mFirst);
+            putEdges(resolver, media, response, mFirst, mInclude);
             putPageInfo(media, response, mFirst, !TextUtils.isEmpty(mAfter) ? Integer.parseInt(mAfter) : 0);
           } finally {
             media.close();
@@ -463,10 +491,10 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
       ContentResolver resolver,
       Cursor media,
       WritableMap response,
-      int limit) {
+      int limit,
+      Set<String> include) {
     WritableArray edges = new WritableNativeArray();
     media.moveToFirst();
-    int idIndex = media.getColumnIndex(Images.Media._ID);
     int mimeTypeIndex = media.getColumnIndex(Images.Media.MIME_TYPE);
     int groupNameIndex = media.getColumnIndex(Images.Media.BUCKET_DISPLAY_NAME);
     int dateTakenIndex = media.getColumnIndex(Images.Media.DATE_TAKEN);
@@ -475,14 +503,19 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
     int sizeIndex = media.getColumnIndex(MediaStore.MediaColumns.SIZE);
     int dataIndex = media.getColumnIndex(MediaStore.MediaColumns.DATA);
 
+    boolean includeLocation = include.contains(INCLUDE_LOCATION);
+    boolean includeFilename = include.contains(INCLUDE_FILENAME);
+    boolean includeFileSize = include.contains(INCLUDE_FILE_SIZE);
+
     for (int i = 0; i < limit && !media.isAfterLast(); i++) {
       WritableMap edge = new WritableNativeMap();
       WritableMap node = new WritableNativeMap();
       boolean imageInfoSuccess =
-          putImageInfo(resolver, media, node, idIndex, widthIndex, heightIndex, sizeIndex, dataIndex, mimeTypeIndex);
+          putImageInfo(resolver, media, node, widthIndex, heightIndex, sizeIndex, dataIndex,
+              mimeTypeIndex, includeFilename, includeFileSize);
       if (imageInfoSuccess) {
         putBasicNodeInfo(media, node, mimeTypeIndex, groupNameIndex, dateTakenIndex);
-        putLocationInfo(media, node, dataIndex);
+        putLocationInfo(media, node, dataIndex, includeLocation);
 
         edge.putMap("node", node);
         edges.pushMap(edge);
@@ -511,22 +544,18 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
       ContentResolver resolver,
       Cursor media,
       WritableMap node,
-      int idIndex,
       int widthIndex,
       int heightIndex,
       int sizeIndex,
       int dataIndex,
-      int mimeTypeIndex) {
+      int mimeTypeIndex,
+      boolean includeFilename,
+      boolean includeFileSize) {
     WritableMap image = new WritableNativeMap();
     Uri photoUri = Uri.parse("file://" + media.getString(dataIndex));
-    File file = new File(media.getString(dataIndex));
-    String strFileName = file.getName();
     image.putString("uri", photoUri.toString());
-    image.putString("filename", strFileName);
     float width = media.getInt(widthIndex);
     float height = media.getInt(heightIndex);
-    long fileSize = media.getLong(sizeIndex);
-
     String mimeType = media.getString(mimeTypeIndex);
 
     if (mimeType != null
@@ -585,7 +614,21 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
     }
     image.putDouble("width", width);
     image.putDouble("height", height);
-    image.putDouble("fileSize", fileSize);
+
+    if (includeFilename) {
+      File file = new File(media.getString(dataIndex));
+      String strFileName = file.getName();
+      image.putString("filename", strFileName);
+    } else {
+      image.putNull("filename");
+    }
+
+    if (includeFileSize) {
+      image.putDouble("fileSize", media.getLong(sizeIndex));
+    } else {
+      image.putNull("fileSize");
+    }
+
     node.putMap("image", image);
 
     return true;
@@ -594,7 +637,13 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
   private static void putLocationInfo(
       Cursor media,
       WritableMap node,
-      int dataIndex) {
+      int dataIndex,
+      boolean includeLocation) {
+    if (!includeLocation) {
+      node.putNull("location");
+      return;
+    }
+
       try {
         // location details are no longer indexed for privacy reasons using string Media.LATITUDE, Media.LONGITUDE
         // we manually obtain location metadata using ExifInterface#getLatLong(float[]).
