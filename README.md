@@ -151,7 +151,7 @@ Returns a Promise with photo identifier objects from the local camera roll of th
 | params | object | Yes      | Expects a params with the shape described below. |
 
 * `first` : {number} : The number of photos wanted in reverse order of the photo application (i.e. most recent first for SavedPhotos). Required.
-* `after` : {string} : A cursor that matches `page_info { end_cursor }` returned from a previous call to `getPhotos`.
+* `after` : {string} : A cursor that matches `page_info { end_cursor }` returned from a previous call to `getPhotos`. Note that using this will reduce performance slightly on iOS. An alternative is just using the `fromTime` and `toTime` filters, which have no such impact.
 * `groupTypes` : {string} : Specifies which group types to filter the results to. Valid values are:
   * `Album`
   * `All` // default
@@ -165,9 +165,13 @@ Returns a Promise with photo identifier objects from the local camera roll of th
   * `All`
   * `Videos`
   * `Photos` // default
-* `mimeTypes` : {Array} : Filter by mimetype (e.g. image/jpeg).
-* `fromTime` : {timestamp} : Filter from date added.
-* `toTime` : {timestamp} : Filter to date added.
+* `mimeTypes` : {Array} : Filter by mimetype (e.g. image/jpeg). Note that using this will reduce performance slightly on iOS.
+* `fromTime` : {number} : Filter by creation time with a timestamp in milliseconds. This time is exclusive, so we'll select all photos with `timestamp > fromTime`.
+* `toTime` : {number} : Filter by creation time with a timestamp in milliseconds. This time is inclusive, so we'll select all photos with `timestamp <= toTime`.
+* `include` : {Array} : Whether to include some fields that are slower to fetch
+  * `filename` : Ensures `image.filename` is available in each node. This has a large performance impact on iOS.
+  * `fileSize` : Ensures `image.fileSize` is available in each node. This has a large performance impact on iOS.
+  * `location`: Ensures `location` is available in each node. This has a large performance impact on Android.
 
 Returns a Promise which when resolved will be of the following shape:
 
@@ -177,14 +181,14 @@ Returns a Promise which when resolved will be of the following shape:
     * `group_name`: {string}
     * `image`: {object} : An object with the following shape:
       * `uri`: {string}
-      * `filename`: {string}
+      * `filename`: {string | null} : Only set if the `include` parameter contains `filename`.
       * `height`: {number}
       * `width`: {number}
-      * `fileSize`: {number}
+      * `fileSize`: {number | null} : Only set if the `include` parameter contains `fileSize`.
       * `isStored`: {boolean}
       * `playableDuration`: {number}
-    * `timestamp`: {number}
-    * `location`: {object} : An object with the following shape:
+    * `timestamp`: {number} : Timestamp in seconds.
+    * `location`: {object | null} : Only set if the `include` parameter contains `location`. An object with the following shape:
       * `latitude`: {number}
       * `longitude`: {number}
       * `altitude`: {number}
@@ -233,8 +237,10 @@ render() {
    </View>
  );
 }
-```  
+```
+
 ---
+
 ### `deletePhotos()`
 
 ```javascript
