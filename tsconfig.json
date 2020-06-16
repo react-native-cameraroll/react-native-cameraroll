@@ -1,5 +1,5 @@
 {
-  "include": ["typings/**/*.d.ts"],
+  "include": ["typings/**/*.d.ts", "example/**/*.ts", "example/**/*.tsx"],
   "compilerOptions": {
     "target": "es5",
     "module": "commonjs",
@@ -16,10 +16,10 @@
     "skipLibCheck": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "lib": ["es2015", "es2016", "esnext", "dom"]
+    "lib": ["es2015", "es2016", "esnext", "dom"],
+    "allowSyntheticDefaultImports": true,
+    "noEmit": true,
+    "resolveJsonModule": true
   },
-  "exclude": [
-    "node_modules",
-    "**/*.spec.ts"
-  ]
+  "exclude": ["node_modules", "**/*.spec.ts"]
 }
