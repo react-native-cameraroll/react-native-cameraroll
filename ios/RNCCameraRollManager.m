@@ -70,7 +70,7 @@ RCT_ENUM_CONVERTER(PHAssetCollectionSubtype, (@{
   }
   if (toTime > 0) {
     NSDate* toDate = [NSDate dateWithTimeIntervalSince1970:toTime/1000];
-    [format addObject:@"creationDate <= %@"];
+    [format addObject:@"creationDate < %@"];
     [arguments addObject:toDate];
   }
   
@@ -255,11 +255,6 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
   NSUInteger const fromTime = [RCTConvert NSInteger:params[@"fromTime"]];
   NSUInteger const toTime = [RCTConvert NSInteger:params[@"toTime"]];
   NSArray<NSString *> *const mimeTypes = [RCTConvert NSStringArray:params[@"mimeTypes"]];
-  NSArray<NSString *> *const include = [RCTConvert NSStringArray:params[@"include"]];
-
-  BOOL __block includeFilename = [include indexOfObject:@"filename"] != NSNotFound;
-  BOOL __block includeFileSize = [include indexOfObject:@"fileSize"] != NSNotFound;
-  BOOL __block includeLocation = [include indexOfObject:@"location"] != NSNotFound;
   
   // If groupTypes is "all", we want to fetch the SmartAlbum "all photos". Otherwise, all
   // other groupTypes values require the "album" collection type.
@@ -270,18 +265,6 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
   
   // Predicate for fetching assets within a collection
   PHFetchOptions *const assetFetchOptions = [RCTConvert PHFetchOptionsFromMediaType:mediaType fromTime:fromTime toTime:toTime];
-  // We can directly set the limit if we guarantee every image fetched will be
-  // added to the output array within the `collectAsset` block
-  BOOL collectAssetMayOmitAsset = !!afterCursor || [mimeTypes count] > 0;
-  if (!collectAssetMayOmitAsset) {
-    // We set the fetchLimit to first + 1 so that `hasNextPage` will be set
-    // correctly:
-    // - If the user set `first: 10` and there are 11 photos, `hasNextPage`
-    //   will be set to true below inside of `collectAsset`
-    // - If the user set `first: 10` and there are 10 photos, `hasNextPage`
-    //   will not be set, as expected
-    assetFetchOptions.fetchLimit = first + 1;
-  }
   assetFetchOptions.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:NO]];
   
   BOOL __block foundAfter = NO;
@@ -294,6 +277,7 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
   collectionFetchOptions.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"endDate" ascending:NO]];
   if (groupName != nil) {
     collectionFetchOptions.predicate = [NSPredicate predicateWithFormat:@"localizedTitle = %@", groupName];
+
   }
   
   BOOL __block stopCollections_;
@@ -302,47 +286,34 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
   requestPhotoLibraryAccess(reject, ^{
     void (^collectAsset)(PHAsset*, NSUInteger, BOOL*) = ^(PHAsset * _Nonnull asset, NSUInteger assetIdx, BOOL * _Nonnull stopAssets) {
       NSString *const uri = [NSString stringWithFormat:@"ph://%@", [asset localIdentifier]];
-      NSString *_Nullable originalFilename = NULL;
-      PHAssetResource *_Nullable resource = NULL;
-      NSNumber* fileSize = [NSNumber numberWithInt:0];
-      
-      if (includeFilename || includeFileSize || [mimeTypes count] > 0) {
-        // Get underlying resources of an asset - this includes files as well as details about edited PHAssets
-        // This is required for the filename and mimeType filtering
-        NSArray<PHAssetResource *> *const assetResources = [PHAssetResource assetResourcesForAsset:asset];
-        resource = [assetResources firstObject];
-        originalFilename = resource.originalFilename;
-        fileSize = [resource valueForKey:@"fileSize"];
-      }
-      
-      // WARNING: If you add any code to `collectAsset` that may skip adding an
-      // asset to the `assets` output array, you should do it inside this
-      // block and ensure the logic for `collectAssetMayOmitAsset` above is
-      // updated
-      if (collectAssetMayOmitAsset) {
-        if (afterCursor && !foundAfter) {
-          if ([afterCursor isEqualToString:uri]) {
-            foundAfter = YES;
-          }
-          return; // skip until we get to the first one
+      if (afterCursor && !foundAfter) {
+        if ([afterCursor isEqualToString:uri]) {
+          foundAfter = YES;
         }
+        return; // skip until we get to the first one
+      }
 
+      // Get underlying resources of an asset - this includes files as well as details about edited PHAssets
+      NSArray<PHAssetResource *> *const assetResources = [PHAssetResource assetResourcesForAsset:asset];
+      if (![assetResources firstObject]) {
+        return;
+      }
+      PHAssetResource *const _Nonnull resource = [assetResources firstObject];
 
-        if ([mimeTypes count] > 0 && resource) {
-          CFStringRef const uti = (__bridge CFStringRef _Nonnull)(resource.uniformTypeIdentifier);
-          NSString *const mimeType = (NSString *)CFBridgingRelease(UTTypeCopyPreferredTagWithClass(uti, kUTTagClassMIMEType));
+      if ([mimeTypes count] > 0) {
+        CFStringRef const uti = (__bridge CFStringRef _Nonnull)(resource.uniformTypeIdentifier);
+        NSString *const mimeType = (NSString *)CFBridgingRelease(UTTypeCopyPreferredTagWithClass(uti, kUTTagClassMIMEType));
 
-          BOOL __block mimeTypeFound = NO;
-          [mimeTypes enumerateObjectsUsingBlock:^(NSString * _Nonnull mimeTypeFilter, NSUInteger idx, BOOL * _Nonnull stop) {
-            if ([mimeType isEqualToString:mimeTypeFilter]) {
-              mimeTypeFound = YES;
-              *stop = YES;
-            }
-          }];
-
-          if (!mimeTypeFound) {
-            return;
+        BOOL __block mimeTypeFound = NO;
+        [mimeTypes enumerateObjectsUsingBlock:^(NSString * _Nonnull mimeTypeFilter, NSUInteger idx, BOOL * _Nonnull stop) {
+          if ([mimeType isEqualToString:mimeTypeFilter]) {
+            mimeTypeFound = YES;
+            *stop = YES;
           }
+        }];
+
+        if (!mimeTypeFound) {
+          return;
         }
       }
 
@@ -365,6 +336,7 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
                                                   ? @"audio"
                                                   : @"unknown")));
       CLLocation *const loc = asset.location;
+      NSString *const origFilename = resource.originalFilename;
 
       // A note on isStored: in the previous code that used ALAssets, isStored
       // was always set to YES, probably because iCloud-synced images were never returned (?).
@@ -379,21 +351,21 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
           @"group_name": currentCollectionName,
           @"image": @{
               @"uri": uri,
-              @"filename": (includeFilename && originalFilename ? originalFilename : [NSNull null]),
+              @"filename": origFilename,
               @"height": @([asset pixelHeight]),
               @"width": @([asset pixelWidth]),
-              @"fileSize": (includeFileSize ? fileSize : [NSNull null]),
+              @"fileSize": [resource valueForKey:@"fileSize"],
               @"isStored": @YES, // this field doesn't seem to exist on android
               @"playableDuration": @([asset duration]) // fractional seconds
           },
           @"timestamp": @(asset.creationDate.timeIntervalSince1970),
-          @"location": (includeLocation && loc ? @{
+          @"location": (loc ? @{
               @"latitude": @(loc.coordinate.latitude),
               @"longitude": @(loc.coordinate.longitude),
               @"altitude": @(loc.altitude),
               @"heading": @(loc.course),
               @"speed": @(loc.speed), // speed in m/s
-            } : [NSNull null])
+            } : @{})
           }
       }];
     };
