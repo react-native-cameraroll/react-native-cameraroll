@@ -517,7 +517,8 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
       WritableMap node = new WritableNativeMap();
       boolean imageInfoSuccess =
           putImageInfo(resolver, media, node, widthIndex, heightIndex, sizeIndex, dataIndex,
-              mimeTypeIndex, includeFilename, includeFileSize, includeImageSize, includePlayableDuration);
+              mimeTypeIndex, includeFilename, includeFileSize, includeImageSize,
+              includePlayableDuration);
       if (imageInfoSuccess) {
         putBasicNodeInfo(media, node, mimeTypeIndex, groupNameIndex, dateTakenIndex);
         putLocationInfo(media, node, dataIndex, includeLocation);
@@ -545,6 +546,10 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
     node.putDouble("timestamp", media.getLong(dateTakenIndex) / 1000d);
   }
 
+  /**
+   * @return Whether we successfully fetched all the information about the image that we were asked
+   * to include
+   */
   private static boolean putImageInfo(
       ContentResolver resolver,
       Cursor media,
@@ -564,9 +569,10 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
     String mimeType = media.getString(mimeTypeIndex);
 
     boolean isVideo = mimeType != null && mimeType.startsWith("video");
-    putImageSize(resolver, media, image, widthIndex, heightIndex, photoUri, isVideo,
-        includeImageSize);
-    putPlayableDuration(resolver, image, photoUri, isVideo, includePlayableDuration);
+    boolean putImageSizeSuccess = putImageSize(resolver, media, image, widthIndex, heightIndex,
+        photoUri, isVideo, includeImageSize);
+    boolean putPlayableDurationSuccess = putPlayableDuration(resolver, image, photoUri, isVideo,
+        includePlayableDuration);
 
     if (includeFilename) {
       File file = new File(media.getString(dataIndex));
@@ -583,25 +589,31 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
     }
 
     node.putMap("image", image);
-    return true;
+    return putImageSizeSuccess && putPlayableDurationSuccess;
   }
 
-  private static void putPlayableDuration(
+  /**
+   * @return Whether we succeeded in fetching and putting the playableDuration
+   */
+  private static boolean putPlayableDuration(
       ContentResolver resolver,
       WritableMap image,
       Uri photoUri,
       boolean isVideo,
       boolean includePlayableDuration) {
+    image.putNull("playableDuration");
+
     if (!includePlayableDuration || !isVideo) {
-      image.putNull("playableDuration");
-      return;
+      return true;
     }
 
+    boolean success = true;
     @Nullable Integer playableDuration = null;
     @Nullable AssetFileDescriptor photoDescriptor = null;
     try {
       photoDescriptor = resolver.openAssetFileDescriptor(photoUri, "r");
     } catch (FileNotFoundException e) {
+      success = false;
       FLog.e(ReactConstants.TAG, "Could not open asset file " + photoUri.toString(), e);
     }
 
@@ -614,6 +626,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
                 retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION));
         playableDuration = timeInMillisec / 1000;
       } catch (NumberFormatException e) {
+        success = false;
         FLog.e(
             ReactConstants.TAG,
             "Number format exception occurred while trying to fetch video metadata for "
@@ -633,12 +646,12 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
 
     if (playableDuration != null) {
       image.putInt("playableDuration", playableDuration);
-    } else {
-      image.putNull("playableDuration");
     }
+
+    return success;
   }
 
-  private static void putImageSize(
+  private static boolean putImageSize(
       ContentResolver resolver,
       Cursor media,
       WritableMap image,
@@ -647,12 +660,14 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
       Uri photoUri,
       boolean isVideo,
       boolean includeImageSize) {
+    image.putNull("width");
+    image.putNull("height");
+
     if (!includeImageSize) {
-      image.putNull("width");
-      image.putNull("height");
-      return;
+      return true;
     }
 
+    boolean success = true;
     int width = media.getInt(widthIndex);
     int height = media.getInt(heightIndex);
 
@@ -661,6 +676,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
       try {
         photoDescriptor = resolver.openAssetFileDescriptor(photoUri, "r");
       } catch (FileNotFoundException e) {
+        success = false;
         FLog.e(ReactConstants.TAG, "Could not open asset file " + photoUri.toString(), e);
       }
 
@@ -676,6 +692,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
                 Integer.parseInt(
                     retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT));
           } catch (NumberFormatException e) {
+            success = false;
             FLog.e(
                 ReactConstants.TAG,
                 "Number format exception occurred while trying to fetch video metadata for "
@@ -703,6 +720,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
 
     image.putInt("width", width);
     image.putInt("height", height);
+    return success;
   }
 
   private static void putLocationInfo(
@@ -710,8 +728,9 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
       WritableMap node,
       int dataIndex,
       boolean includeLocation) {
+    node.putNull("location");
+
     if (!includeLocation) {
-      node.putNull("location");
       return;
     }
 
