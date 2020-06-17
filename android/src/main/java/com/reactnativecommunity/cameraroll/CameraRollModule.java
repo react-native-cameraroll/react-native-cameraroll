@@ -43,6 +43,7 @@ import com.facebook.react.module.annotations.ReactModule;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
@@ -77,6 +78,8 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
   private static final String INCLUDE_FILENAME = "filename";
   private static final String INCLUDE_FILE_SIZE = "fileSize";
   private static final String INCLUDE_LOCATION = "location";
+  private static final String INCLUDE_IMAGE_SIZE = "imageSize";
+  private static final String INCLUDE_PLAYABLE_DURATION = "playableDuration";
 
   private static final String[] PROJECTION = {
     Images.Media._ID,
@@ -506,13 +509,15 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
     boolean includeLocation = include.contains(INCLUDE_LOCATION);
     boolean includeFilename = include.contains(INCLUDE_FILENAME);
     boolean includeFileSize = include.contains(INCLUDE_FILE_SIZE);
+    boolean includeImageSize = include.contains(INCLUDE_IMAGE_SIZE);
+    boolean includePlayableDuration = include.contains(INCLUDE_PLAYABLE_DURATION);
 
     for (int i = 0; i < limit && !media.isAfterLast(); i++) {
       WritableMap edge = new WritableNativeMap();
       WritableMap node = new WritableNativeMap();
       boolean imageInfoSuccess =
           putImageInfo(resolver, media, node, widthIndex, heightIndex, sizeIndex, dataIndex,
-              mimeTypeIndex, includeFilename, includeFileSize);
+              mimeTypeIndex, includeFilename, includeFileSize, includeImageSize, includePlayableDuration);
       if (imageInfoSuccess) {
         putBasicNodeInfo(media, node, mimeTypeIndex, groupNameIndex, dateTakenIndex);
         putLocationInfo(media, node, dataIndex, includeLocation);
@@ -550,70 +555,18 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
       int dataIndex,
       int mimeTypeIndex,
       boolean includeFilename,
-      boolean includeFileSize) {
+      boolean includeFileSize,
+      boolean includeImageSize,
+      boolean includePlayableDuration) {
     WritableMap image = new WritableNativeMap();
     Uri photoUri = Uri.parse("file://" + media.getString(dataIndex));
     image.putString("uri", photoUri.toString());
-    float width = media.getInt(widthIndex);
-    float height = media.getInt(heightIndex);
     String mimeType = media.getString(mimeTypeIndex);
 
-    if (mimeType != null
-        && mimeType.startsWith("video")) {
-      try {
-        AssetFileDescriptor photoDescriptor = resolver.openAssetFileDescriptor(photoUri, "r");
-        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-        retriever.setDataSource(photoDescriptor.getFileDescriptor());
-
-        try {
-          if (width <= 0 || height <= 0) {
-            width =
-                Integer.parseInt(
-                    retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH));
-            height =
-                Integer.parseInt(
-                    retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT));
-          }
-          int timeInMillisec =
-              Integer.parseInt(
-                  retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION));
-          int playableDuration = timeInMillisec / 1000;
-          image.putInt("playableDuration", playableDuration);
-        } catch (NumberFormatException e) {
-          FLog.e(
-              ReactConstants.TAG,
-              "Number format exception occurred while trying to fetch video metadata for "
-                  + photoUri.toString(),
-              e);
-          return false;
-        } finally {
-          retriever.release();
-          photoDescriptor.close();
-        }
-      } catch (Exception e) {
-        FLog.e(ReactConstants.TAG, "Could not get video metadata for " + photoUri.toString(), e);
-        return false;
-      }
-    }
-
-    if (width <= 0 || height <= 0) {
-      try {
-        AssetFileDescriptor photoDescriptor = resolver.openAssetFileDescriptor(photoUri, "r");
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        // Set inJustDecodeBounds to true so we don't actually load the Bitmap, but only get its
-        // dimensions instead.
-        options.inJustDecodeBounds = true;
-        BitmapFactory.decodeFileDescriptor(photoDescriptor.getFileDescriptor(), null, options);
-        width = options.outWidth;
-        height = options.outHeight;
-        photoDescriptor.close();
-      } catch (IOException e) {
-        FLog.e(ReactConstants.TAG, "Could not get width/height for " + photoUri.toString(), e);
-        return false;
-      }
-    }
-    image.putDouble("width", width);
-    image.putDouble("height", height);
+    boolean isVideo = mimeType != null && mimeType.startsWith("video");
+    putImageSize(resolver, media, image, widthIndex, heightIndex, photoUri, isVideo,
+        includeImageSize);
+    putPlayableDuration(resolver, image, photoUri, isVideo, includePlayableDuration);
 
     if (includeFilename) {
       File file = new File(media.getString(dataIndex));
@@ -630,8 +583,126 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
     }
 
     node.putMap("image", image);
-
     return true;
+  }
+
+  private static void putPlayableDuration(
+      ContentResolver resolver,
+      WritableMap image,
+      Uri photoUri,
+      boolean isVideo,
+      boolean includePlayableDuration) {
+    if (!includePlayableDuration || !isVideo) {
+      image.putNull("playableDuration");
+      return;
+    }
+
+    @Nullable Integer playableDuration = null;
+    @Nullable AssetFileDescriptor photoDescriptor = null;
+    try {
+      photoDescriptor = resolver.openAssetFileDescriptor(photoUri, "r");
+    } catch (FileNotFoundException e) {
+      FLog.e(ReactConstants.TAG, "Could not open asset file " + photoUri.toString(), e);
+    }
+
+    if (photoDescriptor != null) {
+      MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+      retriever.setDataSource(photoDescriptor.getFileDescriptor());
+      try {
+        int timeInMillisec =
+            Integer.parseInt(
+                retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION));
+        playableDuration = timeInMillisec / 1000;
+      } catch (NumberFormatException e) {
+        FLog.e(
+            ReactConstants.TAG,
+            "Number format exception occurred while trying to fetch video metadata for "
+                + photoUri.toString(),
+            e);
+      }
+      retriever.release();
+    }
+
+    if (photoDescriptor != null) {
+      try {
+        photoDescriptor.close();
+      } catch (IOException e) {
+        // Do nothing. We can't handle this, and this is usually a system problem
+      }
+    }
+
+    if (playableDuration != null) {
+      image.putInt("playableDuration", playableDuration);
+    } else {
+      image.putNull("playableDuration");
+    }
+  }
+
+  private static void putImageSize(
+      ContentResolver resolver,
+      Cursor media,
+      WritableMap image,
+      int widthIndex,
+      int heightIndex,
+      Uri photoUri,
+      boolean isVideo,
+      boolean includeImageSize) {
+    if (!includeImageSize) {
+      image.putNull("width");
+      image.putNull("height");
+      return;
+    }
+
+    int width = media.getInt(widthIndex);
+    int height = media.getInt(heightIndex);
+
+    if (width <= 0 || height <= 0) {
+      @Nullable AssetFileDescriptor photoDescriptor = null;
+      try {
+        photoDescriptor = resolver.openAssetFileDescriptor(photoUri, "r");
+      } catch (FileNotFoundException e) {
+        FLog.e(ReactConstants.TAG, "Could not open asset file " + photoUri.toString(), e);
+      }
+
+      if (photoDescriptor != null) {
+        if (isVideo) {
+          MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+          retriever.setDataSource(photoDescriptor.getFileDescriptor());
+          try {
+            width =
+                Integer.parseInt(
+                    retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH));
+            height =
+                Integer.parseInt(
+                    retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT));
+          } catch (NumberFormatException e) {
+            FLog.e(
+                ReactConstants.TAG,
+                "Number format exception occurred while trying to fetch video metadata for "
+                    + photoUri.toString(),
+                e);
+          }
+          retriever.release();
+        } else {
+          BitmapFactory.Options options = new BitmapFactory.Options();
+          // Set inJustDecodeBounds to true so we don't actually load the Bitmap, but only get its
+          // dimensions instead.
+          options.inJustDecodeBounds = true;
+          BitmapFactory.decodeFileDescriptor(photoDescriptor.getFileDescriptor(), null, options);
+          width = options.outWidth;
+          height = options.outHeight;
+        }
+      }
+
+      try {
+        photoDescriptor.close();
+      } catch (IOException e) {
+        // Do nothing. We can't handle this, and this is usually a system problem
+      }
+    }
+
+    image.putInt("width", width);
+    image.putInt("height", height);
   }
 
   private static void putLocationInfo(
