@@ -88,10 +88,6 @@ declare namespace CameraRoll {
     include?: Include[];
   }
 
-  type AString = 'a';
-  const a = ['a', 'b', 'c'] as ['a', 'b', 'c'];
-  type ArrayT = ['a', 'b', 'c'];
-
   interface PhotoIdentifier {
     node: {
       type: string;
