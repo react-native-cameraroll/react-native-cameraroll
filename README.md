@@ -187,8 +187,7 @@ Returns a Promise which when resolved will be of the following shape:
       * `height`: {number | null} : Only set if the `include` parameter contains `imageSize`
       * `width`: {number | null} : Only set if the `include` parameter contains `imageSize`
       * `fileSize`: {number | null} : Only set if the `include` parameter contains `fileSize`
-      * `isStored`: {boolean}
-      * `playableDuration`: {number | null} : Only set for videos if the `include` parameter contains `playableDuration`
+      * `playableDuration`: {number | null} : Only set for videos if the `include` parameter contains `playableDuration`. Will be null for images.
     * `timestamp`: {number}
     * `location`: {object | null} : Only set if the `include` parameter contains `location`. An object with the following shape:
       * `latitude`: {number}

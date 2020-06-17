@@ -102,8 +102,10 @@ declare namespace CameraRoll {
         width: number;
         /** Only set if the `include` parameter contains `fileSize`. */
         fileSize: number | null;
-        isStored?: boolean;
-        /** Only set if the `include` parameter contains `playableDuration`. */
+        /**
+         * Only set if the `include` parameter contains `playableDuration`.
+         * Will be null for images.
+         */
         playableDuration: number | null;
       };
       /** Timestamp in seconds. */

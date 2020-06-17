@@ -368,13 +368,6 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
                                                   : @"unknown")));
       CLLocation *const loc = asset.location;
 
-      // A note on isStored: in the previous code that used ALAssets, isStored
-      // was always set to YES, probably because iCloud-synced images were never returned (?).
-      // To get the "isStored" information and filename, we would need to actually request the
-      // image data from the image manager. Those operations could get really expensive and
-      // would definitely utilize the disk too much.
-      // Thus, this field is actually not reliable.
-      // Note that Android also does not return the `isStored` field at all.
       [assets addObject:@{
         @"node": @{
           @"type": assetMediaTypeLabel, // TODO: switch to mimeType?
@@ -385,8 +378,7 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
               @"height": (includeImageSize ? @([asset pixelHeight]) : [NSNull null]),
               @"width": (includeImageSize ? @([asset pixelWidth]) : [NSNull null]),
               @"fileSize": (includeFileSize ? fileSize : [NSNull null]),
-              @"isStored": @YES, // this field doesn't seem to exist on android
-              @"playableDuration": (includePlayableDuration
+              @"playableDuration": (includePlayableDuration && asset.mediaType != PHAssetMediaTypeImage
                                     ? @([asset duration]) // fractional seconds
                                     : [NSNull null])
           },

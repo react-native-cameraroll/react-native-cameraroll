@@ -102,7 +102,6 @@ export type PhotoIdentifier = {
       height: number,
       width: number,
       fileSize: number | null,
-      isStored?: boolean,
       playableDuration: number,
     },
     timestamp: number,
