@@ -57,20 +57,53 @@ import CameraRoll from "@react-native-community/cameraroll";
 
 ### Permissions
 
+**iOS**
+
 The user's permission is required in order to access the Camera Roll on devices running iOS 10 or later. Add the `NSPhotoLibraryUsageDescription` key in your `Info.plist` with a string that describes how your app will use this data. This key will appear as `Privacy - Photo Library Usage Description` in Xcode.
 
 If you are targeting devices running iOS 11 or later, you will also need to add the `NSPhotoLibraryAddUsageDescription` key in your `Info.plist`. Use this key to define a string that describes how your app will use this data. By adding this key to your `Info.plist`, you will be able to request write-only access permission from the user. If you try to save to the camera roll without this permission, your app will exit.
 
-On Android permission is required to read the external storage. Add below line to your manifest to request this permission on app install.
-On Android permission is required to write in the external storage when saving to camera roll. Add below line to your manifest to request this permission on app install.
+**Andriod**
 
-```
+Permission is required to read and write to the external storage. Adding the following lines will add the capability for the app to request for perission.
+
+```xml
 <manifest>
 ...
 <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
 <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 ...
 <application>
+```
+
+Then you have to explicitly ask for the permission
+
+```javascript
+import { PermissionsAndroid, Platform } from 'react-native';
+import CameraRoll from '@react-native-community/cameraroll';
+
+const checkAndroidPermission = async () => {
+    try {
+      const permission = PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE;
+      const isPermissionAlreadyGranted = await PermissionsAndroid.check(permission);
+
+      if(isPermissionAlreadyGranted) { 
+        Promise.resolve();
+      }
+
+      await PermissionsAndroid.request(permission);
+      Promise.resolve();
+    } catch (error) {
+      Promise.reject(error);
+    }
+};
+
+const savePicture = async () => {
+    if (Platform.OS === 'android'){
+      await checkAndroidPermission();
+    }
+   CameraRoll.saveToCameraRoll(tag, [type]);
+}
 ```
 
 ### Methods
