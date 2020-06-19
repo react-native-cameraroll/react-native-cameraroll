@@ -67,7 +67,7 @@ If you are targeting devices running iOS 11 or later, you will also need to add 
 
 Permission is required to read and write to the external storage. Adding the following lines will add the capability for the app to request for perission.
 
-```
+```xml
 <manifest>
 ...
 <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
@@ -78,7 +78,7 @@ Permission is required to read and write to the external storage. Adding the fol
 
 Then you have to explicitly ask for the permission
 
-```
+```javascript
 import { PermissionsAndroid, Platform } from 'react-native';
 import CameraRoll from '@react-native-community/cameraroll';
 
