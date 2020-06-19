@@ -103,10 +103,7 @@ const savePicture = async () => {
       await checkAndroidPermission();
     }
    CameraRoll.saveToCameraRoll(tag, [type]);
-<<<<<<< HEAD
 }
-=======
->>>>>>> 6001dd9c106f489ee5d54e1d74b585d8df8bae55
 ```
 
 ### Methods
