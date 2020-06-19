@@ -1,0 +1,35 @@
+{
+    "env": {
+        "node": true,
+        "mocha": true,
+        "es6": true
+    },
+    "extends": ["eslint:recommended", "plugin:prettier/recommended"],
+    "parser": "babel-eslint",
+    "parserOptions": {
+        "ecmaVersion": 6
+    },
+    "plugins": ["prettier"],
+    "rules": {
+        "indent": ["error", 2],
+        "prettier/prettier": "error",
+        "linebreak-style": ["error", "unix"],
+        "quotes": ["error", "double"],
+        "semi": ["error", "always"],
+        "no-unused-vars": ["error", {
+            "args": "none"
+        }],
+        "prefer-arrow-callback": ["error", {
+            "allowNamedFunctions": true
+        }],
+        "max-len": [
+            "error",
+            {
+                "code": 80,
+                "comments": 80,
+                "ignoreTrailingComments": true,
+                "ignoreUrls": true
+            }
+        ]
+    }
+}

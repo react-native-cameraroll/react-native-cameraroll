@@ -1,0 +1,15 @@
+{
+  "parentList": {
+    "goody": true,
+    "wellDone": "okay",
+    "childList": {
+      "so": "",
+      "many": "",
+      "item": {
+        "image": ">>>>>>>>img<<<<<<<<",
+        "name": "naey nae",
+        "imageArr": [">>>>>>>>one", ">>>>>>>>two"]
+      }
+    }
+  }
+}
