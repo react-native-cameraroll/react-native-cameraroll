@@ -23,7 +23,11 @@ declare namespace CameraRoll {
     /** Ensures the fileSize is included. Has a large performance hit on iOS */
     | 'fileSize'
     /** Ensures the location is included. Has a medium performance hit on Android */
-    | 'location';
+    | 'location'
+    /** Ensures the image width and height are included. Has a small performance hit on Android */
+    | 'imageSize'
+    /** Ensures the image playableDuration is included. Has a medium performance hit on Android */
+    | 'playableDuration';
 
   /**
    * Shape of the param arg for the `getPhotosFast` function.
@@ -92,12 +96,17 @@ declare namespace CameraRoll {
         /** Only set if the `include` parameter contains `filename`. */
         filename: string | null;
         uri: string;
+        /** Only set if the `include` parameter contains `imageSize`. */
         height: number;
+        /** Only set if the `include` parameter contains `imageSize`. */
         width: number;
         /** Only set if the `include` parameter contains `fileSize`. */
         fileSize: number | null;
-        isStored?: boolean;
-        playableDuration: number;
+        /**
+         * Only set if the `include` parameter contains `playableDuration`.
+         * Will be null for images.
+         */
+        playableDuration: number | null;
       };
       /** Timestamp in seconds. */
       timestamp: number;

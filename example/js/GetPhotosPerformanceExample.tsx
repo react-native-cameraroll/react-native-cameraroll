@@ -21,14 +21,14 @@ interface State {
    * with `this.first()` before using.
    */
   firstStr: string;
-  /** `after` passed into `getPhotos`. Not passed if empty */
-  after: string;
 }
 
 const includeValues: CameraRoll.Include[] = [
   'filename',
   'fileSize',
   'location',
+  'imageSize',
+  'playableDuration',
 ];
 
 /**
@@ -45,7 +45,6 @@ export default class GetPhotosPerformanceExample extends React.PureComponent<
     output: null,
     include: [],
     firstStr: '1000',
-    after: '',
   };
 
   first = () => {

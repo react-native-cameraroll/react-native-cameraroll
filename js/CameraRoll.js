@@ -31,7 +31,12 @@ const ASSET_TYPE_OPTIONS = {
 
 export type GroupTypes = $Keys<typeof GROUP_TYPES_OPTIONS>;
 
-export type Include = 'filename' | 'fileSize' | 'location';
+export type Include =
+  | 'filename'
+  | 'fileSize'
+  | 'location'
+  | 'imageSize'
+  | 'playableDuration';
 
 /**
  * Shape of the param arg for the `getPhotos` function.
@@ -97,7 +102,6 @@ export type PhotoIdentifier = {
       height: number,
       width: number,
       fileSize: number | null,
-      isStored?: boolean,
       playableDuration: number,
     },
     timestamp: number,

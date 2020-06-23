@@ -206,6 +206,8 @@ Returns a Promise with photo identifier objects from the local camera roll of th
   * `filename` : Ensures `image.filename` is available in each node. This has a large performance impact on iOS.
   * `fileSize` : Ensures `image.fileSize` is available in each node. This has a large performance impact on iOS.
   * `location`: Ensures `location` is available in each node. This has a large performance impact on Android.
+  * `imageSize` : Ensures `image.width` and `image.height` are available in each node. This has a small performance impact on Android.
+  * `playableDuration` : Ensures `image.playableDuration` is available in each node. This has a medium peformance impact on Android.
 
 Returns a Promise which when resolved will be of the following shape:
 
@@ -215,13 +217,12 @@ Returns a Promise which when resolved will be of the following shape:
     * `group_name`: {string}
     * `image`: {object} : An object with the following shape:
       * `uri`: {string}
-      * `filename`: {string | null} : Only set if the `include` parameter contains `filename`.
-      * `height`: {number}
-      * `width`: {number}
-      * `fileSize`: {number | null} : Only set if the `include` parameter contains `fileSize`.
-      * `isStored`: {boolean}
-      * `playableDuration`: {number}
-    * `timestamp`: {number} : Timestamp in seconds.
+      * `filename`: {string | null} : Only set if the `include` parameter contains `filename`
+      * `height`: {number | null} : Only set if the `include` parameter contains `imageSize`
+      * `width`: {number | null} : Only set if the `include` parameter contains `imageSize`
+      * `fileSize`: {number | null} : Only set if the `include` parameter contains `fileSize`
+      * `playableDuration`: {number | null} : Only set for videos if the `include` parameter contains `playableDuration`. Will be null for images.
+    * `timestamp`: {number}
     * `location`: {object | null} : Only set if the `include` parameter contains `location`. An object with the following shape:
       * `latitude`: {number}
       * `longitude`: {number}
