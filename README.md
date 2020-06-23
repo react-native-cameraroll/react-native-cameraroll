@@ -65,8 +65,6 @@ If you are targeting devices running iOS 11 or later, you will also need to add 
 
 **Android**
 
-This code only works with ejected apps, and not with Expo React Native apps. I suggest also pointing users via a link to both react-native's PermissionsAndroid and Expo's Permissions APIs in addition to including sample code.
-
 Permission is required to read and write to the external storage.
 
 On Expo, follow the guide [here](https://docs.expo.io/versions/latest/sdk/permissions/) for requesting the permission.
