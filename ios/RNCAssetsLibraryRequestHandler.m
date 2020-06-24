@@ -118,38 +118,6 @@ RCT_EXPORT_MODULE()
       }
       [delegate URLRequest:cancellationBlock didCompleteWithError:error];
     }];
-  } else if (isPHUpload) {
-    // By default, allow downloading images from iCloud
-    PHImageRequestOptions *const requestOptions = [PHImageRequestOptions new];
-    requestOptions.networkAccessAllowed = YES;
-      requestOptions.deliveryMode = PHImageRequestOptionsDeliveryModeHighQualityFormat;
-
-      CGSize const targetSize = CGSizeMake((CGFloat)asset.pixelWidth, (CGFloat)asset.pixelHeight);
-      [[PHImageManager defaultManager] requestImageForAsset:asset
-                                                 targetSize:targetSize
-                                                contentMode:PHImageContentModeDefault
-                                                    options:requestOptions
-                                              resultHandler:^(UIImage * _Nullable image,
-                                                              NSDictionary * _Nullable info) {
-      NSError *const error = [info objectForKey:PHImageErrorKey];
-      if (error) {
-        [delegate URLRequest:cancellationBlock didCompleteWithError:error];
-        return;
-      }
-      
-      NSData *const imageData = UIImageJPEGRepresentation(image, 1.0);
-      NSInteger const length = [imageData length];
-
-      NSURLResponse *const response = [[NSURLResponse alloc] initWithURL:request.URL
-                                                                MIMEType:@"image/jpeg"
-                                                   expectedContentLength:length
-                                                        textEncodingName:nil];
-
-      [delegate URLRequest:cancellationBlock didReceiveResponse:response];
-
-      [delegate URLRequest:cancellationBlock didReceiveData:imageData];
-      [delegate URLRequest:cancellationBlock didCompleteWithError:nil];
-    }];
   } else {
     // By default, allow downloading images from iCloud
     PHImageRequestOptions *const requestOptions = [PHImageRequestOptions new];
