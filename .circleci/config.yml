@@ -80,7 +80,6 @@ workflows:
       #       - analyze
       - publish:
           requires:
-            - checkout_code
             - analyze
           filters:
             branches:
