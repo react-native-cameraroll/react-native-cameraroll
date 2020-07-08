@@ -80,7 +80,7 @@ workflows:
       #       - analyze
       - publish:
           requires:
-            - analyze
+            - rn/android_build
           filters:
             branches:
               only: master
