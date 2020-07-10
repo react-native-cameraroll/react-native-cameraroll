@@ -51,6 +51,12 @@ to:
 import CameraRoll from "@react-native-community/cameraroll";
 ```
 
+or in TypeScript:
+
+```typescript
+import * as CameraRoll from '@react-native-community/cameraroll';
+```
+
 ## Usage
 
 `CameraRoll` provides access to the local camera roll or photo library.
