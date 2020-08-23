@@ -135,8 +135,24 @@ RCT_EXPORT_METHOD(saveToCameraRoll:(NSURLRequest *)request
 
     [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
       PHAssetChangeRequest *assetRequest ;
+      NSString *extension = [inputURI pathExtension];
+      BOOL isDNG = ([extension caseInsensitiveCompare:@"DNG"] == NSOrderedSame);
       if ([options[@"type"] isEqualToString:@"video"]) {
         assetRequest = [PHAssetChangeRequest creationRequestForAssetFromVideoAtFileURL:inputURI];
+      } else if (isDNG) {
+	PHAssetCreationRequest *creationRequest = [PHAssetCreationRequest creationRequestForAsset];
+        NSData *data = [NSData dataWithContentsOfURL:inputURI];
+        UIImage *image = [UIImage imageWithData:data];
+	NSData *compressedData = UIImageJPEGRepresentation(image, 1.0);
+	[creationRequest addResourceWithType:PHAssetResourceTypePhoto data: compressedData options:nil];
+	PHAssetResourceCreationOptions *creationOptions = [[PHAssetResourceCreationOptions alloc] init];
+	if (@available(iOS 11, *))
+	    creationOptions.uniformTypeIdentifier = AVFileTypeDNG;
+	else
+	    creationOptions.uniformTypeIdentifier = @"com.adobe.raw-image";
+	creationOptions.shouldMoveFile = false;
+	[creationRequest addResourceWithType:PHAssetResourceTypeAlternatePhoto fileURL:inputURI options:creationOptions];
+	assetRequest = creationRequest;
       } else {
         NSData *data = [NSData dataWithContentsOfURL:inputURI];
         UIImage *image = [UIImage imageWithData:data];
