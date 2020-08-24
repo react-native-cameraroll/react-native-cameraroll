@@ -80,8 +80,8 @@ workflows:
       #       - analyze
       - publish:
           requires:
-            - checkout_code
-            - analyze
+            - android_debug_build
+            - android_release_build
           filters:
             branches:
               only: master
