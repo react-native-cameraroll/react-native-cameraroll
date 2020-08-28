@@ -618,22 +618,26 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
     }
 
     if (photoDescriptor != null) {
-      MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-      retriever.setDataSource(photoDescriptor.getFileDescriptor());
       try {
-        int timeInMillisec =
-            Integer.parseInt(
-                retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION));
-        playableDuration = timeInMillisec / 1000;
-      } catch (NumberFormatException e) {
-        success = false;
-        FLog.e(
-            ReactConstants.TAG,
-            "Number format exception occurred while trying to fetch video metadata for "
-                + photoUri.toString(),
-            e);
+        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+        retriever.setDataSource(photoDescriptor.getFileDescriptor());
+        try {
+          int timeInMillisec =
+              Integer.parseInt(
+                  retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION));
+          playableDuration = timeInMillisec / 1000;
+        } catch (NumberFormatException e) {
+          success = false;
+          FLog.e(
+              ReactConstants.TAG,
+              "Number format exception occurred while trying to fetch video metadata for "
+                  + photoUri.toString(),
+              e);
+        }
+        retriever.release();
+      } catch(Exception e){
+        // this will stop the crash if media file is broken, handle it carefully
       }
-      retriever.release();
     }
 
     if (photoDescriptor != null) {
@@ -682,6 +686,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
 
       if (photoDescriptor != null) {
         if (isVideo) {
+         try { 
           MediaMetadataRetriever retriever = new MediaMetadataRetriever();
           retriever.setDataSource(photoDescriptor.getFileDescriptor());
           try {
@@ -700,6 +705,9 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
                 e);
           }
           retriever.release();
+          } catch(Exception e){
+        // this will stop the crash if media file is broken, handle it carefully
+           }
         } else {
           BitmapFactory.Options options = new BitmapFactory.Options();
           // Set inJustDecodeBounds to true so we don't actually load the Bitmap, but only get its
