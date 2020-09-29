@@ -103,7 +103,7 @@ async function savePicture() {
     return;
   }
 
-  CameraRoll.saveToCameraRoll(tag, [type]);
+  CameraRoll.save(tag, { type, album })
 };
 ```
 
