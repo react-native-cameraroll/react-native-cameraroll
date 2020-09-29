@@ -709,13 +709,14 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
           width = options.outWidth;
           height = options.outHeight;
         }
+
+        try {
+          photoDescriptor.close();
+        } catch (IOException e) {
+          // Do nothing. We can't handle this, and this is usually a system problem
+        }
       }
 
-      try {
-        photoDescriptor.close();
-      } catch (IOException e) {
-        // Do nothing. We can't handle this, and this is usually a system problem
-      }
     }
 
     image.putInt("width", width);
