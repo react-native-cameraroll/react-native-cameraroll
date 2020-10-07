@@ -619,7 +619,11 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
 
     if (photoDescriptor != null) {
       MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-      retriever.setDataSource(photoDescriptor.getFileDescriptor());
+      try {
+        retriever.setDataSource(photoDescriptor.getFileDescriptor());
+      } catch (RuntimeException e) {
+        // Do nothing. We can't handle this, and this is usually a system problem
+      }
       try {
         int timeInMillisec =
             Integer.parseInt(
@@ -683,7 +687,11 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
       if (photoDescriptor != null) {
         if (isVideo) {
           MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-          retriever.setDataSource(photoDescriptor.getFileDescriptor());
+          try {
+            retriever.setDataSource(photoDescriptor.getFileDescriptor());
+          } catch (RuntimeException e) {
+            // Do nothing. We can't handle this, and this is usually a system problem
+          }
           try {
             width =
                 Integer.parseInt(
