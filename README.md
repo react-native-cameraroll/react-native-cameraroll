@@ -297,8 +297,8 @@ Returns a Promise which will resolve when the deletion request is completed, or 
 | uri  | string                 | Yes      | See above.                                                 |
 
 
-[circle-ci-badge]:https://img.shields.io/circleci/project/github/react-native-community/react-native-cameraroll/master.svg?style=flat-square
-[circle-ci]:https://circleci.com/gh/react-native-community/workflows/react-native-cameraroll/tree/master
+[circle-ci-badge]:https://img.shields.io/circleci/project/github/react-native-cameraroll/react-native-cameraroll/master.svg?style=flat-square
+[circle-ci]:https://circleci.com/gh/react-native-cameraroll/workflows/react-native-cameraroll/tree/master
 [supported-os-badge]:https://img.shields.io/badge/platforms-android%20|%20ios-lightgrey.svg?style=flat-square
 [license-badge]:https://img.shields.io/npm/l/@react-native-community/cameraroll.svg?style=flat-square
 [lean-core-badge]: https://img.shields.io/badge/Lean%20Core-Extracted-brightgreen.svg?style=flat-square
