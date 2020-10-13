@@ -202,19 +202,24 @@ RCT_EXPORT_METHOD(getAlbums:(NSDictionary *)params
 {
   NSString *const mediaType = [params objectForKey:@"assetType"] ? [RCTConvert NSString:params[@"assetType"]] : @"All";
   PHFetchOptions* options = [[PHFetchOptions alloc] init];
-  PHFetchResult<PHAssetCollection *> *const assetCollectionFetchResult = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeAlbum subtype:PHAssetCollectionSubtypeAny options:options];
+  PHFetchResult *smartAlbums = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeSmartAlbum subtype:PHAssetCollectionSubtypeAny options:options];
+  PHFetchResult *userAlbums = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeAlbum subtype:PHAssetCollectionSubtypeAny options:options];
+  NSArray *fetchResults = @[smartAlbums, userAlbums];
+
   NSMutableArray * result = [NSMutableArray new];
-  [assetCollectionFetchResult enumerateObjectsUsingBlock:^(PHAssetCollection * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-    PHFetchOptions *const assetFetchOptions = [RCTConvert PHFetchOptionsFromMediaType:mediaType fromTime:0 toTime:0];
-    // Enumerate assets within the collection
-    PHFetchResult<PHAsset *> *const assetsFetchResult = [PHAsset fetchAssetsInAssetCollection:obj options:assetFetchOptions];
-    if (assetsFetchResult.count > 0) {
-      [result addObject:@{
-        @"title": [obj localizedTitle],
-        @"count": @(assetsFetchResult.count)
-      }];
-    }
-  }];
+  for (PHFetchResult *assetCollectionFetchResult in fetchResults) {
+    [assetCollectionFetchResult enumerateObjectsUsingBlock:^(PHAssetCollection * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+      PHFetchOptions *const assetFetchOptions = [RCTConvert PHFetchOptionsFromMediaType:mediaType fromTime:0 toTime:0];
+      // Enumerate assets within the collection
+      PHFetchResult<PHAsset *> *const assetsFetchResult = [PHAsset fetchAssetsInAssetCollection:obj options:assetFetchOptions];
+      if (assetsFetchResult.count > 0) {
+        [result addObject:@{
+          @"title": [obj localizedTitle],
+          @"count": @(assetsFetchResult.count)
+        }];
+      }
+    }];
+  }
   resolve(result);
 }
 
