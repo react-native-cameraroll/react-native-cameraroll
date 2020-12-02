@@ -44,7 +44,7 @@
   "devDependencies": {
     "@babel/core": "^7.9.6",
     "@babel/runtime": "^7.9.6",
-    "@react-native-community/eslint-config": "^1.1.0",
+    "@react-native-community/eslint-config": "^2.0.0",
     "@semantic-release/git": "7.0.8",
     "@types/react-native": "^0.62.10",
     "babel-core": "^7.0.0-bridge.0",
