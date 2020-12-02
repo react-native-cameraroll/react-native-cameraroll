@@ -39,7 +39,7 @@
   "license": "MIT",
   "peerDependencies": {
     "react": "^16.0",
-    "react-native": ">=0.57 <=0.62"
+    "react-native": ">=0.57 <=0.63"
   },
   "devDependencies": {
     "@babel/core": "^7.9.6",
@@ -53,14 +53,14 @@
     "detox": "^16.5.0",
     "eslint": "^7.0.0",
     "eslint-plugin-prettier": "^3.0.1",
-    "flow-bin": "^0.113.0",
+    "flow-bin": "^0.122.0",
     "husky": "^2.2.0",
     "jest": "^26.0.1",
     "metro-react-native-babel-preset": "^0.59.0",
     "prettier": "^1.17.0",
     "pretty-quick": "^1.10.0",
-    "react": "16.11.0",
-    "react-native": "0.62.2",
+    "react": "16.13.1",
+    "react-native": "0.63.4",
     "react-test-renderer": "16.11.0",
     "rimraf": "^2.6.3",
     "semantic-release": "15.13.3",
