@@ -48,6 +48,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -80,6 +81,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
   private static final String INCLUDE_LOCATION = "location";
   private static final String INCLUDE_IMAGE_SIZE = "imageSize";
   private static final String INCLUDE_PLAYABLE_DURATION = "playableDuration";
+  private static final String INCLUDE_ORIENTATION = "orientation";
 
   private static final String[] PROJECTION = {
     Images.Media._ID,
@@ -383,9 +385,18 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
           limit = "limit=" + mAfter + "," + (mFirst + 1);
         }
 
+        String[] projection;
+
+        if (mInclude.contains(INCLUDE_ORIENTATION)) {
+          projection = Arrays.copyOf(PROJECTION, PROJECTION.length + 1);
+          projection[projection.length - 1] = MediaStore.Files.FileColumns.ORIENTATION;
+        } else {
+          projection = PROJECTION;
+        }
+
         Cursor media = resolver.query(
             MediaStore.Files.getContentUri("external").buildUpon().encodedQuery(limit).build(),
-            PROJECTION,
+            projection,
             selection.toString(),
             selectionArgs.toArray(new String[selectionArgs.size()]),
             Images.Media.DATE_ADDED + " DESC, " + Images.Media.DATE_MODIFIED + " DESC");
@@ -505,20 +516,22 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
     int heightIndex = media.getColumnIndex(MediaStore.MediaColumns.HEIGHT);
     int sizeIndex = media.getColumnIndex(MediaStore.MediaColumns.SIZE);
     int dataIndex = media.getColumnIndex(MediaStore.MediaColumns.DATA);
+    int orientationIndex = media.getColumnIndex(MediaStore.MediaColumns.ORIENTATION);
 
     boolean includeLocation = include.contains(INCLUDE_LOCATION);
     boolean includeFilename = include.contains(INCLUDE_FILENAME);
     boolean includeFileSize = include.contains(INCLUDE_FILE_SIZE);
     boolean includeImageSize = include.contains(INCLUDE_IMAGE_SIZE);
     boolean includePlayableDuration = include.contains(INCLUDE_PLAYABLE_DURATION);
+    boolean includeOrientation = include.contains(INCLUDE_ORIENTATION);
 
     for (int i = 0; i < limit && !media.isAfterLast(); i++) {
       WritableMap edge = new WritableNativeMap();
       WritableMap node = new WritableNativeMap();
       boolean imageInfoSuccess =
           putImageInfo(resolver, media, node, widthIndex, heightIndex, sizeIndex, dataIndex,
-              mimeTypeIndex, includeFilename, includeFileSize, includeImageSize,
-              includePlayableDuration);
+              mimeTypeIndex, orientationIndex, includeFilename, includeFileSize, includeImageSize,
+              includePlayableDuration, includeOrientation);
       if (imageInfoSuccess) {
         putBasicNodeInfo(media, node, mimeTypeIndex, groupNameIndex, dateTakenIndex);
         putLocationInfo(media, node, dataIndex, includeLocation);
@@ -559,10 +572,12 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
       int sizeIndex,
       int dataIndex,
       int mimeTypeIndex,
+      int orientationIndex,
       boolean includeFilename,
       boolean includeFileSize,
       boolean includeImageSize,
-      boolean includePlayableDuration) {
+      boolean includePlayableDuration,
+      boolean includeOrientation) {
     WritableMap image = new WritableNativeMap();
     Uri photoUri = Uri.parse("file://" + media.getString(dataIndex));
     image.putString("uri", photoUri.toString());
@@ -586,6 +601,12 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
       image.putDouble("fileSize", media.getLong(sizeIndex));
     } else {
       image.putNull("fileSize");
+    }
+
+    if (includeOrientation) {
+      image.putInt("orientation", media.getInt(orientationIndex));
+    } else {
+      image.putNull("orientation");
     }
 
     node.putMap("image", image);

@@ -27,7 +27,9 @@ declare namespace CameraRoll {
     /** Ensures the image width and height are included. Has a small performance hit on Android */
     | 'imageSize'
     /** Ensures the image playableDuration is included. Has a medium performance hit on Android */
-    | 'playableDuration';
+    | 'playableDuration'
+    /** Ensures the image orientation is included (Android only). Has a low performance hit on Android */
+    | 'orientation'
 
   /**
    * Shape of the param arg for the `getPhotosFast` function.
@@ -107,6 +109,11 @@ declare namespace CameraRoll {
          * Will be null for images.
          */
         playableDuration: number | null;
+        /** 
+         * Only set if the `include` parameter contains `orientation`.
+         * Android only.
+         */
+        orientation: number | null;
       };
       /** Timestamp in seconds. */
       timestamp: number;

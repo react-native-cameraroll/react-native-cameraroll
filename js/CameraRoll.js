@@ -36,7 +36,8 @@ export type Include =
   | 'fileSize'
   | 'location'
   | 'imageSize'
-  | 'playableDuration';
+  | 'playableDuration'
+  | 'orientation';
 
 /**
  * Shape of the param arg for the `getPhotos` function.
@@ -103,6 +104,7 @@ export type PhotoIdentifier = {
       width: number,
       fileSize: number | null,
       playableDuration: number,
+      orientation: number | null,
     },
     timestamp: number,
     location: {
