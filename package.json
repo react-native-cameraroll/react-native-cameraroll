@@ -39,7 +39,7 @@
   "license": "MIT",
   "peerDependencies": {
     "react": "^16.0",
-    "react-native": ">=0.57 <=0.62"
+    "react-native": ">=0.60 <=0.62"
   },
   "devDependencies": {
     "@babel/core": "^7.9.6",
