@@ -98,18 +98,26 @@ static NSString *const kErrorAuthDenied = @"E_PHOTO_LIBRARY_AUTH_DENIED";
 
 typedef void (^PhotosAuthorizedBlock)(void);
 
-static void requestPhotoLibraryAccess(RCTPromiseRejectBlock reject, PhotosAuthorizedBlock authorizedBlock) {
-  PHAuthorizationStatus authStatus = [PHPhotoLibrary authorizationStatus];
-  if (authStatus == PHAuthorizationStatusRestricted) {
-    reject(kErrorAuthRestricted, @"Access to photo library is restricted", nil);
-  } else if (authStatus == PHAuthorizationStatusAuthorized) {
-    authorizedBlock();
-  } else if (authStatus == PHAuthorizationStatusNotDetermined) {
-    [PHPhotoLibrary requestAuthorization:^(PHAuthorizationStatus status) {
-      requestPhotoLibraryAccess(reject, authorizedBlock);
-    }];
-  } else {
-    reject(kErrorAuthDenied, @"Access to photo library was denied", nil);
+static void requestPhotoLibraryAccess(RCTPromiseRejectBlock reject, PhotosAuthorizedBlock authorizedBlock, PHAccessLevel accessLevel) {
+  PHAuthorizationStatus authStatus = [PHPhotoLibrary authorizationStatusForAccessLevel:accessLevel];
+  switch (authStatus) {
+    case PHAuthorizationStatusRestricted: {
+      reject(kErrorAuthRestricted, @"Access to photo library is restricted", nil);
+      break;
+    }
+    case PHAuthorizationStatusAuthorized:
+    case PHAuthorizationStatusLimited: {
+      authorizedBlock();
+      break;
+    }
+    case PHAuthorizationStatusNotDetermined: {
+      [PHPhotoLibrary requestAuthorizationForAccessLevel:accessLevel handler:^(PHAuthorizationStatus status) {
+        requestPhotoLibraryAccess(reject, authorizedBlock, accessLevel);
+      }];
+      break;
+    }
+    default:
+      reject(kErrorAuthDenied, @"Access to photo library was denied", nil);
   }
 }
 
@@ -193,7 +201,11 @@ RCT_EXPORT_METHOD(saveToCameraRoll:(NSURLRequest *)request
     saveWithOptions();
   };
 
-  requestPhotoLibraryAccess(reject, loadBlock);
+  if (![options[@"album"] isEqualToString:@""]) {
+    requestPhotoLibraryAccess(reject, loadBlock, PHAccessLevelReadWrite);
+  } else {
+    requestPhotoLibraryAccess(reject, loadBlock, PHAccessLevelAddOnly);
+  }
 }
 
 RCT_EXPORT_METHOD(getAlbums:(NSDictionary *)params
@@ -415,7 +427,7 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
       RCTResolvePromise(resolve, assets, hasNextPage);
       resolvedPromise = YES;
     }
-  });
+  }, PHAccessLevelReadWrite);
 }
 
 RCT_EXPORT_METHOD(deletePhotos:(NSArray<NSString *>*)assets
