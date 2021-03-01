@@ -22,10 +22,11 @@ import android.provider.MediaStore;
 import android.provider.MediaStore.Images;
 import android.text.TextUtils;
 import android.media.ExifInterface;
+import android.util.Base64;
+import android.webkit.MimeTypeMap;
 
 import com.facebook.common.logging.FLog;
 import com.facebook.react.bridge.GuardedAsyncTask;
-import com.facebook.react.bridge.JSApplicationIllegalArgumentException;
 import com.facebook.react.bridge.NativeModule;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
@@ -53,6 +54,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
 
@@ -114,18 +117,19 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
    */
   @ReactMethod
   public void saveToCameraRoll(String uri, ReadableMap options, Promise promise) {
-    new SaveToCameraRoll(getReactApplicationContext(), Uri.parse(uri), options, promise)
+    new SaveToCameraRoll(getReactApplicationContext(), uri, options, promise)
         .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
   }
 
   private static class SaveToCameraRoll extends GuardedAsyncTask<Void, Void> {
 
     private final Context mContext;
-    private final Uri mUri;
+    private final String mUri;
     private final Promise mPromise;
     private final ReadableMap mOptions;
+    private final static Pattern re = Pattern.compile("^data:([\\w/\\-\\.]+);(\\w+),(.*)");
 
-    public SaveToCameraRoll(ReactContext context, Uri uri, ReadableMap options, Promise promise) {
+    public SaveToCameraRoll(ReactContext context, String uri, ReadableMap options, Promise promise) {
       super(context);
       mContext = context;
       mUri = uri;
@@ -133,11 +137,37 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
       mOptions = options;
     }
 
+    public File parseUri(String uri, Context context) throws Exception {
+      Matcher m = re.matcher(uri);
+      if (m.find()) {
+        if (!"base64".equals(m.group(2))) {
+          throw new Exception("Only support base64 encoding");
+        }
+        byte[] bytes = Base64.decode(m.group(3), Base64.DEFAULT);
+        String prefix = String.valueOf(System.currentTimeMillis());
+        String suffix = MimeTypeMap.getSingleton().getExtensionFromMimeType(m.group(1));
+        File dir = context.getCacheDir();
+        File file = File.createTempFile(prefix + "-", "." + suffix, dir);
+        FileOutputStream out = null;
+        try {
+          out = new FileOutputStream(file);
+          out.write(bytes);
+        } finally {
+          if (out != null) {
+            out.close();
+          }
+        }
+        return file;
+      } else {
+        return new File(Uri.parse(uri).getPath());
+      }
+    }
+
     @Override
     protected void doInBackgroundGuarded(Void... params) {
-      File source = new File(mUri.getPath());
       FileChannel input = null, output = null;
       try {
+        File source = parseUri(mUri, mContext);
         boolean isAlbumPresent = !"".equals(mOptions.getString("album"));
         
         final File environment;
@@ -201,7 +231,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
                 }
               }
             });
-      } catch (IOException e) {
+      } catch (Exception e) {
         mPromise.reject(e);
       } finally {
         if (input != null && input.isOpen()) {
