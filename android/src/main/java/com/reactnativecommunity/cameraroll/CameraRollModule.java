@@ -127,7 +127,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
     private final String mUri;
     private final Promise mPromise;
     private final ReadableMap mOptions;
-    private final static Pattern re = Pattern.compile("^data:([\\w/\\-\\.]+);(\\w+),(.*)");
+    private final static Pattern re = Pattern.compile("^data:([\\w/\\-\\.]+);(\\w+),(.*)", Pattern.DOTALL);
 
     public SaveToCameraRoll(ReactContext context, String uri, ReadableMap options, Promise promise) {
       super(context);
