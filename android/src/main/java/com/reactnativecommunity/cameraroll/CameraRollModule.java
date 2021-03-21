@@ -86,6 +86,8 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
     Images.Media.MIME_TYPE,
     Images.Media.BUCKET_DISPLAY_NAME,
     Images.Media.DATE_TAKEN,
+    MediaStore.MediaColumns.DATE_ADDED,
+    MediaStore.MediaColumns.DATE_MODIFIED,
     MediaStore.MediaColumns.WIDTH,
     MediaStore.MediaColumns.HEIGHT,
     MediaStore.MediaColumns.SIZE,
@@ -501,6 +503,8 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
     int mimeTypeIndex = media.getColumnIndex(Images.Media.MIME_TYPE);
     int groupNameIndex = media.getColumnIndex(Images.Media.BUCKET_DISPLAY_NAME);
     int dateTakenIndex = media.getColumnIndex(Images.Media.DATE_TAKEN);
+    int dateAddedIndex = media.getColumnIndex(MediaStore.MediaColumns.DATE_ADDED);
+    int dateModifiedIndex = media.getColumnIndex(MediaStore.MediaColumns.DATE_MODIFIED);
     int widthIndex = media.getColumnIndex(MediaStore.MediaColumns.WIDTH);
     int heightIndex = media.getColumnIndex(MediaStore.MediaColumns.HEIGHT);
     int sizeIndex = media.getColumnIndex(MediaStore.MediaColumns.SIZE);
@@ -520,7 +524,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
               mimeTypeIndex, includeFilename, includeFileSize, includeImageSize,
               includePlayableDuration);
       if (imageInfoSuccess) {
-        putBasicNodeInfo(media, node, mimeTypeIndex, groupNameIndex, dateTakenIndex);
+        putBasicNodeInfo(media, node, mimeTypeIndex, groupNameIndex, dateTakenIndex, dateAddedIndex, dateModifiedIndex);
         putLocationInfo(media, node, dataIndex, includeLocation);
 
         edge.putMap("node", node);
@@ -540,10 +544,18 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
       WritableMap node,
       int mimeTypeIndex,
       int groupNameIndex,
-      int dateTakenIndex) {
+      int dateTakenIndex,
+      int dateAddedIndex,
+      int dateModifiedIndex) {
     node.putString("type", media.getString(mimeTypeIndex));
     node.putString("group_name", media.getString(groupNameIndex));
-    node.putDouble("timestamp", media.getLong(dateTakenIndex) / 1000d);
+    long dateTaken = media.getLong(dateTakenIndex);
+    if (dateTaken == 0L) {
+        //date added is in seconds, date taken in milliseconds, thus the multiplication
+        dateTaken = media.getLong(dateAddedIndex) * 1000;
+    }
+    node.putDouble("timestamp", dateTaken / 1000d);
+    node.putDouble("modified", media.getLong(dateModifiedIndex));
   }
 
   /**
