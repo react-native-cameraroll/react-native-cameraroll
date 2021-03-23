@@ -38,8 +38,8 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "react": "^16.0",
-    "react-native": ">=0.57 <=0.63"
+    "react": "16 || 17",
+    "react-native": ">=0.60"
   },
   "devDependencies": {
     "@babel/core": "^7.9.6",
