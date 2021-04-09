@@ -384,7 +384,6 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
           @"group_name": currentCollectionName,
           @"image": @{
               @"uri": uri,
-              @"extension": extension,
               @"filename": (includeFilename && originalFilename ? originalFilename : [NSNull null]),
               @"height": (includeImageSize ? @([asset pixelHeight]) : [NSNull null]),
               @"width": (includeImageSize ? @([asset pixelWidth]) : [NSNull null]),
