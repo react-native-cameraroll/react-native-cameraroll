@@ -359,13 +359,23 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
         return;
       }
 
-      NSString *const assetMediaTypeLabel = (asset.mediaType == PHAssetMediaTypeVideo
+      NSString *assetMediaTypeLabel = (asset.mediaType == PHAssetMediaTypeVideo
                                             ? @"video"
-                                            : (asset.mediaType == PHAssetMediaTypeImage
+                                             : (asset.mediaType == PHAssetMediaTypeImage
                                                 ? @"image"
                                                 : (asset.mediaType == PHAssetMediaTypeAudio
                                                   ? @"audio"
                                                   : @"unknown")));
+        
+      NSString *const extension = [asset valueForKey:@"uniformTypeIdentifier"];
+        
+      if (extension.length > 0) {
+          NSArray const *extensionArr = [extension componentsSeparatedByString:@"."];
+          if (extensionArr && extensionArr.count > 1) {
+              assetMediaTypeLabel = [assetMediaTypeLabel stringByAppendingString: @"/"];
+              assetMediaTypeLabel = [assetMediaTypeLabel stringByAppendingString:extensionArr[1]];
+          }
+      }
       CLLocation *const loc = asset.location;
 
       [assets addObject:@{
@@ -374,6 +384,7 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
           @"group_name": currentCollectionName,
           @"image": @{
               @"uri": uri,
+              @"extension": extension,
               @"filename": (includeFilename && originalFilename ? originalFilename : [NSNull null]),
               @"height": (includeImageSize ? @([asset pixelHeight]) : [NSNull null]),
               @"width": (includeImageSize ? @([asset pixelWidth]) : [NSNull null]),
