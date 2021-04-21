@@ -187,7 +187,7 @@ class CameraRoll {
         'unknown'}`,
     );
     if (type === 'auto') {
-      if (['mov', 'mp4'].indexOf(tag.split('.').slice(-1)[0]) >= 0) {
+      if (['mov', 'mp4'].includes(tag.split('.').pop().toLocaleLowerCase())) {
         type = 'video';
       } else {
         type = 'photo';
