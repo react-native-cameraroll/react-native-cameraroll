@@ -9,7 +9,9 @@ package com.reactnativecommunity.cameraroll;
 
 import android.content.ContentResolver;
 import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.graphics.BitmapFactory;
@@ -17,7 +19,9 @@ import android.media.MediaMetadataRetriever;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Environment;
+import android.os.FileUtils;
 import android.provider.MediaStore;
 import android.provider.MediaStore.Images;
 import android.text.TextUtils;
@@ -25,7 +29,6 @@ import android.media.ExifInterface;
 
 import com.facebook.common.logging.FLog;
 import com.facebook.react.bridge.GuardedAsyncTask;
-import com.facebook.react.bridge.JSApplicationIllegalArgumentException;
 import com.facebook.react.bridge.NativeModule;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
@@ -39,13 +42,8 @@ import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.WritableNativeArray;
 import com.facebook.react.bridge.WritableNativeMap;
 import com.facebook.react.common.ReactConstants;
-import com.facebook.react.module.annotations.ReactModule;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -139,59 +137,100 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
     protected void doInBackgroundGuarded(Void... params) {
       File source = new File(mUri.getPath());
       FileChannel input = null, output = null;
+      String destinationAbsolutePath = null;
       try {
         boolean isAlbumPresent = !"".equals(mOptions.getString("album"));
-        
-        final File environment;
+        String topFolderName;
+
         // Media is not saved into an album when using Environment.DIRECTORY_DCIM.
         if (isAlbumPresent) {
           if ("video".equals(mOptions.getString("type"))) {
-            environment = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES);
+            topFolderName = Environment.DIRECTORY_MOVIES;
           } else {
-            environment = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+            topFolderName = Environment.DIRECTORY_PICTURES;
           }
         } else {
-          environment = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
+          topFolderName = Environment.DIRECTORY_DCIM;
         }
 
-        File exportDir;
-        if (isAlbumPresent) {
-          exportDir = new File(environment, mOptions.getString("album"));
-          if (!exportDir.exists() && !exportDir.mkdirs()) {
-            mPromise.reject(ERROR_UNABLE_TO_LOAD, "Album Directory not created. Did you request WRITE_EXTERNAL_STORAGE?");
+        // Android Q / 10
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q ) {
+          final File environment = Environment.getExternalStoragePublicDirectory(topFolderName);
+
+          File exportDir;
+          if (isAlbumPresent) {
+            exportDir = new File(environment, mOptions.getString("album"));
+            if (!exportDir.exists() && !exportDir.mkdirs()) {
+              mPromise.reject(ERROR_UNABLE_TO_LOAD, "Album Directory not created. Did you request WRITE_EXTERNAL_STORAGE?");
+              return;
+            }
+          } else {
+            exportDir = environment;
+          }
+
+          if (!exportDir.isDirectory()) {
+            mPromise.reject(ERROR_UNABLE_TO_LOAD, "External media storage directory not available");
             return;
           }
-        } else {
-          exportDir = environment;
-        }
 
-        if (!exportDir.isDirectory()) {
-          mPromise.reject(ERROR_UNABLE_TO_LOAD, "External media storage directory not available");
-          return;
-        }
-        File dest = new File(exportDir, source.getName());
-        int n = 0;
-        String fullSourceName = source.getName();
-        String sourceName, sourceExt;
-        if (fullSourceName.indexOf('.') >= 0) {
-          sourceName = fullSourceName.substring(0, fullSourceName.lastIndexOf('.'));
-          sourceExt = fullSourceName.substring(fullSourceName.lastIndexOf('.'));
+          File dest = new File(exportDir, source.getName());
+          int n = 0;
+          String fullSourceName = source.getName();
+          String sourceName, sourceExt;
+          if (fullSourceName.indexOf('.') >= 0) {
+              sourceName = fullSourceName.substring(0, fullSourceName.lastIndexOf('.'));
+              sourceExt = fullSourceName.substring(fullSourceName.lastIndexOf('.'));
+          } else {
+              sourceName = fullSourceName;
+              sourceExt = "";
+          }
+          while (!dest.createNewFile()) {
+              dest = new File(exportDir, sourceName + "_" + (n++) + sourceExt);
+          }
+
+          output = new FileOutputStream(dest).getChannel();
+          input = new FileInputStream(source).getChannel();
+          output.transferFrom(input, 0, input.size());
+          input.close();
+          output.close();
+          destinationAbsolutePath = dest.getAbsolutePath();
         } else {
-          sourceName = fullSourceName;
-          sourceExt = "";
+          ContentValues values = new ContentValues();
+          values.put(MediaStore.Images.Media.DISPLAY_NAME, source.getName()); // TODO : manage unique file name?
+          Uri uri = Uri.fromFile(source);
+          ContentResolver cR = mContext.getContentResolver();
+          values.put(MediaStore.Images.Media.MIME_TYPE, cR.getType(uri));
+
+          String folder;
+          if (isAlbumPresent) {
+            folder = topFolderName + File.separator + mOptions.getString("album");
+          } else {
+            ApplicationInfo applicationInfo = mContext.getApplicationInfo();
+            int stringId = applicationInfo.labelRes;
+            String appName =  stringId == 0 ? applicationInfo.nonLocalizedLabel.toString() : mContext.getString(stringId);
+            folder = topFolderName + File.separator + appName;
+          }
+          values.put(MediaStore.MediaColumns.RELATIVE_PATH, folder);
+          values.put(MediaStore.MediaColumns.IS_PENDING, 1);
+
+          ContentResolver resolver = mContext.getContentResolver();
+          Uri outputUri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+
+          if (outputUri == null) {
+            mPromise.reject(ERROR_UNABLE_TO_LOAD, "Unable to insert image into MediaStore");
+            return;
+          }
+
+          OutputStream outputStream = resolver.openOutputStream(outputUri);
+          try (InputStream in = new FileInputStream(source)) {
+            FileUtils.copy(in, outputStream);
+          }
+          destinationAbsolutePath = Utils.getFilePathFromContentUri(mContext, outputUri);
         }
-        while (!dest.createNewFile()) {
-          dest = new File(exportDir, sourceName + "_" + (n++) + sourceExt);
-        }
-        input = new FileInputStream(source).getChannel();
-        output = new FileOutputStream(dest).getChannel();
-        output.transferFrom(input, 0, input.size());
-        input.close();
-        output.close();
 
         MediaScannerConnection.scanFile(
             mContext,
-            new String[]{dest.getAbsolutePath()},
+            new String[]{destinationAbsolutePath},
             null,
             new MediaScannerConnection.OnScanCompletedListener() {
               @Override
