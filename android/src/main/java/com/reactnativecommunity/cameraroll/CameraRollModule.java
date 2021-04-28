@@ -42,6 +42,7 @@ import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.WritableNativeArray;
 import com.facebook.react.bridge.WritableNativeMap;
 import com.facebook.react.common.ReactConstants;
+import com.facebook.react.module.annotations.ReactModule;
 
 import java.io.*;
 import java.nio.channels.FileChannel;
