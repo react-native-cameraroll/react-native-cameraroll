@@ -7,7 +7,7 @@
 
 ## Getting started
 
-`$ npm install @react-native-community/cameraroll --save`
+`$ npm install @react-native-community/cameraroll fbjs --save`
 
 ### Mostly automatic installation
 
