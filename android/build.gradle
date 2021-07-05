@@ -39,4 +39,5 @@ repositories {
 dependencies {
   //noinspection GradleDynamicVersion
   api 'com.facebook.react:react-native:+'
+  implementation 'org.jcodec:jcodec:0.2.5'
 }
