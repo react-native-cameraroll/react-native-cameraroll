@@ -41,11 +41,19 @@ import com.facebook.react.bridge.WritableNativeMap;
 import com.facebook.react.common.ReactConstants;
 import com.facebook.react.module.annotations.ReactModule;
 
+import org.jcodec.containers.mp4.boxes.MovieBox;
+import org.jcodec.containers.mp4.boxes.MovieFragmentBox;
+import org.jcodec.containers.mp4.boxes.MovieHeaderBox;
+import org.jcodec.containers.mp4.boxes.NodeBox;
+import org.jcodec.movtool.MP4Edit;
+import org.jcodec.movtool.ReplaceMP4Editor;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -140,6 +148,29 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
       File source = new File(mUri.getPath());
       FileChannel input = null, output = null;
       try {
+         if ("video".equals(mOptions.getString("type"))) {
+          new ReplaceMP4Editor().modifyOrReplace(source, new MP4Edit() {
+            @Override
+            public void applyToFragment(MovieBox mov, MovieFragmentBox[] fragmentBox) {
+            }
+
+            @Override
+            public void apply(MovieBox movie) {
+              MovieHeaderBox mvhd = NodeBox.findFirst(movie, MovieHeaderBox.class, MovieHeaderBox.fourcc());
+              try {
+                long currentTimeMillis = System.currentTimeMillis();
+                Field createdField = MovieHeaderBox.class.getDeclaredField("created");
+                createdField.setAccessible(true);
+                createdField.set(mvhd, currentTimeMillis);
+                Field modifiedField = MovieHeaderBox.class.getDeclaredField("modified");
+                modifiedField.setAccessible(true);
+                modifiedField.set(mvhd, currentTimeMillis);
+              } catch (Exception ignored) {
+              }
+            }
+          });
+        }
+
         boolean isAlbumPresent = !"".equals(mOptions.getString("album"));
         
         final File environment;
