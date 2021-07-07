@@ -215,7 +215,10 @@ class CameraRoll {
     return CameraRoll.save(tag, {type});
   }
   static getAlbums(
-    params?: GetAlbumsParams = {assetType: ASSET_TYPE_OPTIONS.All, albumType: ALBUM_TYPE_OPTIONS.Album},
+    params?: GetAlbumsParams = {
+      assetType: ASSET_TYPE_OPTIONS.All,
+      albumType: ALBUM_TYPE_OPTIONS.Album,
+    },
   ): Promise<Album[]> {
     return RNCCameraRoll.getAlbums(params);
   }
