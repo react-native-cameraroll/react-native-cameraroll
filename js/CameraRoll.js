@@ -19,6 +19,7 @@ const GROUP_TYPES_OPTIONS = {
   Event: 'Event',
   Faces: 'Faces',
   Library: 'Library',
+  SmartAlbum: 'SmartAlbum',
   PhotoStream: 'PhotoStream',
   SavedPhotos: 'SavedPhotos',
 };
@@ -27,6 +28,12 @@ const ASSET_TYPE_OPTIONS = {
   All: 'All',
   Videos: 'Videos',
   Photos: 'Photos',
+};
+
+const ALBUM_TYPE_OPTIONS = {
+  All: 'All',
+  Album: 'Album',
+  SmartAlbum: 'SmartAlbum',
 };
 
 export type GroupTypes = $Keys<typeof GROUP_TYPES_OPTIONS>;
@@ -130,10 +137,12 @@ export type SaveToCameraRollOptions = {
 
 export type GetAlbumsParams = {
   assetType?: $Keys<typeof ASSET_TYPE_OPTIONS>,
+  albumType?: $Keys<typeof ALBUM_TYPE_OPTIONS>,
 };
 
 export type Album = {
   title: string,
+  type: string,
   count: number,
 };
 
@@ -145,6 +154,7 @@ export type Album = {
 class CameraRoll {
   static GroupTypesOptions = GROUP_TYPES_OPTIONS;
   static AssetTypeOptions = ASSET_TYPE_OPTIONS;
+  static AlbumTypeOptions = ALBUM_TYPE_OPTIONS;
 
   /**
    * `CameraRoll.saveImageWithTag()` is deprecated. Use `CameraRoll.saveToCameraRoll()` instead.
@@ -205,7 +215,7 @@ class CameraRoll {
     return CameraRoll.save(tag, {type});
   }
   static getAlbums(
-    params?: GetAlbumsParams = {assetType: ASSET_TYPE_OPTIONS.All},
+    params?: GetAlbumsParams = {assetType: ASSET_TYPE_OPTIONS.All, albumType: ALBUM_TYPE_OPTIONS.Album},
   ): Promise<Album[]> {
     return RNCCameraRoll.getAlbums(params);
   }
