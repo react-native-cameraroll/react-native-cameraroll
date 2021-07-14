@@ -241,6 +241,7 @@ Returns a Promise which when resolved will be of the following shape:
   * `has_next_page`: {boolean}
   * `start_cursor`: {string}
   * `end_cursor`: {string}
+* `limited` : {boolean | undefined} : true if the app can only access a subset of the gallery pictures (authorization is `PHAuthorizationStatusLimited`), false otherwise (iOS only)
 
 #### Example
 
