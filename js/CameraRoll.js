@@ -122,7 +122,9 @@ export type PhotoIdentifiersPage = {
     start_cursor?: string,
     end_cursor?: string,
   },
+  limited?: boolean,
 };
+
 export type SaveToCameraRollOptions = {
   type?: 'photo' | 'video' | 'auto',
   album?: string,
