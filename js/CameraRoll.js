@@ -90,6 +90,8 @@ export type GetPhotosParams = {
    * might have some performance impact.
    */
   include?: Include[],
+
+  ...
 };
 
 export type PhotoIdentifier = {
@@ -103,6 +105,7 @@ export type PhotoIdentifier = {
       width: number,
       fileSize: number | null,
       playableDuration: number,
+      ...
     },
     timestamp: number,
     location: {
@@ -111,8 +114,11 @@ export type PhotoIdentifier = {
       altitude?: number,
       heading?: number,
       speed?: number,
+      ...
     } | null,
+    ...
   },
+  ...
 };
 
 export type PhotoIdentifiersPage = {
@@ -121,20 +127,25 @@ export type PhotoIdentifiersPage = {
     has_next_page: boolean,
     start_cursor?: string,
     end_cursor?: string,
+    ...
   },
+  ...
 };
 export type SaveToCameraRollOptions = {
   type?: 'photo' | 'video' | 'auto',
   album?: string,
+  ...
 };
 
 export type GetAlbumsParams = {
   assetType?: $Keys<typeof ASSET_TYPE_OPTIONS>,
+  ...
 };
 
 export type Album = {
   title: string,
   count: number,
+  ...
 };
 
 /**
