@@ -168,6 +168,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
           mediaDetails.clear();
           mediaDetails.put(Images.Media.IS_PENDING, 0);
           resolver.update(mediaContentUri, mediaDetails, null, null);
+          mPromise.resolve(mediaContentUri.toString());
         } else {
           final File environment;
           // Media is not saved into an album when using Environment.DIRECTORY_DCIM.
