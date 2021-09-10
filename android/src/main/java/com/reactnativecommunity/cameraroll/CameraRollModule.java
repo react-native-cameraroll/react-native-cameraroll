@@ -17,6 +17,7 @@ import android.media.MediaMetadataRetriever;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.provider.MediaStore.Images;
@@ -25,7 +26,6 @@ import android.media.ExifInterface;
 
 import com.facebook.common.logging.FLog;
 import com.facebook.react.bridge.GuardedAsyncTask;
-import com.facebook.react.bridge.JSApplicationIllegalArgumentException;
 import com.facebook.react.bridge.NativeModule;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
@@ -637,9 +637,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
         // Do nothing. We can't handle this, and this is usually a system problem
       }
       try {
-        int timeInMillisec =
-            Integer.parseInt(
-                retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION));
+        int timeInMillisec = Integer.parseInt(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION));
         playableDuration = timeInMillisec / 1000;
       } catch (NumberFormatException e) {
         success = false;
@@ -684,19 +682,16 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
     }
 
     boolean success = true;
+    @Nullable AssetFileDescriptor photoDescriptor = null;
+
+    /* Read height and width data from the gallery cursor columns */
     int width = media.getInt(widthIndex);
     int height = media.getInt(heightIndex);
 
+    /* If the columns don't contain the size information, read the media file */
     if (width <= 0 || height <= 0) {
-      @Nullable AssetFileDescriptor photoDescriptor = null;
       try {
         photoDescriptor = resolver.openAssetFileDescriptor(photoUri, "r");
-      } catch (FileNotFoundException e) {
-        success = false;
-        FLog.e(ReactConstants.TAG, "Could not open asset file " + photoUri.toString(), e);
-      }
-
-      if (photoDescriptor != null) {
         if (isVideo) {
           MediaMetadataRetriever retriever = new MediaMetadataRetriever();
           try {
@@ -705,12 +700,8 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
             // Do nothing. We can't handle this, and this is usually a system problem
           }
           try {
-            width =
-                Integer.parseInt(
-                    retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH));
-            height =
-                Integer.parseInt(
-                    retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT));
+            width = Integer.parseInt(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH));
+            height = Integer.parseInt(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT));
           } catch (NumberFormatException e) {
             success = false;
             FLog.e(
@@ -722,21 +713,45 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
           retriever.release();
         } else {
           BitmapFactory.Options options = new BitmapFactory.Options();
-          // Set inJustDecodeBounds to true so we don't actually load the Bitmap, but only get its
-          // dimensions instead.
+          // Set inJustDecodeBounds to true so we don't actually load the Bitmap in memory,
+          // but only get its dimensions
           options.inJustDecodeBounds = true;
           BitmapFactory.decodeFileDescriptor(photoDescriptor.getFileDescriptor(), null, options);
           width = options.outWidth;
           height = options.outHeight;
         }
-
-        try {
-          photoDescriptor.close();
-        } catch (IOException e) {
-          // Do nothing. We can't handle this, and this is usually a system problem
-        }
+      } catch (FileNotFoundException e) {
+        success = false;
+        FLog.e(ReactConstants.TAG, "Could not open asset file " + photoUri.toString(), e);
       }
+    }
 
+    /* Read the EXIF photo data to update height and width in case a rotation is encoded */
+    if (success && !isVideo && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+      try {
+        if (photoDescriptor == null) photoDescriptor = resolver.openAssetFileDescriptor(photoUri, "r");
+        ExifInterface exif = new ExifInterface(photoDescriptor.getFileDescriptor());
+        int rotation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+        if (rotation == ExifInterface.ORIENTATION_ROTATE_90 || rotation == ExifInterface.ORIENTATION_ROTATE_270) {
+          // swap values
+          int temp = width;
+          width = height;
+          height = temp;
+        }
+      } catch (FileNotFoundException e) {
+        success = false;
+        FLog.e(ReactConstants.TAG, "Could not open asset file " + photoUri.toString(), e);
+      } catch (IOException e) {
+        FLog.e(ReactConstants.TAG, "Could not get exif data for file " + photoUri.toString(), e);
+      }
+    }
+
+    if (photoDescriptor != null) {
+      try {
+        photoDescriptor.close();
+      } catch (IOException e) {
+        // Do nothing. We can't handle this, and this is usually a system problem
+      }
     }
 
     image.putInt("width", width);
