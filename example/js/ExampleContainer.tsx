@@ -7,9 +7,12 @@ import {
   Modal,
   TouchableWithoutFeedback,
 } from 'react-native';
+import {AlbumsExample} from './AlbumsExample';
 // @ts-ignore: CameraRollExample has no typings in same folder
 import CameraRollExample from './CameraRollExample';
 import GetPhotosPerformanceExample from './GetPhotosPerformanceExample';
+import {PaginationExample} from './PaginationExample';
+import {SavePhotoExample} from './SavePhotoExample';
 
 interface Props {}
 
@@ -27,6 +30,18 @@ const examples: Example[] = [
   {
     label: 'CameraRollExample',
     Component: CameraRollExample,
+  },
+  {
+    label: 'PaginationExample',
+    Component: PaginationExample,
+  },
+  {
+    label: 'AlbumsExample',
+    Component: AlbumsExample,
+  },
+  {
+    label: 'SavePhotoExample',
+    Component: SavePhotoExample,
   },
   {
     label: 'GetPhotosPerformanceExample',

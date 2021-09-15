@@ -47,6 +47,8 @@ type State = {|
   bigImages: boolean,
 |};
 
+const INCLUDE = ['filename'];
+
 export default class CameraRollExample extends React.Component<Props, State> {
   state = {
     groupTypes: 'All',
@@ -78,6 +80,7 @@ export default class CameraRollExample extends React.Component<Props, State> {
           groupTypes={this.state.groupTypes}
           renderImage={this._renderImage}
           bigImages={this.state.bigImages}
+          include={INCLUDE}
         />
       </View>
     );
@@ -105,9 +108,11 @@ export default class CameraRollExample extends React.Component<Props, State> {
       <TouchableOpacity
         key={asset.node.image.uri}
         onPress={this.loadAsset.bind(this, asset)}>
-        <View style={styles.row}>
+        <View
+          style={styles.row}
+          testID={`${asset.node.group_name}/${asset.node.image.filename}`}>
           <Image source={{uri: asset.node.image.uri}} style={imageStyle} />
-          <View style={styles.flex1}>
+          <View>
             <Text style={styles.url}>{asset.node.image.uri}</Text>
             <Text>{locationStr}</Text>
             <Text>{asset.node.group_name}</Text>

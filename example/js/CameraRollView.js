@@ -20,6 +20,7 @@ const {
   Platform,
   StyleSheet,
   View,
+  ScrollView,
 } = ReactNative;
 
 import CameraRoll from '../../js/CameraRoll';
@@ -44,11 +45,13 @@ class CameraRollView extends React.Component {
     batchSize: 5,
     imagesPerRow: 1,
     assetType: 'Photos',
+    flatList: true,
     renderImage: function(asset) {
       const imageSize = 150;
       const imageStyle = [styles.image, {width: imageSize, height: imageSize}];
       return <Image source={asset.node.image} style={imageStyle} />;
     },
+    include: [],
   };
 
   state = this.getInitialState();
@@ -69,7 +72,10 @@ class CameraRollView extends React.Component {
   }
 
   UNSAFE_componentWillReceiveProps(nextProps) {
-    if (this.props.groupTypes !== nextProps.groupTypes) {
+    if (
+      this.props.groupTypes !== nextProps.groupTypes ||
+      this.props.groupName !== nextProps.groupName
+    ) {
       this.fetch(true);
     }
   }
@@ -98,6 +104,8 @@ class CameraRollView extends React.Component {
       first: this.props.batchSize,
       groupTypes: this.props.groupTypes,
       assetType: this.props.assetType,
+      include: this.props.include,
+      groupName: this.props.groupName,
     };
     if (Platform.OS === 'android') {
       // not supported in android
@@ -130,17 +138,34 @@ class CameraRollView extends React.Component {
 
   render() {
     console.log({data: this.state.data});
+
+    if (this.props.flatList) {
+      return (
+        <FlatList
+          keyExtractor={(_, idx) => String(idx)}
+          renderItem={this._renderItem}
+          ListFooterComponent={this._renderFooterSpinner}
+          onEndReached={this._onEndReached}
+          onEndReachedThreshold={0.2}
+          style={styles.container}
+          data={this.state.data || []}
+          extraData={this.props.bigImages + this.state.noMore}
+        />
+      );
+    }
+
     return (
-      <FlatList
-        keyExtractor={(_, idx) => String(idx)}
-        renderItem={this._renderItem}
-        ListFooterComponent={this._renderFooterSpinner}
-        onEndReached={this._onEndReached}
-        onEndReachedThreshold={0.2}
-        style={styles.container}
-        data={this.state.data || []}
-        extraData={this.props.bigImages + this.state.noMore}
-      />
+      <ScrollView>
+        {(this.state.data || []).map((images, idx) => {
+          return (
+            <View key={String(idx)} style={styles.row}>
+              {images.map(image => {
+                return image ? this.props.renderImage(image) : null;
+              })}
+            </View>
+          );
+        })}
+      </ScrollView>
     );
   }
 

@@ -26,6 +26,7 @@
     "test:detox:ios:build:release": "detox build -c ios.sim.release",
     "test:detox:ios:bundle:release": "mkdir -p .tmp && react-native bundle --max-workers 4 --platform ios --dev false --entry-file example/index.js --bundle-output .tmp/ios-bundle.js",
     "test:detox:clean": "rimraf example/android/build && rimraf example/android/app/build && rimraf example/android/.gradle && rimraf example/ios/build",
+    "emulator:android:create": "ts-node scripts/create-android-emulator.ts",
     "ci:publish": "yarn semantic-release",
     "semantic-release": "semantic-release"
   },
@@ -46,11 +47,12 @@
     "@babel/runtime": "^7.9.6",
     "@react-native-community/eslint-config": "^2.0.0",
     "@semantic-release/git": "7.0.8",
+    "@types/detox": "^17.14.2",
     "@types/react-native": "^0.62.10",
     "babel-core": "^7.0.0-bridge.0",
     "babel-jest": "^26.0.1",
     "babel-plugin-module-resolver": "^3.2.0",
-    "detox": "^16.5.0",
+    "detox": "^18.20.3",
     "eslint": "^7.0.0",
     "eslint-plugin-prettier": "^3.0.1",
     "flow-bin": "^0.122.0",
@@ -64,6 +66,7 @@
     "react-test-renderer": "16.11.0",
     "rimraf": "^2.6.3",
     "semantic-release": "15.13.3",
+    "ts-node": "^10.2.1",
     "typescript": "^3.4.1"
   },
   "rn-docs": {
@@ -110,7 +113,7 @@
         "build": "pushd example/android && ./gradlew assembleDebug assembleAndroidTest -DtestBuildType=debug && popd",
         "type": "android.emulator",
         "device": {
-          "avdName": "TestingAVD"
+          "avdName": "RNCameraRollTestingAVD"
         }
       },
       "android.emu.release": {
@@ -118,7 +121,7 @@
         "build": "pushd example/android && ./gradlew assembleRelease assembleAndroidTest -DtestBuildType=release && popd",
         "type": "android.emulator",
         "device": {
-          "avdName": "TestingAVD"
+          "avdName": "RNCameraRollTestingAVD"
         }
       }
     }
