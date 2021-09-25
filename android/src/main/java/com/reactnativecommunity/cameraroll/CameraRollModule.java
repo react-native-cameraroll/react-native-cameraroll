@@ -456,7 +456,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
               if ( column < 0 ) {
                 throw new IndexOutOfBoundsException();
               }
-              String albumName = media.getString();
+              String albumName = media.getString(column);
               if (albumName != null) {
                 Integer albumCount = albums.get(albumName);
                 if (albumCount == null) {
