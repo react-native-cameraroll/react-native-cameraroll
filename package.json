@@ -2,7 +2,7 @@
   "name": "@react-native-community/cameraroll",
   "author": "Bartol Karuza <bartol.k@gmail.com>",
   "homepage": "https://github.com/react-native-community/react-native-cameraroll#readme",
-  "version": "4.1.1",
+  "version": "4.1.2",
   "description": "React Native Camera Roll for iOS & Android",
   "main": "./js/CameraRoll.js",
   "types": "./typings/CameraRoll.d.ts",
