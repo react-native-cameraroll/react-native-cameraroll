@@ -396,7 +396,7 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
               @"filename": (includeFilename && originalFilename ? originalFilename : [NSNull null]),
               @"height": (includeImageSize ? @([asset pixelHeight]) : [NSNull null]),
               @"width": (includeImageSize ? @([asset pixelWidth]) : [NSNull null]),
-              @"fileSize": (includeFileSize ? fileSize : [NSNull null]),
+              @"fileSize": (includeFileSize && fileSize ? fileSize : [NSNull null]),
               @"playableDuration": (includePlayableDuration && asset.mediaType != PHAssetMediaTypeImage
                                     ? @([asset duration]) // fractional seconds
                                     : [NSNull null])
