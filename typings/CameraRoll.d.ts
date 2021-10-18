@@ -12,10 +12,13 @@ declare namespace CameraRoll {
     | 'Event'
     | 'Faces'
     | 'Library'
+    | 'SmartAlbum'
     | 'PhotoStream'
     | 'SavedPhotos';
 
   type AssetType = 'All' | 'Videos' | 'Photos';
+
+  type AlbumType = 'All' | 'Album' | 'SmartAlbum';
 
   type Include =
     /** Ensures the filename is included. Has a large performance hit on iOS */
@@ -132,10 +135,12 @@ declare namespace CameraRoll {
 
   interface GetAlbumsParams {
     assetType?: AssetType;
+    albumType?: AlbumType;
   }
 
   interface Album {
     title: string;
+    type: AlbumType;
     count: number;
   }
 

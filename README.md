@@ -169,11 +169,16 @@ Returns a Promise with a list of albums
   * `All` // default
   * `Videos`
   * `Photos`
+* `albumType` : {string} :  (iOS only) Specifies filter on type of album. Valid values are:
+  * `All`
+  * `Album` // default
+  * `SmartAlbum`
 
 **Returns:**
 
 Array of `Album` object
   * title: {string}
+  * type: {string} (iOS only)
   * count: {number}
 
 ---
@@ -200,6 +205,7 @@ Returns a Promise with photo identifier objects from the local camera roll of th
   * `Event`
   * `Faces`
   * `Library`
+  * `SmartAlbum`
   * `PhotoStream`
   * `SavedPhotos`
 * `groupName` : {string} : Specifies filter on group names, like 'Recent Photos' or custom album titles.
@@ -241,7 +247,6 @@ Returns a Promise which when resolved will be of the following shape:
   * `has_next_page`: {boolean}
   * `start_cursor`: {string}
   * `end_cursor`: {string}
-* `limited` : {boolean | undefined} : true if the app can only access a subset of the gallery pictures (authorization is `PHAuthorizationStatusLimited`), false otherwise (iOS only)
 
 #### Example
 
