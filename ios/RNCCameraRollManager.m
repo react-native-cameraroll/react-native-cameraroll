@@ -98,10 +98,14 @@ static NSString *const kErrorAuthDenied = @"E_PHOTO_LIBRARY_AUTH_DENIED";
 
 typedef void (^PhotosAuthorizedBlock)(bool isLimited);
 
-static void requestPhotoLibraryAccess(RCTPromiseRejectBlock reject, PhotosAuthorizedBlock authorizedBlock) {
+static void requestPhotoLibraryAccess(RCTPromiseRejectBlock reject, PhotosAuthorizedBlock authorizedBlock, bool requestAddOnly) {
   PHAuthorizationStatus authStatus;
   if (@available(iOS 14, *)) {
-    authStatus = [PHPhotoLibrary authorizationStatusForAccessLevel:PHAccessLevelReadWrite];
+      if (requestAddOnly) {
+        authStatus = [PHPhotoLibrary authorizationStatusForAccessLevel:PHAccessLevelAddOnly];
+      } else {
+        authStatus = [PHPhotoLibrary authorizationStatusForAccessLevel:PHAccessLevelReadWrite];
+      }
   } else {
     authStatus = [PHPhotoLibrary authorizationStatus];
   }
@@ -117,11 +121,11 @@ static void requestPhotoLibraryAccess(RCTPromiseRejectBlock reject, PhotosAuthor
   } else if (authStatus == PHAuthorizationStatusNotDetermined) {
       if (@available(iOS 14, *)) {
           [PHPhotoLibrary requestAuthorizationForAccessLevel:PHAccessLevelReadWrite handler:^(PHAuthorizationStatus status) {
-              requestPhotoLibraryAccess(reject, authorizedBlock);
+              requestPhotoLibraryAccess(reject, authorizedBlock, requestAddOnly);
           }];
       } else {
           [PHPhotoLibrary requestAuthorization:^(PHAuthorizationStatus status) {
-              requestPhotoLibraryAccess(reject, authorizedBlock);
+              requestPhotoLibraryAccess(reject, authorizedBlock, requestAddOnly);
           }];
       }
   } else {
@@ -209,7 +213,7 @@ RCT_EXPORT_METHOD(saveToCameraRoll:(NSURLRequest *)request
     saveWithOptions();
   };
 
-  requestPhotoLibraryAccess(reject, loadBlock);
+  requestPhotoLibraryAccess(reject, loadBlock, true);
 }
 
 RCT_EXPORT_METHOD(getAlbums:(NSDictionary *)params
@@ -434,7 +438,7 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
       RCTResolvePromise(resolve, assets, hasNextPage, isLimited);
       resolvedPromise = YES;
     }
-  });
+  }, false);
 }
 
 RCT_EXPORT_METHOD(deletePhotos:(NSArray<NSString *>*)assets
