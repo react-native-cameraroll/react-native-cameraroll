@@ -452,7 +452,11 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
           if (media.moveToFirst()) {
             Map<String, Integer> albums = new HashMap<>();
             do {
-              String albumName = media.getString(media.getColumnIndex(MediaStore.Images.ImageColumns.BUCKET_DISPLAY_NAME));
+              int column = media.getColumnIndex(MediaStore.Images.ImageColumns.BUCKET_DISPLAY_NAME);
+              if ( column < 0 ) {
+                throw new IndexOutOfBoundsException();
+              }
+              String albumName = media.getString(column);
               if (albumName != null) {
                 Integer albumCount = albums.get(albumName);
                 if (albumCount == null) {
