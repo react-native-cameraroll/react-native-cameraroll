@@ -37,6 +37,9 @@
     "photo gallery"
   ],
   "license": "MIT",
+  "dependencies": {
+    "fbjs": "^1.0.0"
+  },
   "peerDependencies": {
     "react": "16 || 17",
     "react-native": ">=0.60"
