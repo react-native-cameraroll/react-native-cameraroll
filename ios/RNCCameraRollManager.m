@@ -120,15 +120,9 @@ static void requestPhotoLibraryAccess(RCTPromiseRejectBlock reject, PhotosAuthor
     authorizedBlock(true);
   } else if (authStatus == PHAuthorizationStatusNotDetermined) {
       if (@available(iOS 14, *)) {
-          if (requestAddOnly) {
-              [PHPhotoLibrary requestAuthorizationForAccessLevel:PHAccessLevelAddOnly handler:^(PHAuthorizationStatus status) {
-                  requestPhotoLibraryAccess(reject, authorizedBlock, requestAddOnly);
-              }];
-          } else {
-              [PHPhotoLibrary requestAuthorizationForAccessLevel:PHAccessLevelReadWrite handler:^(PHAuthorizationStatus status) {
-                  requestPhotoLibraryAccess(reject, authorizedBlock, requestAddOnly);
-              }];
-          }
+          [PHPhotoLibrary requestAuthorizationForAccessLevel:PHAccessLevelReadWrite handler:^(PHAuthorizationStatus status) {
+              requestPhotoLibraryAccess(reject, authorizedBlock, requestAddOnly);
+          }];
       } else {
           [PHPhotoLibrary requestAuthorization:^(PHAuthorizationStatus status) {
               requestPhotoLibraryAccess(reject, authorizedBlock, requestAddOnly);
