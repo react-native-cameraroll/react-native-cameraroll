@@ -11,7 +11,7 @@
 import {Platform} from 'react-native';
 import RNCCameraRoll from './nativeInterface';
 
-const invariant = require('fbjs/lib/invariant');
+const invariant = require('invariant');
 
 const GROUP_TYPES_OPTIONS = {
   Album: 'Album',

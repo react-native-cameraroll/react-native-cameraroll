@@ -24,7 +24,7 @@ const {
 import CameraRoll from '../../js/CameraRoll';
 import type {PhotoIdentifier, GroupTypes} from '../../js/CameraRoll';
 
-const invariant = require('fbjs/lib/invariant');
+const invariant = require('invariant');
 
 const CameraRollView = require('./CameraRollView');
 
