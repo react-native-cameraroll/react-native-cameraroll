@@ -18,6 +18,7 @@ import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.provider.MediaStore.Images;
@@ -388,12 +389,36 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
                     limit = "limit=" + mAfter + "," + (mFirst + 1);
                 }
 
-                Cursor media = resolver.query(
-                        MediaStore.Files.getContentUri("external").buildUpon().encodedQuery(limit).build(),
-                        PROJECTION,
-                        selection.toString(),
-                        selectionArgs.toArray(new String[selectionArgs.size()]),
-                        Images.Media.DATE_ADDED + " DESC, " + Images.Media.DATE_MODIFIED + " DESC");
+                Cursor media = null;
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    Bundle selectionBundle = new Bundle();
+                    if (!TextUtils.isEmpty(mAfter)) {
+                        selectionBundle.putInt(ContentResolver.QUERY_ARG_LIMIT, mFirst + 1);
+                        selectionBundle.putInt(ContentResolver.QUERY_ARG_OFFSET, Integer.parseInt(mAfter));
+                    } else {
+                        selectionBundle.putInt(ContentResolver.QUERY_ARG_LIMIT, mFirst + 1);
+                        selectionBundle.putInt(ContentResolver.QUERY_ARG_OFFSET, 0);
+                    }
+                    selectionBundle.putString(ContentResolver.QUERY_ARG_SQL_SORT_ORDER, Images.Media.DATE_ADDED + " DESC, " + Images.Media.DATE_MODIFIED + " DESC");
+                    selectionBundle.putString(ContentResolver.QUERY_ARG_SQL_SELECTION, selection.toString());
+                    selectionBundle.putStringArray(ContentResolver.QUERY_ARG_SQL_SELECTION_ARGS, selectionArgs.toArray(new String[selectionArgs.size()]));
+
+                    media = resolver.query(
+                            MediaStore.Files.getContentUri("external").buildUpon().encodedQuery(limit).build(),
+                            PROJECTION,
+                            selectionBundle,
+                            null
+                    );
+                } else {
+                    media = resolver.query(
+                            MediaStore.Files.getContentUri("external").buildUpon().encodedQuery(limit).build(),
+                            PROJECTION,
+                            selection.toString(),
+                            selectionArgs.toArray(new String[selectionArgs.size()]),
+                            Images.Media.DATE_ADDED + " DESC, " + Images.Media.DATE_MODIFIED + " DESC"
+                    );
+                }
+
                 if (media == null) {
                     mPromise.reject(ERROR_UNABLE_TO_LOAD, "Could not get media");
                 } else {
