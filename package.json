@@ -126,5 +126,8 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/react-native-community/react-native-cameraroll.git"
+  },
+  "dependencies": {
+    "invariant": "^2.2.4"
   }
 }
