@@ -323,6 +323,13 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
   requestPhotoLibraryAccess(reject, ^(bool isLimited){
     void (^collectAsset)(PHAsset*, NSUInteger, BOOL*) = ^(PHAsset * _Nonnull asset, NSUInteger assetIdx, BOOL * _Nonnull stopAssets) {
       NSString *const uri = [NSString stringWithFormat:@"ph://%@", [asset localIdentifier]];
+       
+      if (afterCursor && !foundAfter) {
+        if ([afterCursor isEqualToString:uri]) {
+          foundAfter = YES;
+        }
+        return;
+      }
       NSString *_Nullable originalFilename = NULL;
       PHAssetResource *_Nullable resource = NULL;
       NSNumber* fileSize = [NSNumber numberWithInt:0];
@@ -341,14 +348,6 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
       // block and ensure the logic for `collectAssetMayOmitAsset` above is
       // updated
       if (collectAssetMayOmitAsset) {
-        if (afterCursor && !foundAfter) {
-          if ([afterCursor isEqualToString:uri]) {
-            foundAfter = YES;
-          }
-          return; // skip until we get to the first one
-        }
-
-
         if ([mimeTypes count] > 0 && resource) {
           CFStringRef const uti = (__bridge CFStringRef _Nonnull)(resource.uniformTypeIdentifier);
           NSString *const mimeType = (NSString *)CFBridgingRelease(UTTypeCopyPreferredTagWithClass(uti, kUTTagClassMIMEType));
