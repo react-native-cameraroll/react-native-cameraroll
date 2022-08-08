@@ -87,6 +87,7 @@ On react-native-cli or ejected apps, adding the following lines will add the cap
 ...
 <application>
 ```
+Add the `android:requestLegacyExternalStorage="true"` attribute to the `<application>` tag for Android 10 support.
 
 Then you have to explicitly ask for the permission
 
