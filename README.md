@@ -25,7 +25,7 @@
 
 #### Android
 
-1. Open up `android/app/src/main/java/[...]/MainApplication.java`
+1. Open up `android/app/src/main/java/[...]/MainApplication.java` (Auto link, ^RN0.69 does not required)
   - Add `import com.reactnativecommunity.cameraroll.CameraRollPackage;` to the imports at the top of the file
   - Add `new CameraRollPackage()` to the list returned by the `getPackages()` method
 2. Append the following lines to `android/settings.gradle`:
@@ -35,7 +35,7 @@
   	```
 3. Insert the following lines inside the dependencies block in `android/app/build.gradle`:
   	```
-      compile project(':@react-native-community_cameraroll')
+      implementation project(':@react-native-community_cameraroll')
   	```
 Starting with Android 10, the concept of [scoped storage](https://developer.android.com/training/data-storage#scoped-storage) is introduced. Currently, to make it working with that change, you have to add `android:requestLegacyExternalStorage="true"` to `AndroidManifest.xml`:
 
