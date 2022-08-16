@@ -56,7 +56,7 @@ import { CameraRoll } from "react-native";
 to:
 
 ```javascript
-import CameraRoll from "@react-native-community/cameraroll";
+import { CameraRoll } from "@react-native-community/cameraroll";
 ```
 
 ## Usage
@@ -93,7 +93,7 @@ Then you have to explicitly ask for the permission
 
 ```javascript
 import { PermissionsAndroid, Platform } from "react-native";
-import CameraRoll from "@react-native-community/cameraroll";
+import { CameraRoll } from "@react-native-community/cameraroll";
 
 async function hasAndroidPermission() {
   const permission = PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE;

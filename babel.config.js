@@ -1,13 +1,13 @@
 module.exports = {
-  presets: ["module:metro-react-native-babel-preset"],
+  presets: ['module:metro-react-native-babel-preset'],
   plugins: [
     [
-      "module-resolver",
+      'module-resolver',
       {
         alias: {
-          "@react-native-community/cameraroll": "./js/CameraRoll.js"
+          '@react-native-community/cameraroll': './src/index.ts'
         },
-        cwd: "babelrc"
+        cwd: 'babelrc'
       }
     ]
   ]
