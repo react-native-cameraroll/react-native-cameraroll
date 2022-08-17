@@ -51,13 +51,13 @@ workflows:
             - checkout_code
       - rn/android_build:
           name: android_debug_build
-          project_path: "example/android"
+          project_path: 'example/android'
           build_type: debug
           requires:
             - analyze
       - rn/android_build:
           name: android_release_build
-          project_path: "example/android"
+          project_path: 'example/android'
           build_type: release
           requires:
             - analyze

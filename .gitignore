@@ -38,6 +38,8 @@ build/
 .gradle
 local.properties
 *.iml
+android/gradlew
+gradle/
 
 **/.settings
 **/.classpath
