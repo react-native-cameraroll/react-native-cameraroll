@@ -30,21 +30,19 @@ export const iosReadGalleryPermission = (
   return CameraRollPermissionModule.checkPermission(accessLevel);
 };
 
-export const iosRequestReadWriteGalleryPermission = (): Promise<
-  CameraRollAuthorizationStatus
-> => {
-  if (!isIOS) throw new Error('this module is available only for ios');
+export const iosRequestReadWriteGalleryPermission =
+  (): Promise<CameraRollAuthorizationStatus> => {
+    if (!isIOS) throw new Error('this module is available only for ios');
 
-  return CameraRollPermissionModule.requestReadWritePermission();
-};
+    return CameraRollPermissionModule.requestReadWritePermission();
+  };
 
-export const iosRequestAddOnlyGalleryPermission = (): Promise<
-  CameraRollAuthorizationStatus
-> => {
-  if (!isIOS) throw new Error('this module is available only for ios');
+export const iosRequestAddOnlyGalleryPermission =
+  (): Promise<CameraRollAuthorizationStatus> => {
+    if (!isIOS) throw new Error('this module is available only for ios');
 
-  return CameraRollPermissionModule.requestAddOnlyPermission();
-};
+    return CameraRollPermissionModule.requestAddOnlyPermission();
+  };
 
 export const iosRefreshGallerySelection = (): Promise<boolean> => {
   if (!isIOS) throw new Error('this module is available only for ios');
