@@ -4,15 +4,15 @@ buildscript {
     ext {
         buildToolsVersion = "29.0.2"
         // detox requires minSdkVersion 18
-        minSdkVersion = 18
-        compileSdkVersion = 29
-        targetSdkVersion = 29
+        minSdkVersion = 23
+        compileSdkVersion = 31
+        targetSdkVersion = 31
         // Added for detox from https://github.com/wix/Detox/blob/16.5.0/docs/Introduction.Android.md
         kotlinVersion = "1.3.70"
     }
     repositories {
         google()
-        jcenter()
+        mavenCentral()
     }
     dependencies {
         classpath("com.android.tools.build:gradle:3.5.3")
@@ -37,7 +37,6 @@ allprojects {
         }
 
         google()
-        jcenter()
         maven { url 'https://www.jitpack.io' }
 
         // Start added for detox from https://github.com/wix/Detox/blob/16.5.0/docs/Introduction.Android.md
