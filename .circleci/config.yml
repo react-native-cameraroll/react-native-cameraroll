@@ -11,7 +11,7 @@ jobs:
       - persist_to_workspace:
           root: .
           paths: .
-  analyze_js:
+  analyse_js:
     executor: rn/linux_js
     steps:
       - attach_workspace:
@@ -46,7 +46,7 @@ workflows:
   test:
     jobs:
       - checkout_code
-      - analyze_js:
+      - analyse_js:
           requires:
             - checkout_code
       - rn/android_build:
@@ -54,7 +54,7 @@ workflows:
           name: build_android_release
           project_path: android
           requires:
-            - analyze_js
+            - analyse_js
       # - rn/android_test:
       #     logcat_grep: "com.camerarollexample"
       #     detox_configuration: "android.emu.release"
