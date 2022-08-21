@@ -9,8 +9,8 @@ jobs:
     steps:
       - checkout
       - persist_to_workspace:
-          root: .
           paths: .
+          root: .
   analyse_js:
     executor: rn/linux_js
     steps:
@@ -55,6 +55,14 @@ workflows:
           project_path: android
           requires:
             - analyse_js
+      - rn/ios_build:
+          build_configuration: Release
+          device: iPhone 11
+          name: build_ios_release
+          project_path: ios/Example.xcodeproj
+          requires:
+            - analyse_js
+          scheme: Example
       # - rn/android_test:
       #     logcat_grep: "com.camerarollexample"
       #     detox_configuration: "android.emu.release"
@@ -72,6 +80,7 @@ workflows:
       - publish:
           requires:
             - build_android_release
+            - build_ios_release
           filters:
             branches:
               only: master
