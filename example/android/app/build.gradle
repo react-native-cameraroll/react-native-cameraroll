@@ -9,18 +9,16 @@ import com.android.build.OutputFile
  * cycle. By default, bundleDebugJsAndAssets is skipped, as in debug/dev mode we prefer to load the
  * bundle directly from the development server. Below you can see all the possible configurations
  * and their defaults. If you decide to add a configuration block, make sure to add it before the
- * `apply from: "../../../node_modules/react-native/react.gradle"` line.
+ * `apply from: "../../node_modules/react-native/react.gradle"` line.
  *
  * project.ext.react = [
  *   // the name of the generated asset file containing your JS bundle
  *   bundleAssetName: "index.android.bundle",
  *
- *   // the entry file for bundle generation. If none specified and
- *   // "index.android.js" exists, it will be used. Otherwise "index.js" is
- *   // default. Can be overridden with ENTRY_FILE environment variable.
+ *   // the entry file for bundle generation
  *   entryFile: "index.android.js",
  *
- *   // https://reactnative.dev/docs/performance#enable-the-ram-format
+ *   // https://facebook.github.io/react-native/docs/performance#enable-the-ram-format
  *   bundleCommand: "ram-bundle",
  *
  *   // whether to bundle JS and assets in debug mode
@@ -78,11 +76,9 @@ import com.android.build.OutputFile
  */
 
 project.ext.react = [
-    // Start added for this project (react-native-cameraroll)
-    cliPath: "node_modules/react-native/local-cli/cli.js",
-    entryFile: "example/index.js",
+    cliPath: "../../../node_modules/react-native/local-cli/cli.js",
+    entryFile: "example/index.tsx",
     root: "../../../",
-    // End added
     enableHermes: false,  // clean and rebuild if changing
 ]
 
@@ -125,6 +121,19 @@ def jscFlavor = 'org.webkit:android-jsc:+'
  */
 def enableHermes = project.ext.react.get("enableHermes", false);
 
+task downloadDependencies() {
+  description 'Download all dependencies to the Gradle cache'
+  doLast {
+    configurations.findAll().each { config ->
+      if (config.name.contains("minReactNative") && config.canBeResolved) {
+        print config.name
+        print '\n'
+        config.files
+      }
+    }
+  }
+}
+
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
 
@@ -134,15 +143,13 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.camerarollexample"
+        applicationId "com.reactnativecommunity.cameraroll.example"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
-
-        // Added for detox from https://github.com/wix/Detox/blob/16.5.0/docs/Introduction.Android.md
-        testBuildType System.getProperty('testBuildType', 'debug')  // This will later be used to control the test apk build type
-        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+        testBuildType System.getProperty('testBuildType', 'debug')
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     splits {
         abi {
@@ -159,20 +166,25 @@ android {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
         }
+        release {
+            if (project.hasProperty('EXAMPLE_APP_STORE_FILE')) {
+                storeFile file(EXAMPLE_APP_STORE_FILE)
+                storePassword EXAMPLE_APP_STORE_PASSWORD
+                keyAlias EXAMPLE_APP_KEY_ALIAS
+                keyPassword EXAMPLE_APP_KEY_PASSWORD
+            }
+        }
     }
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
         }
         release {
-            // Caution! In production, you need to generate your own keystore file.
-            // see https://reactnative.dev/docs/signed-apk-android.
-            signingConfig signingConfigs.debug
+            signingConfig signingConfigs.release
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
     }
-
     // applicationVariants are e.g. debug, release
     applicationVariants.all { variant ->
         variant.outputs.each { output ->
@@ -184,29 +196,16 @@ android {
                 output.versionCodeOverride =
                         versionCodes.get(abi) * 1048576 + defaultConfig.versionCode
             }
+
         }
     }
 }
 
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
-    //noinspection GradleDynamicVersion
+    // You will not need to manually link like this. This is a quirk of the example project
+    implementation project(':react-native-cameraroll')
     implementation "com.facebook.react:react-native:+"  // From node_modules
-
-    implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.0.0"
-
-    debugImplementation("com.facebook.flipper:flipper:${FLIPPER_VERSION}") {
-      exclude group:'com.facebook.fbjni'
-    }
-
-    debugImplementation("com.facebook.flipper:flipper-network-plugin:${FLIPPER_VERSION}") {
-        exclude group:'com.facebook.flipper'
-        exclude group:'com.squareup.okhttp3', module:'okhttp'
-    }
-
-    debugImplementation("com.facebook.flipper:flipper-fresco-plugin:${FLIPPER_VERSION}") {
-        exclude group:'com.facebook.flipper'
-    }
 
     if (enableHermes) {
         def hermesPath = "../../../node_modules/hermes-engine/android/";
@@ -216,11 +215,7 @@ dependencies {
         implementation jscFlavor
     }
 
-    // Added for this project (react-native-cameraroll)
-    implementation project(':react-native-cameraroll')
-
-    // Added for detox from https://github.com/wix/Detox/blob/16.5.0/docs/Introduction.Android.md
-    androidTestImplementation('com.wix:detox:+')
+    androidTestImplementation 'junit:junit:4.12'
 }
 
 // Run this once to be able to run the application with BUCK
@@ -231,17 +226,3 @@ task copyDownloadableDepsToLibs(type: Copy) {
 }
 
 apply from: file("../../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesAppBuildGradle(project)
-
-// Added for react-native-circleci-orb from https://github.com/react-native-community/react-native-circleci-orb/tree/v4.4.2#android
-task downloadDependencies() {
-  description 'Download all dependencies to the Gradle cache'
-  doLast {
-    configurations.findAll().each { config ->
-      if (config.name.contains("minReactNative") && config.canBeResolved) {
-        print config.name
-        print '\n'
-        config.files
-      }
-    }
-  }
-}

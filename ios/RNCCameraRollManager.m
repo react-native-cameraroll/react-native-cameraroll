@@ -472,6 +472,166 @@ RCT_EXPORT_METHOD(deletePhotos:(NSArray<NSString *>*)assets
   ];
 }
 
+RCT_EXPORT_METHOD(getPhotoByInternalID:(NSString *)internalId
+                  options:(NSDictionary *)options
+                  resolve:(RCTPromiseResolveBlock)resolve
+                  reject:(RCTPromiseRejectBlock)reject)
+{
+  checkPhotoLibraryConfig();
+
+  BOOL const convertHeic = [RCTConvert BOOL:options[@"convertHeicImages"]];
+
+  requestPhotoLibraryAccess(reject, ^(bool isLimited){
+    
+    PHFetchResult<PHAsset *> *fetchResult;
+    PHAsset *asset;
+    
+    NSString *mediaIdentifier = internalId;
+    
+    if ([internalId rangeOfString:@"ph://"].location != NSNotFound) {
+      mediaIdentifier = [internalId stringByReplacingOccurrencesOfString:@"ph://"
+                                                                   withString:@""];
+    }
+    
+    fetchResult = [PHAsset fetchAssetsWithLocalIdentifiers:@[mediaIdentifier] options:nil];
+    if(fetchResult){
+      asset = fetchResult.firstObject;//only object in the array.
+    }
+    
+    if(asset){
+      __block NSURL *imageURL = [[NSURL alloc]initWithString:@""];
+      
+      NSString *const assetMediaTypeLabel = (asset.mediaType == PHAssetMediaTypeVideo
+                                             ? @"video"
+                                             : (asset.mediaType == PHAssetMediaTypeImage
+                                                ? @"image"
+                                                : (asset.mediaType == PHAssetMediaTypeAudio
+                                                   ? @"audio"
+                                                   : @"unknown")));
+
+
+      CLLocation *const loc = asset.location;
+      
+      NSArray<PHAssetResource *> *const assetResources = [PHAssetResource assetResourcesForAsset:asset];
+      if (![assetResources firstObject]) {
+        return;
+      }
+      PHAssetResource *const _Nonnull resource = [assetResources firstObject];
+      
+      __block NSString *originalFilename = resource.originalFilename;
+      NSString *const uniformMimeType = resource.uniformTypeIdentifier;
+      
+      __block NSString *filePath = @"";
+
+      // check if HEIC extension asset
+      if (convertHeic && asset.mediaType == PHAssetMediaTypeImage && [uniformMimeType  isEqual: @"public.heic"]) {
+        // convert to JPEG
+        PHImageRequestOptions *const requestOptions = [PHImageRequestOptions new];
+        requestOptions.networkAccessAllowed = YES;
+        requestOptions.version = PHImageRequestOptionsVersionUnadjusted;
+        requestOptions.deliveryMode = PHImageRequestOptionsDeliveryModeHighQualityFormat;
+        
+        CGSize const targetSize = CGSizeMake((CGFloat)asset.pixelWidth, (CGFloat)asset.pixelHeight);
+        [[PHImageManager defaultManager] requestImageForAsset:asset
+                                                     targetSize:targetSize
+                                                    contentMode:PHImageContentModeDefault
+                                                        options:requestOptions
+                                                  resultHandler:^(UIImage * _Nullable image,
+                                                                  NSDictionary * _Nullable info) {
+          NSError *const error = [info objectForKey:PHImageErrorKey];
+          if (error) {
+            reject(@"Error while converting to JPEG image",@"Error while converting",error);
+          }
+
+          originalFilename = [originalFilename stringByReplacingOccurrencesOfString:@"HEIC" withString:@"JPEG" options:NSCaseInsensitiveSearch range:NSMakeRange(0, [originalFilename length])];
+          NSData *const imageData = UIImageJPEGRepresentation(image, 1.0);
+          NSFileManager *fileManager = [NSFileManager defaultManager];
+          NSString *fullPath = [NSTemporaryDirectory() stringByAppendingPathComponent:originalFilename];
+          if ([fileManager createFileAtPath:fullPath contents:imageData attributes:nil]) {
+            unsigned long long fileSize = [[fileManager attributesOfItemAtPath:fullPath error:nil] fileSize];
+
+            resolve(@{
+                      @"node": @{
+                          @"type": assetMediaTypeLabel,
+                          @"image": @{
+                              @"filepath": fullPath,
+                              @"filename": originalFilename,
+                              @"height": @([asset pixelHeight]),
+                              @"width": @([asset pixelWidth]),
+                              @"isStored": @YES,
+                              @"playableDuration": @([asset duration]), // fractional seconds
+                              @"fileSize": @(fileSize)
+                              },
+                          @"timestamp": @(asset.creationDate.timeIntervalSince1970),
+                          @"location": (loc ? @{
+                                                @"latitude": @(loc.coordinate.latitude),
+                                                @"longitude": @(loc.coordinate.longitude),
+                                                @"altitude": @(loc.altitude),
+                                                @"heading": @(loc.course),
+                                                @"speed": @(loc.speed), // speed in m/s
+                                                } : @{})
+                          }
+                      });
+          } else {
+            NSString *errorMessage = [NSString stringWithFormat:@"Failed to create tmp file for asset %@.", originalFilename];
+            NSError *error = RCTErrorWithMessage(errorMessage);
+            reject(@"Error while creating image tmp file",@"Error creating tmp file",error);
+          }
+
+        }];
+      } else {
+        NSNumber* fileSize = [resource valueForKey:@"fileSize"];
+        PHContentEditingInputRequestOptions *const editOptions = [PHContentEditingInputRequestOptions new];
+        // Download asset if on icloud.
+        editOptions.networkAccessAllowed = YES;
+        
+        [asset requestContentEditingInputWithOptions:editOptions completionHandler:^(PHContentEditingInput *contentEditingInput, NSDictionary *info) {
+          imageURL = contentEditingInput.fullSizeImageURL;
+          if (imageURL.absoluteString.length != 0) {
+            
+            filePath = [imageURL.absoluteString stringByReplacingOccurrencesOfString:@"pathfile:" withString:@"file:"];
+
+            resolve(@{
+                      @"node": @{
+                          @"type": assetMediaTypeLabel,
+                          @"image": @{
+                              @"filepath": filePath,
+                              @"filename": originalFilename,
+                              @"height": @([asset pixelHeight]),
+                              @"width": @([asset pixelWidth]),
+                              @"isStored": @YES,
+                              @"playableDuration": @([asset duration]), // fractional seconds
+                              @"fileSize": fileSize
+                              },
+                          @"timestamp": @(asset.creationDate.timeIntervalSince1970),
+                          @"location": (loc ? @{
+                                                @"latitude": @(loc.coordinate.latitude),
+                                                @"longitude": @(loc.coordinate.longitude),
+                                                @"altitude": @(loc.altitude),
+                                                @"heading": @(loc.course),
+                                                @"speed": @(loc.speed), // speed in m/s
+                                                } : @{})
+                          }
+                      });
+          } else {
+            NSString *errorMessage = [NSString stringWithFormat:@"Failed to load asset"
+                                      " with localIdentifier %@ with no error message.", internalId];
+            NSError *error = RCTErrorWithMessage(errorMessage);
+            reject(@"Error while getting file path",@"Error while getting file path",error);
+          }
+        }];
+      }
+      
+    } else {
+      NSString *errorMessage = [NSString stringWithFormat:@"Failed to load asset"
+                                " with localIdentifier %@ with no error message.", internalId];
+      NSError *error = RCTErrorWithMessage(errorMessage);
+      reject(@"No asset found",@"No asset found",error);
+    }
+    
+  }, false);
+}
+
 static void checkPhotoLibraryConfig()
 {
 #if RCT_DEV

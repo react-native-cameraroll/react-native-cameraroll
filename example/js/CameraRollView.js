@@ -25,7 +25,7 @@ const {
   Linking,
 } = ReactNative;
 
-import CameraRoll from '../../js/CameraRoll';
+import {CameraRoll} from '../../src';
 
 const groupByEveryN = function groupByEveryN(num) {
   const n = num;
@@ -133,7 +133,6 @@ class CameraRollView extends React.Component {
   };
 
   render() {
-    console.log({data: this.state.data});
     return (
       <FlatList
         keyExtractor={(_, idx) => String(idx)}
@@ -166,7 +165,6 @@ class CameraRollView extends React.Component {
   };
 
   _renderItem = ({item}) => {
-    console.log({item});
     return (
       <View style={styles.row}>
         {item.map(image => (image ? this.props.renderImage(image) : null))}

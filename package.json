@@ -2,19 +2,32 @@
   "name": "@react-native-community/cameraroll",
   "author": "Bartol Karuza <bartol.k@gmail.com>",
   "homepage": "https://github.com/react-native-community/react-native-cameraroll#readme",
-  "version": "4.1.2",
+  "version": "5.0.0",
   "description": "React Native Camera Roll for iOS & Android",
-  "main": "./js/CameraRoll.js",
-  "types": "./typings/CameraRoll.d.ts",
+  "main": "lib/commonjs/index",
+  "module": "lib/module/index",
+  "types": "lib/typescript/index.d.ts",
+  "react-native": "src/index.ts",
+  "source": "src/index",
+  "files": [
+    "src/",
+    "lib/",
+    "android/",
+    "ios/",
+    "react-native-cameraroll.podspec",
+    "README.md"
+  ],
   "scripts": {
+    "prepare": "bob build",
     "start": "react-native start",
     "start:android": "react-native run-android --root example/",
     "start:ios": "react-native run-ios --project-path example/ios",
     "test": "yarn validate:eslint && yarn validate:flow && yarn validate:typescript && yarn test:jest",
-    "validate:eslint": "eslint 'js/**/*.js' 'example/**/*.js'",
+    "lint": "eslint \"**/*.{js,ts,tsx}\"",
+    "validate:eslint": "eslint 'src/**/*.ts'",
     "validate:flow": "flow check",
     "validate:typescript": "tsc --project ./",
-    "test:jest": "jest js/",
+    "test:jest": "jest src/",
     "test:detox:android:test:debug": "detox test -c android.emu.debug",
     "test:detox:android:test:release": "detox test -c android.emu.release",
     "test:detox:android:build:debug": "detox build -c android.emu.debug",
@@ -38,33 +51,47 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "react": "16 || 17 || 18",
-    "react-native": ">=0.60"
+    "react-native": ">=0.59"
   },
   "devDependencies": {
-    "@babel/core": "^7.9.6",
-    "@babel/runtime": "^7.9.6",
-    "@react-native-community/eslint-config": "^2.0.0",
-    "@semantic-release/git": "7.0.8",
-    "@types/react-native": "^0.62.10",
-    "babel-core": "^7.0.0-bridge.0",
-    "babel-jest": "^26.0.1",
-    "babel-plugin-module-resolver": "^3.2.0",
-    "detox": "^16.5.0",
-    "eslint": "^7.0.0",
-    "eslint-plugin-prettier": "^3.0.1",
-    "flow-bin": "^0.122.0",
-    "husky": "^2.2.0",
-    "jest": "^26.0.1",
-    "metro-react-native-babel-preset": "^0.59.0",
-    "prettier": "^1.17.0",
-    "pretty-quick": "^1.10.0",
-    "react": "16.13.1",
-    "react-native": "0.63.4",
-    "react-test-renderer": "16.11.0",
-    "rimraf": "^2.6.3",
-    "semantic-release": "15.13.3",
-    "typescript": "^3.4.1"
+    "react-native-builder-bob": "0.18.3",
+    "@babel/core": "7.18.10",
+    "@babel/runtime": "7.18.9",
+    "@react-native-community/eslint-config": "3.1.0",
+    "@semantic-release/git": "10.0.1",
+    "@types/react-native": "0.62.10",
+    "babel-core": "7.0.0-bridge.0",
+    "babel-plugin-module-resolver": "4.1.0",
+    "babel-jest": "28.1.3",
+    "detox": "19.9.3",
+    "eslint": "8.22.0",
+    "eslint-plugin-prettier": "4.2.1",
+    "husky": "8.0.1",
+    "jest": "28.1.3",
+    "@types/jest": "28.1.7",
+    "prettier": "2.7.1",
+    "metro-react-native-babel-preset": "0.72.0",
+    "pretty-quick": "3.1.3",
+    "react": "17.0.2",
+    "react-native": "0.66.0",
+    "react-test-renderer": "17.0.2",
+    "semantic-release": "19.0.3",
+    "rimraf": "3.0.2",
+    "typescript": "4.7.4"
+  },
+  "react-native-builder-bob": {
+    "source": "src",
+    "output": "lib",
+    "targets": [
+      "commonjs",
+      "module",
+      [
+        "typescript",
+        {
+          "project": "tsconfig.json"
+        }
+      ]
+    ]
   },
   "rn-docs": {
     "title": "CameraRoll",
@@ -76,7 +103,6 @@
     }
   },
   "resolutions": {
-    "lodash": "4.17.15",
     "@react-native-community/cli-platform-android": "~4.3.0"
   },
   "jest": {
@@ -126,8 +152,5 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/react-native-community/react-native-cameraroll.git"
-  },
-  "dependencies": {
-    "invariant": "^2.2.4"
   }
 }
