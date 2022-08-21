@@ -8,9 +8,6 @@ jobs:
     executor: rn/linux_js
     steps:
       - checkout
-      - persist_to_workspace:
-          paths: .
-          root: .
   analyse_js:
     executor: rn/linux_js
     steps:
