@@ -51,8 +51,7 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "react": "*",
-    "react-native": "*"
+    "react-native": ">=0.59"
   },
   "devDependencies": {
     "react-native-builder-bob": "0.18.3",
