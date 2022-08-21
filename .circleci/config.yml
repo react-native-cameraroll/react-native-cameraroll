@@ -53,7 +53,7 @@ workflows:
       - rn/android_build:
           build_type: release
           name: build_android_release
-          project_path: android
+          project_path: example/android
           requires:
             - analyse_js
       - rn/ios_build:
