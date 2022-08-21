@@ -11,7 +11,8 @@ jobs:
       - persist_to_workspace:
           root: .
           paths:
-            - /home/circleci/project
+            - ./*
+            
   analyse_js:
     executor: rn/linux_js
     steps:
