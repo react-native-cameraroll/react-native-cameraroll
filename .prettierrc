@@ -3,7 +3,5 @@
   "trailingComma": "all",
   "bracketSpacing": false,
   "jsxBracketSameLine": true,
-  "overrides": [
-    {"files": ["*.js"], "options": {"parser": "flow", "requirePragma": true}}
-  ]
+  "overrides": [{ "files": ["*.js"], "options": { "parser": "flow", "requirePragma": true } }]
 }

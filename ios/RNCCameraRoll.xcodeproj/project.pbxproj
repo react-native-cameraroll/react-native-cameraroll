@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		143879351AAD238D00F088A5 /* RNCCameraRollManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 143879341AAD238D00F088A5 /* RNCCameraRollManager.m */; };
+		2F2D96EC28ABF12100B2EF6B /* RNCCameraRollPermissionModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 2F2D96EB28ABF12100B2EF6B /* RNCCameraRollPermissionModule.m */; };
 		4F788CB822226740001DB9D2 /* RNCAssetsLibraryRequestHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 4F788CB722226740001DB9D2 /* RNCAssetsLibraryRequestHandler.m */; };
 /* End PBXBuildFile section */
 
@@ -26,6 +27,8 @@
 /* Begin PBXFileReference section */
 		143879331AAD238D00F088A5 /* RNCCameraRollManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = RNCCameraRollManager.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		143879341AAD238D00F088A5 /* RNCCameraRollManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RNCCameraRollManager.m; sourceTree = "<group>"; };
+		2F2D96EA28ABF0FE00B2EF6B /* RNCCameraRollPermissionModule.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RNCCameraRollPermissionModule.h; sourceTree = "<group>"; };
+		2F2D96EB28ABF12100B2EF6B /* RNCCameraRollPermissionModule.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RNCCameraRollPermissionModule.m; sourceTree = "<group>"; };
 		4F788CB622226740001DB9D2 /* RNCAssetsLibraryRequestHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RNCAssetsLibraryRequestHandler.h; sourceTree = "<group>"; };
 		4F788CB722226740001DB9D2 /* RNCAssetsLibraryRequestHandler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RNCAssetsLibraryRequestHandler.m; sourceTree = "<group>"; };
 		58B5115D1A9E6B3D00147676 /* libRNCCameraRoll.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRNCCameraRoll.a; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -45,6 +48,8 @@
 		58B511541A9E6B3D00147676 = {
 			isa = PBXGroup;
 			children = (
+				2F2D96EB28ABF12100B2EF6B /* RNCCameraRollPermissionModule.m */,
+				2F2D96EA28ABF0FE00B2EF6B /* RNCCameraRollPermissionModule.h */,
 				4F788CB622226740001DB9D2 /* RNCAssetsLibraryRequestHandler.h */,
 				4F788CB722226740001DB9D2 /* RNCAssetsLibraryRequestHandler.m */,
 				143879331AAD238D00F088A5 /* RNCCameraRollManager.h */,
@@ -98,11 +103,12 @@
 					};
 				};
 			};
-			buildConfigurationList = 58B511581A9E6B3D00147676 /* Build configuration list for PBXProject "RNCCameraRoll" */;
+			buildConfigurationList = 58B511581A9E6B3D00147676 /* Build configuration list for PBXProject "RNCCameraroll" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 			);
 			mainGroup = 58B511541A9E6B3D00147676;
@@ -122,6 +128,7 @@
 			files = (
 				4F788CB822226740001DB9D2 /* RNCAssetsLibraryRequestHandler.m in Sources */,
 				143879351AAD238D00F088A5 /* RNCCameraRollManager.m in Sources */,
+				2F2D96EC28ABF12100B2EF6B /* RNCCameraRollPermissionModule.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -266,7 +273,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		58B511581A9E6B3D00147676 /* Build configuration list for PBXProject "RNCCameraRoll" */ = {
+		58B511581A9E6B3D00147676 /* Build configuration list for PBXProject "RNCCameraroll" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				58B5116F1A9E6B3D00147676 /* Debug */,

@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  rn: react-native-community/react-native@4.0.4
+  rn: react-native-community/react-native@7.1.1
 
 jobs:
   checkout_code:
@@ -10,8 +10,10 @@ jobs:
       - checkout
       - persist_to_workspace:
           root: .
-          paths: .
-  analyze:
+          paths: 
+            - .
+
+  analyse_js:
     executor: rn/linux_js
     steps:
       - attach_workspace:
@@ -20,9 +22,6 @@ jobs:
       - run:
           name: Eslint
           command: yarn run validate:eslint
-      - run:
-          name: Flow
-          command: yarn run validate:flow
       - run:
           name: TypeScript
           command: yarn run validate:typescript
@@ -49,39 +48,30 @@ workflows:
   test:
     jobs:
       - checkout_code
-      - analyze:
+      - analyse_js:
           requires:
             - checkout_code
       - rn/android_build:
-          name: android_debug_build
-          project_path: "example/android"
-          build_type: debug
-          requires:
-            - analyze
-      - rn/android_build:
-          name: android_release_build
-          project_path: "example/android"
           build_type: release
+          name: build_android_release
+          project_path: android
+          store_artifacts: false
+          persist_to_workspace: false
           requires:
-            - analyze
-      # - rn/android_test:
-      #     logcat_grep: "com.camerarollexample"
-      #     detox_configuration: "android.emu.release"
+            - analyse_js
+      # - rn/ios_build:
+      #     build_configuration: Debug
+      #     device: iPhone 11
+      #     name: build_ios_debug
+      #     project_path: example/ios/CameraRollExample.xcworkspace
+      #     project_type: workspace
       #     requires:
-      #       - android_release_build
-      # - rn/ios_build_and_test:
-      #     project_path: "example/ios/CameraRollExample.xcodeproj"
-      #     derived_data_path: "example/ios/build"
-      #     device: "iPhone X"
-      #     build_configuration: "Release"
-      #     scheme: "CameraRollExample"
-      #     detox_configuration: "ios.sim.release"
-      #     requires:
-      #       - analyze
+      #       - analyse_js
+      #     scheme: CameraRollExample
       - publish:
           requires:
-            - android_debug_build
-            - android_release_build
+            - build_android_release
+            # - build_ios_debug
           filters:
             branches:
               only: master
