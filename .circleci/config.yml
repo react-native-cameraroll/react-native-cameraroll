@@ -71,7 +71,7 @@ workflows:
       #       - analyze
       - publish:
           requires:
-            - rn/android_build
+            - analyze_js
           filters:
             branches:
               only: master
