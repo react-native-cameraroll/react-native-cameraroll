@@ -10,9 +10,7 @@ jobs:
       - checkout
       - persist_to_workspace:
           root: .
-          paths:
-            - ./*
-            - ./**/*
+          paths: .
             
   analyse_js:
     executor: rn/linux_js
@@ -62,7 +60,7 @@ workflows:
           build_configuration: Release
           device: iPhone 11
           name: build_ios_release
-          project_path: ios/CameraRollExample.xcodeproj
+          project_path: example/ios/CameraRollExample.xcodeproj
           requires:
             - analyse_js
           scheme: Example
