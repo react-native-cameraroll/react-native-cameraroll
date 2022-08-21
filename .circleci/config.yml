@@ -12,6 +12,7 @@ jobs:
           root: .
           paths:
             - ./*
+            - ./**/*
             
   analyse_js:
     executor: rn/linux_js
