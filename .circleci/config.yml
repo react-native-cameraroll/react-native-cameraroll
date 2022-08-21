@@ -10,8 +10,9 @@ jobs:
       - checkout
       - persist_to_workspace:
           root: .
-          paths: .
-            
+          paths: 
+            - .
+
   analyse_js:
     executor: rn/linux_js
     steps:
@@ -55,6 +56,7 @@ workflows:
           name: build_android_release
           project_path: android
           store_artifacts: false
+          persist_to_workspace: false
           requires:
             - analyse_js
       - rn/ios_build:
