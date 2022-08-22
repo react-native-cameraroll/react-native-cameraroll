@@ -690,6 +690,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
       try {
         int timeInMillisecond = Integer.parseInt(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION));
         playableDuration = timeInMillisecond / 1000;
+        retriever.release();
       } catch (NumberFormatException e) {
         success = false;
         FLog.e(
@@ -697,8 +698,12 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
                 "Number format exception occurred while trying to fetch video metadata for "
                         + photoUri.toString(),
                 e);
+      } catch (IOException ex) {
+        FLog.e(
+            ReactConstants.TAG,
+            "Failed to release retriever.",
+            ex);
       }
-      retriever.release();
     }
 
     if (photoDescriptor != null) {
@@ -757,6 +762,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
           try {
             width = Integer.parseInt(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH));
             height = Integer.parseInt(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT));
+            retriever.release();
           } catch (NumberFormatException e) {
             success = false;
             FLog.e(
@@ -764,8 +770,12 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
                     "Number format exception occurred while trying to fetch video metadata for "
                             + photoUri.toString(),
                     e);
+          } catch (IOException ex) {
+            FLog.e(
+                ReactConstants.TAG,
+                "Failed to release retriever.",
+                ex);
           }
-          retriever.release();
         } else {
           BitmapFactory.Options options = new BitmapFactory.Options();
           // Set inJustDecodeBounds to true so we don't actually load the Bitmap, but only get its
