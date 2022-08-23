@@ -1,8 +1,8 @@
 {
-  "name": "@react-native-community/cameraroll",
+  "name": "@react-native-camera-roll/camera-roll",
   "author": "Bartol Karuza <bartol.k@gmail.com>",
-  "homepage": "https://github.com/react-native-community/react-native-cameraroll#readme",
-  "version": "5.0.0",
+  "homepage": "https://github.com/react-native-cameraroll/react-native-cameraroll#readme",
+  "version": "1.0.0",
   "description": "React Native Camera Roll for iOS & Android",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
@@ -151,6 +151,6 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/react-native-community/react-native-cameraroll.git"
+    "url": "https://github.com/react-native-cameraroll/react-native-cameraroll.git"
   }
 }
