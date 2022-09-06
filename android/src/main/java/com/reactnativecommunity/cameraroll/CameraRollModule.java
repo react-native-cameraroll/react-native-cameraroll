@@ -700,7 +700,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
       }
       try {
         retriever.release();
-      } catch (IOException e) {
+      } catch (Exception e) { // Use general Exception here, see: https://developer.android.com/reference/android/media/MediaMetadataRetriever#release()
         // Do nothing. We can't handle this, and this is usually a system problem
       }
     }
@@ -771,7 +771,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
           }
           try {
             retriever.release();
-          } catch (IOException e) {
+          } catch (Exception e) { // Use general Exception here, see: https://developer.android.com/reference/android/media/MediaMetadataRetriever#release()
             // Do nothing. We can't handle this, and this is usually a system problem
           }
         } else {
