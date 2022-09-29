@@ -216,7 +216,7 @@ export class CameraRoll {
    * See https://facebook.github.io/react-native/docs/cameraroll.html#getphotos
    */
   static getPhotos(params: GetPhotosParams): Promise<PhotoIdentifiersPage> {
-    params = this.getParamsWithDefaults(params);
+    params = CameraRoll.getParamsWithDefaults(params);
     return RNCCameraRoll.getPhotos(params);
   }
 
