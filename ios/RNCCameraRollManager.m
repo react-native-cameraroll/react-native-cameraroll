@@ -163,6 +163,8 @@ RCT_EXPORT_METHOD(saveToCameraRoll:(NSURLRequest *)request
       PHAssetChangeRequest *assetRequest ;
       if ([options[@"type"] isEqualToString:@"video"]) {
         assetRequest = [PHAssetChangeRequest creationRequestForAssetFromVideoAtFileURL:inputURI];
+        // 修改视频的拍摄日期
+        assetRequest.creationDate = [NSDate date];
       } else if ([[inputURI.pathExtension lowercaseString] isEqualToString:@"gif"]) {
         NSData *data = [NSData dataWithContentsOfURL:inputURI];
         PHAssetCreationRequest *request = [PHAssetCreationRequest creationRequestForAsset];

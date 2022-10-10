@@ -63,7 +63,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Set;
-
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.lang.reflect.Field;
 import javax.annotation.Nullable;
 
 /**
@@ -154,6 +156,47 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
       Boolean isVideo = mimeType != null && mimeType.contains("video");
 
       try {
+
+        // 修改视频的拍摄日期
+        if ("video".equals(mOptions.getString("type"))) {
+          new ReplaceMP4Editor().modifyOrReplace(source, new MP4Edit() {
+            @Override
+            public void applyToFragment(MovieBox mov, MovieFragmentBox[] fragmentBox) {
+            }
+
+            @Override
+            public void apply(MovieBox movie) {
+              MovieHeaderBox mvhd = NodeBox.findFirst(movie, MovieHeaderBox.class, MovieHeaderBox.fourcc());
+              try {
+                long currentTimeMillis = System.currentTimeMillis();
+                Field createdField = MovieHeaderBox.class.getDeclaredField("created");
+                createdField.setAccessible(true);
+                createdField.set(mvhd, currentTimeMillis);
+                Field modifiedField = MovieHeaderBox.class.getDeclaredField("modified");
+                modifiedField.setAccessible(true);
+                modifiedField.set(mvhd, currentTimeMillis);
+              } catch (Exception ignored) {
+              }
+            }
+          });
+        }
+
+        // 修改图片的拍摄日期
+        if ("photo".equals(mOptions.getString("type"))) {
+          try {
+            SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss");
+            Date date = new Date();
+            ExifInterface newSource = new ExifInterface(mUri.getPath());
+            newSource.setAttribute(ExifInterface.TAG_DATETIME_ORIGINAL, dateTimeFormat.format(date));
+            newSource.setAttribute(ExifInterface.TAG_DATETIME, dateTimeFormat.format(date));
+            newSource.setAttribute(ExifInterface.TAG_DATETIME_DIGITIZED, dateTimeFormat.format(date));
+            newSource.saveAttributes();
+          } catch (Exception e) {
+            FLog.e(ReactConstants.TAG, "Could not　modify photo created or modified", e);
+            return;
+          }
+        }
+         
         String album = mOptions.getString("album");
         boolean isAlbumPresent = !TextUtils.isEmpty(album);
 
