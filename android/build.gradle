@@ -1,13 +1,34 @@
-
 buildscript {
-  repositories {
-    google()
-    jcenter()
-  }
+  // The Android Gradle plugin is only required when opening the android folder stand-alone.
+  // This avoids unnecessary downloads and potential conflicts when the library is included as a
+  // module dependency in an application project.
+  if (project == rootProject) {
+    repositories {
+      google()
+      mavenCentral()
+    }
 
-  dependencies {
-    classpath 'com.android.tools.build:gradle:3.2.1'
+    dependencies {
+      classpath("com.android.tools.build:gradle:4.2.2")
+    }
   }
+}
+
+task downloadDependencies() {
+  description 'Download all dependencies to the Gradle cache'
+  doLast {
+    configurations.findAll().each { config ->
+      if (config.name.contains("minReactNative") && config.canBeResolved) {
+        print config.name
+        print '\n'
+        config.files
+      }
+    }
+  }
+}
+
+def getExtOrInitialValue(name, initialValue) {
+  return rootProject.ext.has(name) ? rootProject.ext.get(name) : initialValue
 }
 
 def getExtOrDefault(name) {
@@ -22,22 +43,33 @@ apply plugin: 'com.android.library'
 
 android {
   compileSdkVersion getExtOrIntegerDefault('compileSdkVersion')
-  buildToolsVersion getExtOrDefault('buildToolsVersion')
+
+  compileOptions {
+      sourceCompatibility JavaVersion.VERSION_1_8
+      targetCompatibility JavaVersion.VERSION_1_8
+  }
 
   defaultConfig {
     minSdkVersion getExtOrIntegerDefault('minSdkVersion')
     targetSdkVersion getExtOrIntegerDefault('targetSdkVersion')
   }
+  lintOptions{
+    abortOnError false
+  }
 }
 
 repositories {
+  maven {
+    // All of React Native (JS, Obj-C sources, Android binaries) is installed from npm
+    url "$rootDir/../node_modules/react-native/android"
+  }
   google()
-  jcenter()
+  mavenLocal()
   mavenCentral()
 }
 
 dependencies {
   //noinspection GradleDynamicVersion
-  api 'com.facebook.react:react-native:+'
-  implementation 'org.jcodec:jcodec:0.2.5'
+  implementation 'com.facebook.react:react-native:+'
+
 }

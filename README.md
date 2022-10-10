@@ -1,17 +1,24 @@
-# `@react-native-community/cameraroll`
+# `@react-native-camera-roll/camera-roll`
 
 [![CircleCI Status][circle-ci-badge]][circle-ci]
 ![Supports Android and iOS][supported-os-badge]
 ![MIT License][license-badge]
 [![Lean Core Badge][lean-core-badge]][lean-core-issue]
 
+## *Notice*: The NPM package name has changed, please change your package.json dependency! 
+
+Previous package name: @react-native-community/cameraroll
+
+New package name: @react-native-camera-roll/camera-roll
+
+
 ## Getting started
 
-`$ npm install @react-native-community/cameraroll --save`
+`$ npm install @react-native-camera-roll/camera-roll --save`
 
 ### Mostly automatic installation
 
-`$ react-native link @react-native-community/cameraroll && npx pod-install`
+`$ react-native link @react-native-camera-roll/camera-roll && npx pod-install`
 
 ### Manual installation
 
@@ -19,23 +26,23 @@
 #### iOS
 
 1. In XCode, in the project navigator, right click `Libraries` ➜ `Add Files to [your project's name]`
-2. Go to `node_modules` ➜ `@react-native-community/cameraroll` and add `RNCCameraroll.xcodeproj`
+2. Go to `node_modules` ➜ `@react-native-camera-roll/camera-roll` and add `RNCCameraroll.xcodeproj`
 3. In XCode, in the project navigator, select your project. Add `libRNCCameraroll.a` to your project's `Build Phases` ➜ `Link Binary With Libraries`
 4. Run your project (`Cmd+R`)<
 
 #### Android
 
-1. Open up `android/app/src/main/java/[...]/MainApplication.java`
+1. Open up `android/app/src/main/java/[...]/MainApplication.java` (Auto link, ^RN0.69 does not required)
   - Add `import com.reactnativecommunity.cameraroll.CameraRollPackage;` to the imports at the top of the file
   - Add `new CameraRollPackage()` to the list returned by the `getPackages()` method
 2. Append the following lines to `android/settings.gradle`:
   	```
-  	include ':@react-native-community_cameraroll'
-  	project(':@react-native-community_cameraroll').projectDir = new File(rootProject.projectDir, 	'../node_modules/@react-native-community/cameraroll/android')
+  	include ':@react-native-camera-roll_camera-roll'
+  	project(':@react-native-camera-roll_camera-roll').projectDir = new File(rootProject.projectDir, 	'../node_modules/@react-native-camera-roll/camera-roll/android')
   	```
 3. Insert the following lines inside the dependencies block in `android/app/build.gradle`:
   	```
-      compile project(':@react-native-community_cameraroll')
+      implementation project(':@react-native-camera-roll_camera-roll')
   	```
 Starting with Android 10, the concept of [scoped storage](https://developer.android.com/training/data-storage#scoped-storage) is introduced. Currently, to make it working with that change, you have to add `android:requestLegacyExternalStorage="true"` to `AndroidManifest.xml`:
 
@@ -56,7 +63,7 @@ import { CameraRoll } from "react-native";
 to:
 
 ```javascript
-import CameraRoll from "@react-native-community/cameraroll";
+import { CameraRoll } from "@react-native-camera-roll/camera-roll";
 ```
 
 ## Usage
@@ -87,12 +94,13 @@ On react-native-cli or ejected apps, adding the following lines will add the cap
 ...
 <application>
 ```
+Add the `android:requestLegacyExternalStorage="true"` attribute to the `<application>` tag for Android 10 support.
 
 Then you have to explicitly ask for the permission
 
 ```javascript
 import { PermissionsAndroid, Platform } from "react-native";
-import CameraRoll from "@react-native-community/cameraroll";
+import { CameraRoll } from "@react-native-camera-roll/camera-roll";
 
 async function hasAndroidPermission() {
   const permission = PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE;
@@ -113,6 +121,20 @@ async function savePicture() {
 
   CameraRoll.save(tag, { type, album })
 };
+```
+
+**Andoid 13**
+
+On Android 13 the `READ_EXTERNAL_STORAGE` has been [replace](https://developer.android.com/about/versions/13/behavior-changes-13#granular-media-permissions) by `READ_MEDIA_IMAGES` and `READ_MEDIA_VIDEO`.
+
+```xml
+<manifest>
+...
+<uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
+<uses-permission android:name="android.permission.READ_MEDIA_VIDEO"/>
+<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+...
+<application>
 ```
 
 ### Methods
@@ -241,6 +263,7 @@ Returns a Promise which when resolved will be of the following shape:
   * `has_next_page`: {boolean}
   * `start_cursor`: {string}
   * `end_cursor`: {string}
+* `limited` : {boolean | undefined} : true if the app can only access a subset of the gallery pictures (authorization is `PHAuthorizationStatusLimited`), false otherwise (iOS only)
 
 #### Example
 
@@ -282,6 +305,138 @@ render() {
 }
 ```
 
+Loading images with listeners and refetchs:
+
+```javascript
+import { PhotoGallery, cameraRollEventEmitter } from '@react-native-camera-roll/camera-roll';
+
+import { useCallback, useEffect, useState } from 'react';
+
+import { AppState, EmitterSubscription } from 'react-native';
+
+interface GalleryOptions {
+  pageSize: number;
+  mimeTypeFilter?: Array<string>;
+}
+
+interface GalleryLogic {
+  photos?: ImageDTO[];
+  loadNextPagePictures: () => void;
+  isLoading: boolean;
+  isLoadingNextPage: boolean;
+  isReloading: boolean;
+  hasNextPage: boolean;
+}
+
+const supportedMimeTypesByTheBackEnd = [
+  'image/jpeg',
+  'image/png',
+  'image/heif',
+  'image/heic',
+  'image/heif-sequence',
+  'image/heic-sequence',
+];
+
+export const useGallery = ({
+  pageSize = 30,
+  mimeTypeFilter = supportedMimeTypesByTheBackEnd,
+}: GalleryOptions): GalleryLogic => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [isReloading, setIsReloading] = useState(false);
+  const [isLoadingNextPage, setIsLoadingNextPage] = useState(false);
+  const [hasNextPage, setHasNextPage] = useState(false);
+  const [nextCursor, setNextCursor] = useState<string>();
+  const [photos, setPhotos] = useState<ImageDTO[]>();
+
+  const loadNextPagePictures = useCallback(async () => {
+    try {
+      nextCursor ? setIsLoadingNextPage(true) : setIsLoading(true);
+      const { edges, page_info } = await PhotoGallery.getPhotos({
+        first: pageSize,
+        after: nextCursor,
+        assetType: 'Photos',
+        mimeTypes: mimeTypeFilter,
+        ...(isAndroid && { include: ['fileSize', 'filename'] }),
+      });
+      const photos = convertCameraRollPicturesToImageDtoType(edges);
+      setPhotos((prev) => [...(prev ?? []), ...photos]);
+
+      setNextCursor(page_info.end_cursor);
+      setHasNextPage(page_info.has_next_page);
+    } catch (error) {
+      console.error('useGallery getPhotos error:', error);
+    } finally {
+      setIsLoading(false);
+      setIsLoadingNextPage(false);
+    }
+  }, [mimeTypeFilter, nextCursor, pageSize]);
+
+  const getUnloadedPictures = useCallback(async () => {
+    try {
+      setIsReloading(true);
+      const { edges, page_info } = await PhotoGallery.getPhotos({
+        first: !photos || photos.length < pageSize ? pageSize : photos.length,
+        assetType: 'Photos',
+        mimeTypes: mimeTypeFilter,
+        // Include fileSize only for android since it's causing performance issues on IOS.
+        ...(isAndroid && { include: ['fileSize', 'filename'] }),
+      });
+      const newPhotos = convertCameraRollPicturesToImageDtoType(edges);
+      setPhotos(newPhotos);
+
+      setNextCursor(page_info.end_cursor);
+      setHasNextPage(page_info.has_next_page);
+    } catch (error) {
+      console.error('useGallery getNewPhotos error:', error);
+    } finally {
+      setIsReloading(false);
+    }
+  }, [mimeTypeFilter, pageSize, photos]);
+
+  useEffect(() => {
+    if (!photos) {
+      loadNextPagePictures();
+    }
+  }, [loadNextPagePictures, photos]);
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', async (nextAppState) => {
+      if (nextAppState === 'active') {
+        getUnloadedPictures();
+      }
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, [getUnloadedPictures]);
+
+  useEffect(() => {
+    let subscription: EmitterSubscription;
+    if (isAboveIOS14) {
+      subscription = cameraRollEventEmitter.addListener('onLibrarySelectionChange', (_event) => {
+        getUnloadedPictures();
+      });
+    }
+
+    return () => {
+      if (isAboveIOS14 && subscription) {
+        subscription.remove();
+      }
+    };
+  }, [getUnloadedPictures]);
+
+  return {
+    photos,
+    loadNextPagePictures,
+    isLoading,
+    isLoadingNextPage,
+    isReloading,
+    hasNextPage,
+  };
+};
+```
+
 ---
 
 ### `deletePhotos()`
@@ -305,9 +460,27 @@ Returns a Promise which will resolve when the deletion request is completed, or 
 | uri  | string                 | Yes      | See above.                                                 |
 
 
+### `iosGetImageDataById()`
+```javascript
+CameraRoll.iosGetImageDataById(internalID, true);
+```
+
+**Parameters:**
+
+| Name         | Type                    | Required   | Description                                          |
+| ------------ | ----------------------- | ---------- | ---------------------------------------------------- |
+| internalID   | string                  | Yes        | Ios internal ID 'PH://xxxx'.                         |
+| convertHeic  | boolean                 | False      | Whether to convert or not to JPEG image.             |
+
+### Known issues
+
+#### IOS
+
+If you try to save media into specific album without asking for read and write permission then saving will not work, workaround is to not precice album name for IOS if you don't want to request full permission (Only ios >= 14).
+
 [circle-ci-badge]:https://img.shields.io/circleci/project/github/react-native-cameraroll/react-native-cameraroll/master.svg?style=flat-square
 [circle-ci]:https://circleci.com/gh/react-native-cameraroll/workflows/react-native-cameraroll/tree/master
 [supported-os-badge]:https://img.shields.io/badge/platforms-android%20|%20ios-lightgrey.svg?style=flat-square
-[license-badge]:https://img.shields.io/npm/l/@react-native-community/cameraroll.svg?style=flat-square
+[license-badge]:https://img.shields.io/npm/l/@react-native-camera-roll/camera-roll.svg?style=flat-square
 [lean-core-badge]: https://img.shields.io/badge/Lean%20Core-Extracted-brightgreen.svg?style=flat-square
 [lean-core-issue]: https://github.com/facebook/react-native/issues/23313

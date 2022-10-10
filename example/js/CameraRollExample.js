@@ -21,10 +21,10 @@ const {
   TouchableOpacity,
   Dimensions,
 } = ReactNative;
-import CameraRoll from '../../js/CameraRoll';
-import type {PhotoIdentifier, GroupTypes} from '../../js/CameraRoll';
+import CameraRoll from '../../src/CameraRoll';
+import type {PhotoIdentifier, GroupTypes} from '../../src/CameraRoll';
 
-const invariant = require('fbjs/lib/invariant');
+const invariant = require('invariant');
 
 const CameraRollView = require('./CameraRollView');
 

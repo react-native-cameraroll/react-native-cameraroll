@@ -1,4 +1,5 @@
-import * as React from 'react';
+import React from 'react';
+import {Component} from 'react';
 import {
   SafeAreaView,
   StyleSheet,
@@ -40,7 +41,7 @@ const examples: Example[] = [
  * Shows a button which opens up a Modal to switch between examples, as well
  * as the current example itself.
  */
-export default class ExamplesContainer extends React.Component<Props, State> {
+export default class ExamplesContainer extends Component<Props, State> {
   state: State = {showChangeExampleModal: false, currentExampleIndex: 0};
 
   render() {

@@ -49,7 +49,7 @@ RCT_ENUM_CONVERTER(PHAssetCollectionSubtype, (@{
   NSString *const lowercase = [mediaType lowercaseString];
   NSMutableArray *format = [NSMutableArray new];
   NSMutableArray *arguments = [NSMutableArray new];
-  
+
   if ([lowercase isEqualToString:@"photos"]) {
     [format addObject:@"mediaType = %d"];
     [arguments addObject:@(PHAssetMediaTypeImage)];
@@ -62,7 +62,7 @@ RCT_ENUM_CONVERTER(PHAssetCollectionSubtype, (@{
                   "'videos' or 'all'.", mediaType);
     }
   }
-  
+
   if (fromTime > 0) {
     NSDate* fromDate = [NSDate dateWithTimeIntervalSince1970:fromTime/1000];
     [format addObject:@"creationDate > %@"];
@@ -73,7 +73,7 @@ RCT_ENUM_CONVERTER(PHAssetCollectionSubtype, (@{
     [format addObject:@"creationDate <= %@"];
     [arguments addObject:toDate];
   }
-  
+
   // This case includes the "all" mediatype
   PHFetchOptions *const options = [PHFetchOptions new];
   if ([format count] > 0) {
@@ -96,18 +96,44 @@ static NSString *const kErrorUnableToLoad = @"E_UNABLE_TO_LOAD";
 static NSString *const kErrorAuthRestricted = @"E_PHOTO_LIBRARY_AUTH_RESTRICTED";
 static NSString *const kErrorAuthDenied = @"E_PHOTO_LIBRARY_AUTH_DENIED";
 
-typedef void (^PhotosAuthorizedBlock)(void);
+typedef void (^PhotosAuthorizedBlock)(bool isLimited);
 
-static void requestPhotoLibraryAccess(RCTPromiseRejectBlock reject, PhotosAuthorizedBlock authorizedBlock) {
-  PHAuthorizationStatus authStatus = [PHPhotoLibrary authorizationStatus];
+static void requestPhotoLibraryAccess(RCTPromiseRejectBlock reject, PhotosAuthorizedBlock authorizedBlock, bool requestAddOnly) {
+  PHAuthorizationStatus authStatus;
+  if (@available(iOS 14, *)) {
+      if (requestAddOnly) {
+        authStatus = [PHPhotoLibrary authorizationStatusForAccessLevel:PHAccessLevelAddOnly];
+      } else {
+        authStatus = [PHPhotoLibrary authorizationStatusForAccessLevel:PHAccessLevelReadWrite];
+      }
+  } else {
+    authStatus = [PHPhotoLibrary authorizationStatus];
+  }
   if (authStatus == PHAuthorizationStatusRestricted) {
     reject(kErrorAuthRestricted, @"Access to photo library is restricted", nil);
   } else if (authStatus == PHAuthorizationStatusAuthorized) {
-    authorizedBlock();
+    authorizedBlock(false);
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+  } else if (authStatus == PHAuthorizationStatusLimited) {
+#pragma clang diagnostic pop
+    authorizedBlock(true);
   } else if (authStatus == PHAuthorizationStatusNotDetermined) {
-    [PHPhotoLibrary requestAuthorization:^(PHAuthorizationStatus status) {
-      requestPhotoLibraryAccess(reject, authorizedBlock);
-    }];
+      if (@available(iOS 14, *)) {
+          if (requestAddOnly) {
+              [PHPhotoLibrary requestAuthorizationForAccessLevel:PHAccessLevelAddOnly handler:^(PHAuthorizationStatus status) {
+                  requestPhotoLibraryAccess(reject, authorizedBlock, requestAddOnly);
+              }];
+          } else {
+              [PHPhotoLibrary requestAuthorizationForAccessLevel:PHAccessLevelReadWrite handler:^(PHAuthorizationStatus status) {
+                  requestPhotoLibraryAccess(reject, authorizedBlock, requestAddOnly);
+              }];
+          }
+      } else {
+          [PHPhotoLibrary requestAuthorization:^(PHAuthorizationStatus status) {
+              requestPhotoLibraryAccess(reject, authorizedBlock, requestAddOnly);
+          }];
+      }
   } else {
     reject(kErrorAuthDenied, @"Access to photo library was denied", nil);
   }
@@ -137,8 +163,11 @@ RCT_EXPORT_METHOD(saveToCameraRoll:(NSURLRequest *)request
       PHAssetChangeRequest *assetRequest ;
       if ([options[@"type"] isEqualToString:@"video"]) {
         assetRequest = [PHAssetChangeRequest creationRequestForAssetFromVideoAtFileURL:inputURI];
-        // 修改视频文件的拍摄时间为当前时间
-        assetRequest.creationDate = [NSDate date];
+      } else if ([[inputURI.pathExtension lowercaseString] isEqualToString:@"gif"]) {
+        NSData *data = [NSData dataWithContentsOfURL:inputURI];
+        PHAssetCreationRequest *request = [PHAssetCreationRequest creationRequestForAsset];
+        [request addResourceWithType:PHAssetResourceTypePhoto data:data options:NULL];
+        assetRequest = request;
       } else {
         NSData *data = [NSData dataWithContentsOfURL:inputURI];
         UIImage *image = [UIImage imageWithData:data];
@@ -161,7 +190,7 @@ RCT_EXPORT_METHOD(saveToCameraRoll:(NSURLRequest *)request
   };
   void (^saveWithOptions)(void) = ^void() {
     if (![options[@"album"] isEqualToString:@""]) {
-  
+
       PHFetchOptions *fetchOptions = [[PHFetchOptions alloc] init];
       fetchOptions.predicate = [NSPredicate predicateWithFormat:@"title = %@", options[@"album"] ];
       collection = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeAlbum
@@ -190,12 +219,12 @@ RCT_EXPORT_METHOD(saveToCameraRoll:(NSURLRequest *)request
     }
   };
 
-  void (^loadBlock)(void) = ^void() {
+  void (^loadBlock)(bool isLimited) = ^void(bool isLimited) {
     inputURI = request.URL;
     saveWithOptions();
   };
 
-  requestPhotoLibraryAccess(reject, loadBlock);
+  requestPhotoLibraryAccess(reject, loadBlock, true);
 }
 
 RCT_EXPORT_METHOD(getAlbums:(NSDictionary *)params
@@ -222,14 +251,16 @@ RCT_EXPORT_METHOD(getAlbums:(NSDictionary *)params
 
 static void RCTResolvePromise(RCTPromiseResolveBlock resolve,
                               NSArray<NSDictionary<NSString *, id> *> *assets,
-                              BOOL hasNextPage)
+                              BOOL hasNextPage,
+                              bool isLimited)
 {
   if (!assets.count) {
     resolve(@{
       @"edges": assets,
       @"page_info": @{
         @"has_next_page": @NO,
-      }
+      },
+      @"limited": @(isLimited)
     });
     return;
   }
@@ -239,7 +270,8 @@ static void RCTResolvePromise(RCTPromiseResolveBlock resolve,
       @"start_cursor": assets[0][@"node"][@"image"][@"uri"],
       @"end_cursor": assets[assets.count - 1][@"node"][@"image"][@"uri"],
       @"has_next_page": @(hasNextPage),
-    }
+    },
+    @"limited": @(isLimited)
   });
 }
 
@@ -264,14 +296,14 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
   BOOL __block includeLocation = [include indexOfObject:@"location"] != NSNotFound;
   BOOL __block includeImageSize = [include indexOfObject:@"imageSize"] != NSNotFound;
   BOOL __block includePlayableDuration = [include indexOfObject:@"playableDuration"] != NSNotFound;
-  
+
   // If groupTypes is "all", we want to fetch the SmartAlbum "all photos". Otherwise, all
   // other groupTypes values require the "album" collection type.
   PHAssetCollectionType const collectionType = ([groupTypes isEqualToString:@"all"]
                                                 ? PHAssetCollectionTypeSmartAlbum
                                                 : PHAssetCollectionTypeAlbum);
   PHAssetCollectionSubtype const collectionSubtype = [RCTConvert PHAssetCollectionSubtype:groupTypes];
-  
+
   // Predicate for fetching assets within a collection
   PHFetchOptions *const assetFetchOptions = [RCTConvert PHFetchOptionsFromMediaType:mediaType fromTime:fromTime toTime:toTime];
   // We can directly set the limit if we guarantee every image fetched will be
@@ -287,29 +319,36 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
     assetFetchOptions.fetchLimit = first + 1;
   }
   assetFetchOptions.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:NO]];
-  
+
   BOOL __block foundAfter = NO;
   BOOL __block hasNextPage = NO;
   BOOL __block resolvedPromise = NO;
   NSMutableArray<NSDictionary<NSString *, id> *> *assets = [NSMutableArray new];
-  
+
   // Filter collection name ("group")
   PHFetchOptions *const collectionFetchOptions = [PHFetchOptions new];
   collectionFetchOptions.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"endDate" ascending:NO]];
   if (groupName != nil) {
     collectionFetchOptions.predicate = [NSPredicate predicateWithFormat:@"localizedTitle = %@", groupName];
   }
-  
+
   BOOL __block stopCollections_;
   NSString __block *currentCollectionName;
 
-  requestPhotoLibraryAccess(reject, ^{
+  requestPhotoLibraryAccess(reject, ^(bool isLimited){
     void (^collectAsset)(PHAsset*, NSUInteger, BOOL*) = ^(PHAsset * _Nonnull asset, NSUInteger assetIdx, BOOL * _Nonnull stopAssets) {
       NSString *const uri = [NSString stringWithFormat:@"ph://%@", [asset localIdentifier]];
+       
+      if (afterCursor && !foundAfter) {
+        if ([afterCursor isEqualToString:uri]) {
+          foundAfter = YES;
+        }
+        return;
+      }
       NSString *_Nullable originalFilename = NULL;
       PHAssetResource *_Nullable resource = NULL;
       NSNumber* fileSize = [NSNumber numberWithInt:0];
-      
+
       if (includeFilename || includeFileSize || [mimeTypes count] > 0) {
         // Get underlying resources of an asset - this includes files as well as details about edited PHAssets
         // This is required for the filename and mimeType filtering
@@ -318,20 +357,12 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
         originalFilename = resource.originalFilename;
         fileSize = [resource valueForKey:@"fileSize"];
       }
-      
+
       // WARNING: If you add any code to `collectAsset` that may skip adding an
       // asset to the `assets` output array, you should do it inside this
       // block and ensure the logic for `collectAssetMayOmitAsset` above is
       // updated
       if (collectAssetMayOmitAsset) {
-        if (afterCursor && !foundAfter) {
-          if ([afterCursor isEqualToString:uri]) {
-            foundAfter = YES;
-          }
-          return; // skip until we get to the first one
-        }
-
-
         if ([mimeTypes count] > 0 && resource) {
           CFStringRef const uti = (__bridge CFStringRef _Nonnull)(resource.uniformTypeIdentifier);
           NSString *const mimeType = (NSString *)CFBridgingRelease(UTTypeCopyPreferredTagWithClass(uti, kUTTagClassMIMEType));
@@ -356,7 +387,7 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
         stopCollections_ = YES;
         hasNextPage = YES;
         RCTAssert(resolvedPromise == NO, @"Resolved the promise before we finished processing the results.");
-        RCTResolvePromise(resolve, assets, hasNextPage);
+        RCTResolvePromise(resolve, assets, hasNextPage, isLimited);
         resolvedPromise = YES;
         return;
       }
@@ -379,7 +410,7 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
               @"filename": (includeFilename && originalFilename ? originalFilename : [NSNull null]),
               @"height": (includeImageSize ? @([asset pixelHeight]) : [NSNull null]),
               @"width": (includeImageSize ? @([asset pixelWidth]) : [NSNull null]),
-              @"fileSize": (includeFileSize ? fileSize : [NSNull null]),
+              @"fileSize": (includeFileSize && fileSize ? fileSize : [NSNull null]),
               @"playableDuration": (includePlayableDuration && asset.mediaType != PHAssetMediaTypeImage
                                     ? @([asset duration]) // fractional seconds
                                     : [NSNull null])
@@ -414,10 +445,10 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
     // If we get this far and haven't resolved the promise yet, we reached the end of the list of photos
     if (!resolvedPromise) {
       hasNextPage = NO;
-      RCTResolvePromise(resolve, assets, hasNextPage);
+      RCTResolvePromise(resolve, assets, hasNextPage, isLimited);
       resolvedPromise = YES;
     }
-  });
+  }, false);
 }
 
 RCT_EXPORT_METHOD(deletePhotos:(NSArray<NSString *>*)assets
@@ -425,7 +456,7 @@ RCT_EXPORT_METHOD(deletePhotos:(NSArray<NSString *>*)assets
                   reject:(RCTPromiseRejectBlock)reject)
 {
   NSMutableArray *convertedAssets = [NSMutableArray array];
-  
+
   for (NSString *asset in assets) {
     [convertedAssets addObject: [asset stringByReplacingOccurrencesOfString:@"ph://" withString:@""]];
   }
@@ -444,6 +475,166 @@ RCT_EXPORT_METHOD(deletePhotos:(NSArray<NSString *>*)assets
     }
   }
   ];
+}
+
+RCT_EXPORT_METHOD(getPhotoByInternalID:(NSString *)internalId
+                  options:(NSDictionary *)options
+                  resolve:(RCTPromiseResolveBlock)resolve
+                  reject:(RCTPromiseRejectBlock)reject)
+{
+  checkPhotoLibraryConfig();
+
+  BOOL const convertHeic = [RCTConvert BOOL:options[@"convertHeicImages"]];
+
+  requestPhotoLibraryAccess(reject, ^(bool isLimited){
+    
+    PHFetchResult<PHAsset *> *fetchResult;
+    PHAsset *asset;
+    
+    NSString *mediaIdentifier = internalId;
+    
+    if ([internalId rangeOfString:@"ph://"].location != NSNotFound) {
+      mediaIdentifier = [internalId stringByReplacingOccurrencesOfString:@"ph://"
+                                                                   withString:@""];
+    }
+    
+    fetchResult = [PHAsset fetchAssetsWithLocalIdentifiers:@[mediaIdentifier] options:nil];
+    if(fetchResult){
+      asset = fetchResult.firstObject;//only object in the array.
+    }
+    
+    if(asset){
+      __block NSURL *imageURL = [[NSURL alloc]initWithString:@""];
+      
+      NSString *const assetMediaTypeLabel = (asset.mediaType == PHAssetMediaTypeVideo
+                                             ? @"video"
+                                             : (asset.mediaType == PHAssetMediaTypeImage
+                                                ? @"image"
+                                                : (asset.mediaType == PHAssetMediaTypeAudio
+                                                   ? @"audio"
+                                                   : @"unknown")));
+
+
+      CLLocation *const loc = asset.location;
+      
+      NSArray<PHAssetResource *> *const assetResources = [PHAssetResource assetResourcesForAsset:asset];
+      if (![assetResources firstObject]) {
+        return;
+      }
+      PHAssetResource *const _Nonnull resource = [assetResources firstObject];
+      
+      __block NSString *originalFilename = resource.originalFilename;
+      NSString *const uniformMimeType = resource.uniformTypeIdentifier;
+      
+      __block NSString *filePath = @"";
+
+      // check if HEIC extension asset
+      if (convertHeic && asset.mediaType == PHAssetMediaTypeImage && [uniformMimeType  isEqual: @"public.heic"]) {
+        // convert to JPEG
+        PHImageRequestOptions *const requestOptions = [PHImageRequestOptions new];
+        requestOptions.networkAccessAllowed = YES;
+        requestOptions.version = PHImageRequestOptionsVersionUnadjusted;
+        requestOptions.deliveryMode = PHImageRequestOptionsDeliveryModeHighQualityFormat;
+        
+        CGSize const targetSize = CGSizeMake((CGFloat)asset.pixelWidth, (CGFloat)asset.pixelHeight);
+        [[PHImageManager defaultManager] requestImageForAsset:asset
+                                                     targetSize:targetSize
+                                                    contentMode:PHImageContentModeDefault
+                                                        options:requestOptions
+                                                  resultHandler:^(UIImage * _Nullable image,
+                                                                  NSDictionary * _Nullable info) {
+          NSError *const error = [info objectForKey:PHImageErrorKey];
+          if (error) {
+            reject(@"Error while converting to JPEG image",@"Error while converting",error);
+          }
+
+          originalFilename = [originalFilename stringByReplacingOccurrencesOfString:@"HEIC" withString:@"JPEG" options:NSCaseInsensitiveSearch range:NSMakeRange(0, [originalFilename length])];
+          NSData *const imageData = UIImageJPEGRepresentation(image, 1.0);
+          NSFileManager *fileManager = [NSFileManager defaultManager];
+          NSString *fullPath = [NSTemporaryDirectory() stringByAppendingPathComponent:originalFilename];
+          if ([fileManager createFileAtPath:fullPath contents:imageData attributes:nil]) {
+            unsigned long long fileSize = [[fileManager attributesOfItemAtPath:fullPath error:nil] fileSize];
+
+            resolve(@{
+                      @"node": @{
+                          @"type": assetMediaTypeLabel,
+                          @"image": @{
+                              @"filepath": fullPath,
+                              @"filename": originalFilename,
+                              @"height": @([asset pixelHeight]),
+                              @"width": @([asset pixelWidth]),
+                              @"isStored": @YES,
+                              @"playableDuration": @([asset duration]), // fractional seconds
+                              @"fileSize": @(fileSize)
+                              },
+                          @"timestamp": @(asset.creationDate.timeIntervalSince1970),
+                          @"location": (loc ? @{
+                                                @"latitude": @(loc.coordinate.latitude),
+                                                @"longitude": @(loc.coordinate.longitude),
+                                                @"altitude": @(loc.altitude),
+                                                @"heading": @(loc.course),
+                                                @"speed": @(loc.speed), // speed in m/s
+                                                } : @{})
+                          }
+                      });
+          } else {
+            NSString *errorMessage = [NSString stringWithFormat:@"Failed to create tmp file for asset %@.", originalFilename];
+            NSError *error = RCTErrorWithMessage(errorMessage);
+            reject(@"Error while creating image tmp file",@"Error creating tmp file",error);
+          }
+
+        }];
+      } else {
+        NSNumber* fileSize = [resource valueForKey:@"fileSize"];
+        PHContentEditingInputRequestOptions *const editOptions = [PHContentEditingInputRequestOptions new];
+        // Download asset if on icloud.
+        editOptions.networkAccessAllowed = YES;
+        
+        [asset requestContentEditingInputWithOptions:editOptions completionHandler:^(PHContentEditingInput *contentEditingInput, NSDictionary *info) {
+          imageURL = contentEditingInput.fullSizeImageURL;
+          if (imageURL.absoluteString.length != 0) {
+            
+            filePath = [imageURL.absoluteString stringByReplacingOccurrencesOfString:@"pathfile:" withString:@"file:"];
+
+            resolve(@{
+                      @"node": @{
+                          @"type": assetMediaTypeLabel,
+                          @"image": @{
+                              @"filepath": filePath,
+                              @"filename": originalFilename,
+                              @"height": @([asset pixelHeight]),
+                              @"width": @([asset pixelWidth]),
+                              @"isStored": @YES,
+                              @"playableDuration": @([asset duration]), // fractional seconds
+                              @"fileSize": fileSize
+                              },
+                          @"timestamp": @(asset.creationDate.timeIntervalSince1970),
+                          @"location": (loc ? @{
+                                                @"latitude": @(loc.coordinate.latitude),
+                                                @"longitude": @(loc.coordinate.longitude),
+                                                @"altitude": @(loc.altitude),
+                                                @"heading": @(loc.course),
+                                                @"speed": @(loc.speed), // speed in m/s
+                                                } : @{})
+                          }
+                      });
+          } else {
+            NSString *errorMessage = [NSString stringWithFormat:@"Failed to load asset"
+                                      " with localIdentifier %@ with no error message.", internalId];
+            NSError *error = RCTErrorWithMessage(errorMessage);
+            reject(@"Error while getting file path",@"Error while getting file path",error);
+          }
+        }];
+      }
+      
+    } else {
+      NSString *errorMessage = [NSString stringWithFormat:@"Failed to load asset"
+                                " with localIdentifier %@ with no error message.", internalId];
+      NSError *error = RCTErrorWithMessage(errorMessage);
+      reject(@"No asset found",@"No asset found",error);
+    }
+    
+  }, false);
 }
 
 static void checkPhotoLibraryConfig()

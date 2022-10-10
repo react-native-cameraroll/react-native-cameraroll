@@ -3,15 +3,9 @@
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
- *
- * @flow
- * @format
  */
-'use strict';
 import {Platform} from 'react-native';
 import RNCCameraRoll from './nativeInterface';
-
-const invariant = require('fbjs/lib/invariant');
 
 const GROUP_TYPES_OPTIONS = {
   Album: 'Album',
@@ -29,7 +23,14 @@ const ASSET_TYPE_OPTIONS = {
   Photos: 'Photos',
 };
 
-export type GroupTypes = $Keys<typeof GROUP_TYPES_OPTIONS>;
+export type GroupTypes =
+  | 'Album'
+  | 'All'
+  | 'Event'
+  | 'Faces'
+  | 'Library'
+  | 'PhotoStream'
+  | 'SavedPhotos';
 
 export type Include =
   | 'filename'
@@ -37,6 +38,8 @@ export type Include =
   | 'location'
   | 'imageSize'
   | 'playableDuration';
+
+export type AssetType = 'All' | 'Videos' | 'Photos';
 
 /**
  * Shape of the param arg for the `getPhotos` function.
@@ -46,95 +49,101 @@ export type GetPhotosParams = {
    * The number of photos wanted in reverse order of the photo application
    * (i.e. most recent first).
    */
-  first: number,
+  first: number;
 
   /**
    * A cursor that matches `page_info { end_cursor }` returned from a previous
    * call to `getPhotos`
    */
-  after?: string,
+  after?: string;
 
   /**
    * Specifies which group types to filter the results to.
    */
-  groupTypes?: GroupTypes,
+  groupTypes?: GroupTypes;
 
   /**
    * Specifies filter on group names, like 'Recent Photos' or custom album
    * titles.
    */
-  groupName?: string,
+  groupName?: string;
 
   /**
    * Specifies filter on asset type
    */
-  assetType?: $Keys<typeof ASSET_TYPE_OPTIONS>,
+  assetType?: AssetType;
 
   /**
    * Earliest time to get photos from. A timestamp in milliseconds. Exclusive.
    */
-  fromTime?: number,
+  fromTime?: number;
 
   /**
    * Latest time to get photos from. A timestamp in milliseconds. Inclusive.
    */
-  toTime?: Number,
+  toTime?: number;
 
   /**
    * Filter by mimetype (e.g. image/jpeg).
    */
-  mimeTypes?: Array<string>,
+  mimeTypes?: Array<string>;
 
   /**
    * Specific fields in the output that we want to include, even though they
    * might have some performance impact.
    */
-  include?: Include[],
+  include?: Include[];
 };
 
 export type PhotoIdentifier = {
   node: {
-    type: string,
-    group_name: string,
+    type: string;
+    group_name: string;
     image: {
-      filename: string | null,
-      uri: string,
-      height: number,
-      width: number,
-      fileSize: number | null,
-      playableDuration: number,
-    },
-    timestamp: number,
+      filename: string | null;
+      uri: string;
+      height: number;
+      width: number;
+      fileSize: number | null;
+      playableDuration: number;
+    };
+    timestamp: number;
     location: {
-      latitude?: number,
-      longitude?: number,
-      altitude?: number,
-      heading?: number,
-      speed?: number,
-    } | null,
-  },
+      latitude?: number;
+      longitude?: number;
+      altitude?: number;
+      heading?: number;
+      speed?: number;
+    } | null;
+  };
+};
+
+export type PhotoConvertionOptions = {
+  convertHeicImages: boolean;
 };
 
 export type PhotoIdentifiersPage = {
-  edges: Array<PhotoIdentifier>,
+  edges: Array<PhotoIdentifier>;
   page_info: {
-    has_next_page: boolean,
-    start_cursor?: string,
-    end_cursor?: string,
-  },
+    has_next_page: boolean;
+    start_cursor?: string;
+    end_cursor?: string;
+  };
+  limited?: boolean;
 };
+
 export type SaveToCameraRollOptions = {
-  type?: 'photo' | 'video' | 'auto',
-  album?: string,
+  type?: 'photo' | 'video' | 'auto';
+  album?: string;
 };
 
 export type GetAlbumsParams = {
-  assetType?: $Keys<typeof ASSET_TYPE_OPTIONS>,
+  assetType?: AssetType;
 };
 
 export type Album = {
-  title: string,
-  count: number,
+  title: string;
+  count: number;
 };
 
 /**
@@ -142,26 +151,16 @@ export type Album = {
  *
  * See https://facebook.github.io/react-native/docs/cameraroll.html
  */
-class CameraRoll {
+export class CameraRoll {
   static GroupTypesOptions = GROUP_TYPES_OPTIONS;
   static AssetTypeOptions = ASSET_TYPE_OPTIONS;
-
-  /**
-   * `CameraRoll.saveImageWithTag()` is deprecated. Use `CameraRoll.saveToCameraRoll()` instead.
-   */
-  static saveImageWithTag(tag: string): Promise<string> {
-    console.warn(
-      '`CameraRoll.saveImageWithTag()` is deprecated. Use `CameraRoll.saveToCameraRoll()` instead.',
-    );
-    return this.saveToCameraRoll(tag, 'photo');
-  }
 
   /**
    * On iOS: requests deletion of a set of photos from the camera roll.
    * On Android: Deletes a set of photos from the camera roll.
    *
    */
-  static deletePhotos(photoUris: Array<string>) {
+  static deletePhotos(photoUris: Array<string>): void {
     return RNCCameraRoll.deletePhotos(photoUris);
   }
 
@@ -173,28 +172,18 @@ class CameraRoll {
     tag: string,
     options: SaveToCameraRollOptions = {},
   ): Promise<string> {
-    let {type = 'auto', album = ''} = options;
-    invariant(
-      typeof tag === 'string',
-      'CameraRoll.saveToCameraRoll must be a valid string.',
-    );
-    invariant(
-      options.type === 'photo' ||
-        options.type === 'video' ||
-        options.type === 'auto' ||
-        options.type === undefined,
-      `The second argument to saveToCameraRoll must be 'photo' or 'video' or 'auto'. You passed ${type ||
-        'unknown'}`,
-    );
+    let {type = 'auto'} = options;
+    const {album = ''} = options;
+    if (tag === '') throw new Error('tag must be a valid string');
+
     if (type === 'auto') {
-      if (['mov', 'mp4'].indexOf(tag.split('.').slice(-1)[0]) >= 0) {
-        type = 'video';
-      } else {
-        type = 'photo';
-      }
+      const fileExtension = tag.split('.').slice(-1)[0] ?? '';
+      if (['mov', 'mp4'].indexOf(fileExtension) >= 0) type = 'video';
+      else type = 'photo';
     }
     return RNCCameraRoll.saveToCameraRoll(tag, {type, album});
   }
+
   static saveToCameraRoll(
     tag: string,
     type?: 'photo' | 'video' | 'auto',
@@ -205,19 +194,18 @@ class CameraRoll {
     return CameraRoll.save(tag, {type});
   }
   static getAlbums(
-    params?: GetAlbumsParams = {assetType: ASSET_TYPE_OPTIONS.All},
+    params: GetAlbumsParams = {assetType: 'All'},
   ): Promise<Album[]> {
     return RNCCameraRoll.getAlbums(params);
   }
 
   static getParamsWithDefaults(params: GetPhotosParams): GetPhotosParams {
     const newParams = {...params};
-    if (!newParams.assetType) {
-      newParams.assetType = ASSET_TYPE_OPTIONS.All;
-    }
-    if (!newParams.groupTypes && Platform.OS !== 'android') {
-      newParams.groupTypes = GROUP_TYPES_OPTIONS.All;
-    }
+    if (newParams.assetType === undefined) newParams.assetType = 'All';
+
+    if (newParams.groupTypes === undefined && Platform.OS !== 'android')
+      newParams.groupTypes = 'All';
+
     return newParams;
   }
 
@@ -229,19 +217,24 @@ class CameraRoll {
    */
   static getPhotos(params: GetPhotosParams): Promise<PhotoIdentifiersPage> {
     params = CameraRoll.getParamsWithDefaults(params);
-    const promise = RNCCameraRoll.getPhotos(params);
+    return RNCCameraRoll.getPhotos(params);
+  }
 
-    if (arguments.length > 1) {
-      console.warn(
-        'CameraRoll.getPhotos(tag, success, error) is deprecated.  Use the returned Promise instead',
-      );
-      let successCallback = arguments[1];
-      const errorCallback = arguments[2] || (() => {});
-      promise.then(successCallback, errorCallback);
-    }
-
-    return promise;
+  /**
+   * Returns a Promise with photo internal path.
+   * if conversion is requested from HEIC then temporary file is created.
+   *
+   * @param internalID - PH photo internal ID.
+   * @param convertHeicImages - whether to convert or not heic images to JPEG.
+   * @returns Promise<PhotoIdentifier>
+   */
+  static iosGetImageDataById(
+    internalID: string,
+    convertHeicImages = false,
+  ): Promise<PhotoIdentifier> {
+    const conversionOption: PhotoConvertionOptions = {
+      convertHeicImages: convertHeicImages,
+    };
+    return RNCCameraRoll.getPhotoByInternalID(internalID, conversionOption);
   }
 }
-
-module.exports = CameraRoll;
