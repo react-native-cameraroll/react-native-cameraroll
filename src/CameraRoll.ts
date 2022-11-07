@@ -193,6 +193,7 @@ export class CameraRoll {
     );
     return CameraRoll.save(tag, {type});
   }
+
   static getAlbums(
     params: GetAlbumsParams = {assetType: 'All'},
   ): Promise<Album[]> {
