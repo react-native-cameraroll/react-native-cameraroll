@@ -478,7 +478,7 @@ CameraRoll.iosGetImageDataById(internalID, true);
 
 ### `useCameraRoll()`
 
-`useCameraRoll` is a utility hooks for the CameraRoll module. data contains the content stored in the clipboard.
+`useCameraRoll` is a utility hooks for the CameraRoll module.
 
 ```javascript
 import React, {useEffect} from 'react';
