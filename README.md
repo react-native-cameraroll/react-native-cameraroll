@@ -143,6 +143,8 @@ On Android 13 the `READ_EXTERNAL_STORAGE` has been [replace](https://developer.a
 * [`getAlbums`](#getalbums)
 * [`getPhotos`](#getphotos)
 * [`deletePhotos`](#deletephotos)
+* [`iosGetImageDataById`](#iosgetimagedatabyid)
+* [`useCameraRoll`](#usecameraroll)
 
 ---
 
@@ -471,6 +473,29 @@ CameraRoll.iosGetImageDataById(internalID, true);
 | ------------ | ----------------------- | ---------- | ---------------------------------------------------- |
 | internalID   | string                  | Yes        | Ios internal ID 'PH://xxxx'.                         |
 | convertHeic  | boolean                 | False      | Whether to convert or not to JPEG image.             |
+
+
+
+### `useCameraRoll()`
+
+`useCameraRoll` is a utility hooks for the CameraRoll module. data contains the content stored in the clipboard.
+
+```javascript
+import React, {useEffect} from 'react';
+import {Button} from 'react-native';
+import {useCameraRoll} from "@react-native-camera-roll/camera-roll";
+
+function Example() {
+  const [photos, getPhotos, save] = useCameraRoll();
+
+  return <>
+    <Button title='Get Photos' onPress={() => getPhotos()}>Get Photos</Button>
+    {
+      photos.map((photo, index) => /* render photos */)
+    }
+  </>;
+};
+```
 
 ### Known issues
 
