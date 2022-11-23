@@ -26,7 +26,6 @@ import android.provider.MediaStore;
 import android.provider.MediaStore.Images;
 import android.text.TextUtils;
 import android.media.ExifInterface;
-import android.webkit.MimeTypeMap;
 
 import com.facebook.common.logging.FLog;
 import com.facebook.react.bridge.GuardedAsyncTask;
@@ -664,8 +663,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
     }
 
     if (includeFileExtension) {
-      MimeTypeMap mime = MimeTypeMap.getSingleton();
-      image.putString("extension", mime.getExtensionFromMimeType(mimeType));
+      image.putString("extension", Utils.getExtension(mimeType));
     } else {
       image.putNull("extension");
     }
