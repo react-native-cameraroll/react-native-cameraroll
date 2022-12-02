@@ -8,7 +8,7 @@ import {
   Modal,
   TouchableWithoutFeedback,
 } from 'react-native';
-// @ts-ignore: CameraRollExample has no typings in same folder
+
 import CameraRollExample from './CameraRollExample';
 import GetPhotosPerformanceExample from './GetPhotosPerformanceExample';
 
@@ -21,7 +21,7 @@ interface State {
 
 interface Example {
   label: string;
-  Component: React.ComponentType;
+  Component: any; // TODO: Fix me
 }
 
 const examples: Example[] = [

@@ -153,5 +153,6 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/react-native-cameraroll/react-native-cameraroll.git"
-  }
+  },
+  "dependencies": {}
 }
