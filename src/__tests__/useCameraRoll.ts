@@ -104,7 +104,7 @@ describe('useCameraRoll()', () => {
       expect(photos).toEqual(mockPhotos);
     });
 
-    it('should handle an error when invoke getPhotos', async () => {
+    it('should handle an error when invoke getPhotos', () => {
       const error = new Error('Ops...');
       const {result} = renderHook(() => useCameraRoll());
       const [initialPhotos, getPhotos] = result.current;

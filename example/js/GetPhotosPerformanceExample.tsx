@@ -9,7 +9,7 @@ import {
   Keyboard,
 } from 'react-native';
 // @ts-ignore: CameraRollExample has no typings in same folder
-import CameraRoll from '../../src/CameraRoll';
+import { CameraRoll } from '../../src/CameraRoll';
 
 interface State {
   fetchingPhotos: boolean;
