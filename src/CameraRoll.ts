@@ -178,7 +178,7 @@ export class CameraRoll {
 
     if (type === 'auto') {
       const fileExtension = tag.split('.').slice(-1)[0] ?? '';
-      if (['mov', 'mp4'].indexOf(fileExtension) >= 0) type = 'video';
+      if (['mov', 'mp4'].indexOf(fileExtension.toLowerCase()) >= 0) type = 'video';
       else type = 'photo';
     }
     return RNCCameraRoll.saveToCameraRoll(tag, {type, album});
