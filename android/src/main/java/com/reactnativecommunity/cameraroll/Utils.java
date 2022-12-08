@@ -13,4 +13,9 @@ public class Utils {
         return type;
     }
 
+    public static String getExtension(String mimeType) {
+        String extension = MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType);
+        return extension;
+    }
+
 }

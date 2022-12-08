@@ -35,6 +35,7 @@ export type GroupTypes =
 export type Include =
   | 'filename'
   | 'fileSize'
+  | 'fileExtension'
   | 'location'
   | 'imageSize'
   | 'playableDuration';
@@ -101,6 +102,7 @@ export type PhotoIdentifier = {
     group_name: string;
     image: {
       filename: string | null;
+      extension: string | null;
       uri: string;
       height: number;
       width: number;

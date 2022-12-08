@@ -80,6 +80,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
 
   private static final String INCLUDE_FILENAME = "filename";
   private static final String INCLUDE_FILE_SIZE = "fileSize";
+  private static final String INCLUDE_FILE_EXTENSION = "fileExtension";
   private static final String INCLUDE_LOCATION = "location";
   private static final String INCLUDE_IMAGE_SIZE = "imageSize";
   private static final String INCLUDE_PLAYABLE_DURATION = "playableDuration";
@@ -572,6 +573,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
     boolean includeLocation = include.contains(INCLUDE_LOCATION);
     boolean includeFilename = include.contains(INCLUDE_FILENAME);
     boolean includeFileSize = include.contains(INCLUDE_FILE_SIZE);
+    boolean includeFileExtension = include.contains(INCLUDE_FILE_EXTENSION);
     boolean includeImageSize = include.contains(INCLUDE_IMAGE_SIZE);
     boolean includePlayableDuration = include.contains(INCLUDE_PLAYABLE_DURATION);
 
@@ -580,7 +582,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
       WritableMap node = new WritableNativeMap();
       boolean imageInfoSuccess =
               putImageInfo(resolver, media, node, widthIndex, heightIndex, sizeIndex, dataIndex,
-                      mimeTypeIndex, includeFilename, includeFileSize, includeImageSize,
+                      mimeTypeIndex, includeFilename, includeFileSize, includeFileExtension, includeImageSize,
                       includePlayableDuration);
       if (imageInfoSuccess) {
         putBasicNodeInfo(media, node, mimeTypeIndex, groupNameIndex, dateTakenIndex, dateAddedIndex, dateModifiedIndex);
@@ -632,6 +634,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
           int mimeTypeIndex,
           boolean includeFilename,
           boolean includeFileSize,
+          boolean includeFileExtension,
           boolean includeImageSize,
           boolean includePlayableDuration) {
     WritableMap image = new WritableNativeMap();
@@ -657,6 +660,12 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
       image.putDouble("fileSize", media.getLong(sizeIndex));
     } else {
       image.putNull("fileSize");
+    }
+
+    if (includeFileExtension) {
+      image.putString("extension", Utils.getExtension(mimeType));
+    } else {
+      image.putNull("extension");
     }
 
     node.putMap("image", image);
