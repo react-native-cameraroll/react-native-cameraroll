@@ -7,6 +7,7 @@ import {
   Switch,
   TextInput,
   Keyboard,
+  ScrollView,
 } from 'react-native';
 // @ts-ignore: CameraRollExample has no typings in same folder
 import { CameraRoll, GetPhotosParams, Include, PhotoIdentifiersPage } from '../../src/CameraRoll';
@@ -140,11 +141,13 @@ export default class GetPhotosPerformanceExample extends React.PureComponent<
         <View>
           <Text>Output</Text>
         </View>
-        <TextInput
-          value={JSON.stringify(output, null, 2)}
-          multiline
+        <ScrollView
           style={styles.outputBox}
-        />
+        >
+          <Text selectable>
+          {JSON.stringify(output, null, 2)}
+          </Text>
+        </ScrollView>
       </View>
     );
   }
