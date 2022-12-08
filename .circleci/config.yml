@@ -59,19 +59,19 @@ workflows:
           persist_to_workspace: false
           requires:
             - analyse_js
-      # - rn/ios_build:
-      #     build_configuration: Debug
-      #     device: iPhone 11
-      #     name: build_ios_debug
-      #     project_path: example/ios/CameraRollExample.xcworkspace
-      #     project_type: workspace
-      #     requires:
-      #       - analyse_js
-      #     scheme: CameraRollExample
+      - rn/ios_build:
+          build_configuration: Debug
+          device: iPhone 14
+          name: build_ios_debug
+          project_path: example/ios/CameraRollExample.xcworkspace
+          project_type: workspace
+          requires:
+            - analyse_js
+          scheme: CameraRollExample
       - publish:
           requires:
             - build_android_release
-            # - build_ios_debug
+            - build_ios_debug
           filters:
             branches:
               only: master
