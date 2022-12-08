@@ -164,7 +164,7 @@ On Android, the tag must be a local image or video URI, such as `"file:///sdcard
 
 On iOS, the tag can be any image URI (including local, remote asset-library and base64 data URIs) or a local video file URI (remote or data URIs are not supported for saving video at this time).
 
-If the tag has a file extension of .mov or .mp4, it will be inferred as a video. Otherwise it will be treated as a photo. To override the automatic choice, you can pass an optional `type` parameter that must be one of 'photo' or 'video'.
+If the tag has a file extension of .mov or .mp4 (lower or uppercase), it will be inferred as a video. Otherwise it will be treated as a photo. To override the automatic choice, you can pass an optional `type` parameter that must be one of 'photo' or 'video'.
 
 It allows to specify a particular album you want to store the asset to when the param `album` is provided.
 On Android, if no album is provided, DCIM directory is used, otherwise PICTURE or MOVIES directory is used depending on the `type` provided.
@@ -237,6 +237,7 @@ Returns a Promise with photo identifier objects from the local camera roll of th
 * `include` : {Array} : Whether to include some fields that are slower to fetch
   * `filename` : Ensures `image.filename` is available in each node. This has a large performance impact on iOS.
   * `fileSize` : Ensures `image.fileSize` is available in each node. This has a large performance impact on iOS.
+  * `fileExtension` : Ensures `image.fileExtension` is available in each node.
   * `location`: Ensures `location` is available in each node. This has a large performance impact on Android.
   * `imageSize` : Ensures `image.width` and `image.height` are available in each node. This has a small performance impact on Android.
   * `playableDuration` : Ensures `image.playableDuration` is available in each node. This has a medium peformance impact on Android.
@@ -250,6 +251,7 @@ Returns a Promise which when resolved will be of the following shape:
     * `image`: {object} : An object with the following shape:
       * `uri`: {string}
       * `filename`: {string | null} : Only set if the `include` parameter contains `filename`
+      * `extension`: {string | null} : Only set if the `include` parameter contains `fileExtension`
       * `height`: {number | null} : Only set if the `include` parameter contains `imageSize`
       * `width`: {number | null} : Only set if the `include` parameter contains `imageSize`
       * `fileSize`: {number | null} : Only set if the `include` parameter contains `fileSize`

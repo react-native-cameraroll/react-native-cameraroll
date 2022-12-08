@@ -35,6 +35,7 @@ export type GroupTypes =
 export type Include =
   | 'filename'
   | 'fileSize'
+  | 'fileExtension'
   | 'location'
   | 'imageSize'
   | 'playableDuration';
@@ -101,6 +102,7 @@ export type PhotoIdentifier = {
     group_name: string;
     image: {
       filename: string | null;
+      extension: string | null;
       uri: string;
       height: number;
       width: number;
@@ -178,7 +180,7 @@ export class CameraRoll {
 
     if (type === 'auto') {
       const fileExtension = tag.split('.').slice(-1)[0] ?? '';
-      if (['mov', 'mp4'].indexOf(fileExtension) >= 0) type = 'video';
+      if (['mov', 'mp4'].indexOf(fileExtension.toLowerCase()) >= 0) type = 'video';
       else type = 'photo';
     }
     return RNCCameraRoll.saveToCameraRoll(tag, {type, album});
