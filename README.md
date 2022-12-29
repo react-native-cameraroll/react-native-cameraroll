@@ -103,7 +103,7 @@ import { PermissionsAndroid, Platform } from "react-native";
 import { CameraRoll } from "@react-native-camera-roll/camera-roll";
 
 async function hasAndroidPermission() {
-  const permission = PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE;
+  const permission = Platform.Version >= 33 ? PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES : PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE;
 
   const hasPermission = await PermissionsAndroid.check(permission);
   if (hasPermission) {
