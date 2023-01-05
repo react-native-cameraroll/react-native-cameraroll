@@ -586,7 +586,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
                       includePlayableDuration);
       if (imageInfoSuccess) {
         putBasicNodeInfo(media, node, mimeTypeIndex, groupNameIndex, dateTakenIndex, dateAddedIndex, dateModifiedIndex);
-        putLocationInfo(media, node, dataIndex, includeLocation);
+        putLocationInfo(media, node, dataIndex, includeLocation,mimeTypeIndex,resolver);
 
         edge.putMap("node", node);
         edges.pushMap(edge);
@@ -823,7 +823,9 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
           Cursor media,
           WritableMap node,
           int dataIndex,
-          boolean includeLocation) {
+          boolean includeLocation,
+          int mimeTypeIndex,
+          ContentResolver resolver) {
     node.putNull("location");
 
     if (!includeLocation) {
@@ -831,19 +833,65 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
     }
 
     try {
-      // location details are no longer indexed for privacy reasons using string Media.LATITUDE, Media.LONGITUDE
-      // we manually obtain location metadata using ExifInterface#getLatLong(float[]).
-      // ExifInterface is added in API level 5
-      final ExifInterface exif = new ExifInterface(media.getString(dataIndex));
-      float[] imageCoordinates = new float[2];
-      boolean hasCoordinates = exif.getLatLong(imageCoordinates);
-      if (hasCoordinates) {
-        double longitude = imageCoordinates[1];
-        double latitude = imageCoordinates[0];
-        WritableMap location = new WritableNativeMap();
-        location.putDouble("longitude", longitude);
-        location.putDouble("latitude", latitude);
-        node.putMap("location", location);
+      String mimeType = media.getString(mimeTypeIndex);
+      boolean isVideo = mimeType != null && mimeType.startsWith("video");
+      if(isVideo){
+        Uri photoUri = Uri.parse("file://" + media.getString(dataIndex));
+        @Nullable AssetFileDescriptor photoDescriptor = null;
+        try {
+          photoDescriptor = resolver.openAssetFileDescriptor(photoUri, "r");
+        } catch (FileNotFoundException e) {
+          FLog.e(ReactConstants.TAG, "Could not open asset file " + photoUri.toString(), e);
+        }
+
+        if (photoDescriptor != null) {
+          MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+          try {
+            retriever.setDataSource(photoDescriptor.getFileDescriptor());
+          } catch (RuntimeException e) {
+            // Do nothing. We can't handle this, and this is usually a system problem
+          }
+          try {
+            String videoGeoTag = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_LOCATION);
+            if (videoGeoTag!=null){
+              String filtered = videoGeoTag.replaceAll("/","");
+              WritableMap location = new WritableNativeMap();
+              location.putDouble("latitude", Double.parseDouble(filtered.split("[+]|[-]")[1]));
+              location.putDouble("longitude", Double.parseDouble(filtered.split("[+]|[-]")[2]));
+              node.putMap("location", location);
+            }
+          } catch (NumberFormatException e) {
+            FLog.e(ReactConstants.TAG,"Number format exception occurred while trying to fetch video metadata for "+ photoUri.toString(),e);
+          }
+          try {
+            retriever.release();
+          } catch (Exception e) { // Use general Exception here, see: https://developer.android.com/reference/android/media/MediaMetadataRetriever#release()
+            // Do nothing. We can't handle this, and this is usually a system problem
+          }
+        }
+        if (photoDescriptor != null) {
+          try {
+            photoDescriptor.close();
+          } catch (IOException e) {
+            // Do nothing. We can't handle this, and this is usually a system problem
+          }
+        }
+      }
+      else{
+        // location details are no longer indexed for privacy reasons using string Media.LATITUDE, Media.LONGITUDE
+        // we manually obtain location metadata using ExifInterface#getLatLong(float[]).
+        // ExifInterface is added in API level 5
+        final ExifInterface exif = new ExifInterface(media.getString(dataIndex));
+        float[] imageCoordinates = new float[2];
+        boolean hasCoordinates = exif.getLatLong(imageCoordinates);
+        if (hasCoordinates) {
+          double longitude = imageCoordinates[1];
+          double latitude = imageCoordinates[0];
+          WritableMap location = new WritableNativeMap();
+          location.putDouble("longitude", longitude);
+          location.putDouble("latitude", latitude);
+          node.putMap("location", location);
+        }
       }
     } catch (IOException e) {
       FLog.e(ReactConstants.TAG, "Could not read the metadata", e);
