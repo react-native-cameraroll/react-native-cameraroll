@@ -7,15 +7,18 @@ import {
   Switch,
   TextInput,
   Keyboard,
+  ScrollView,
 } from 'react-native';
 // @ts-ignore: CameraRollExample has no typings in same folder
-import CameraRoll from '../../src/CameraRoll';
+import { CameraRoll, GetPhotosParams, Include, PhotoIdentifiersPage } from '../../src/CameraRoll';
+
+interface Props {}
 
 interface State {
   fetchingPhotos: boolean;
   timeTakenMillis: number | null;
-  output: CameraRoll.PhotoIdentifiersPage | null;
-  include: CameraRoll.Include[];
+  output: PhotoIdentifiersPage | null;
+  include: Include[];
   /**
    * `first` argument passed into `getPhotos`, but as a string. Validate it
    * with `this.first()` before using.
@@ -23,7 +26,7 @@ interface State {
   firstStr: string;
 }
 
-const includeValues: CameraRoll.Include[] = [
+const includeValues: Include[] = [
   'filename',
   'fileSize',
   'location',
@@ -36,7 +39,7 @@ const includeValues: CameraRoll.Include[] = [
  * `getPhotosFast`
  */
 export default class GetPhotosPerformanceExample extends React.PureComponent<
-  {},
+  Props,
   State
 > {
   state: State = {
@@ -63,9 +66,9 @@ export default class GetPhotosPerformanceExample extends React.PureComponent<
     }
     this.setState({fetchingPhotos: true});
     Keyboard.dismiss();
-    const params: CameraRoll.GetPhotosParams = {first, include};
+    const params: GetPhotosParams = {first, include};
     const startTime = Date.now();
-    const output: CameraRoll.PhotoIdentifiersPage = await CameraRoll.getPhotos(
+    const output: PhotoIdentifiersPage = await CameraRoll.getPhotos(
       params,
     );
     const endTime = Date.now();
@@ -77,7 +80,7 @@ export default class GetPhotosPerformanceExample extends React.PureComponent<
   };
 
   handleIncludeChange = (
-    includeValue: CameraRoll.Include,
+    includeValue: Include,
     changedTo: boolean,
   ) => {
     if (changedTo === false) {
@@ -138,11 +141,13 @@ export default class GetPhotosPerformanceExample extends React.PureComponent<
         <View>
           <Text>Output</Text>
         </View>
-        <TextInput
-          value={JSON.stringify(output, null, 2)}
-          multiline
+        <ScrollView
           style={styles.outputBox}
-        />
+        >
+          <Text selectable>
+          {JSON.stringify(output, null, 2)}
+          </Text>
+        </ScrollView>
       </View>
     );
   }

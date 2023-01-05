@@ -61,7 +61,7 @@ workflows:
             - analyse_js
       # - rn/ios_build:
       #     build_configuration: Debug
-      #     device: iPhone 11
+      #     device: iPhone 12
       #     name: build_ios_debug
       #     project_path: example/ios/CameraRollExample.xcworkspace
       #     project_type: workspace

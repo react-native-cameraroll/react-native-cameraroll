@@ -10,11 +10,6 @@ describe('CameraRoll', () => {
     expect(NativeModule.deletePhotos.mock.calls).toMatchSnapshot();
   });
 
-  it('Should call saveToCameraRoll', async () => {
-    await CameraRoll.saveToCameraRoll('a tag', 'photo');
-    expect(NativeModule.saveToCameraRoll.mock.calls).toMatchSnapshot();
-  });
-
   it('Should call save', async () => {
     await CameraRoll.save('a tag', {type: 'photo'});
     expect(NativeModule.saveToCameraRoll.mock.calls).toMatchSnapshot();

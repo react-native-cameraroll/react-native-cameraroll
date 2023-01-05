@@ -16,13 +16,13 @@ const {Image, StyleSheet, View, ScrollView} = ReactNative;
 
 import type {PhotoIdentifier} from '../../src/CameraRoll';
 
-type Props = $ReadOnly<{|
-  asset: PhotoIdentifier,
-|}>;
+type Props = {
+  readonly asset: PhotoIdentifier,
+};
 
-type State = {|
+type State = {
   asset: PhotoIdentifier,
-|};
+};
 
 class AssetScaledImageExample extends React.Component<Props, State> {
   state = {

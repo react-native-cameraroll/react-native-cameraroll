@@ -163,6 +163,11 @@ RCT_EXPORT_METHOD(saveToCameraRoll:(NSURLRequest *)request
       PHAssetChangeRequest *assetRequest ;
       if ([options[@"type"] isEqualToString:@"video"]) {
         assetRequest = [PHAssetChangeRequest creationRequestForAssetFromVideoAtFileURL:inputURI];
+      } else if ([[inputURI.pathExtension lowercaseString] isEqualToString:@"gif"]) {
+        NSData *data = [NSData dataWithContentsOfURL:inputURI];
+        PHAssetCreationRequest *request = [PHAssetCreationRequest creationRequestForAsset];
+        [request addResourceWithType:PHAssetResourceTypePhoto data:data options:NULL];
+        assetRequest = request;
       } else {
         NSData *data = [NSData dataWithContentsOfURL:inputURI];
         UIImage *image = [UIImage imageWithData:data];
@@ -288,6 +293,7 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
 
   BOOL __block includeFilename = [include indexOfObject:@"filename"] != NSNotFound;
   BOOL __block includeFileSize = [include indexOfObject:@"fileSize"] != NSNotFound;
+  BOOL __block includeFileExtension = [include indexOfObject:@"fileExtension"] != NSNotFound;
   BOOL __block includeLocation = [include indexOfObject:@"location"] != NSNotFound;
   BOOL __block includeImageSize = [include indexOfObject:@"imageSize"] != NSNotFound;
   BOOL __block includePlayableDuration = [include indexOfObject:@"playableDuration"] != NSNotFound;
@@ -333,7 +339,7 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
   requestPhotoLibraryAccess(reject, ^(bool isLimited){
     void (^collectAsset)(PHAsset*, NSUInteger, BOOL*) = ^(PHAsset * _Nonnull asset, NSUInteger assetIdx, BOOL * _Nonnull stopAssets) {
       NSString *const uri = [NSString stringWithFormat:@"ph://%@", [asset localIdentifier]];
-       
+
       if (afterCursor && !foundAfter) {
         if ([afterCursor isEqualToString:uri]) {
           foundAfter = YES;
@@ -341,6 +347,7 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
         return;
       }
       NSString *_Nullable originalFilename = NULL;
+      NSString *_Nullable fileExtension = NULL;
       PHAssetResource *_Nullable resource = NULL;
       NSNumber* fileSize = [NSNumber numberWithInt:0];
 
@@ -394,6 +401,13 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
                                                 : (asset.mediaType == PHAssetMediaTypeAudio
                                                   ? @"audio"
                                                   : @"unknown")));
+
+      if (includeFileExtension) {
+        NSString *name = [asset valueForKey:@"filename"];
+        NSString *extension = [name pathExtension];
+        fileExtension = [extension lowercaseString];
+      }
+
       CLLocation *const loc = asset.location;
 
       [assets addObject:@{
@@ -402,6 +416,7 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
           @"group_name": currentCollectionName,
           @"image": @{
               @"uri": uri,
+              @"extension": (includeFileExtension ? fileExtension : [NSNull null]),
               @"filename": (includeFilename && originalFilename ? originalFilename : [NSNull null]),
               @"height": (includeImageSize ? @([asset pixelHeight]) : [NSNull null]),
               @"width": (includeImageSize ? @([asset pixelWidth]) : [NSNull null]),
@@ -482,25 +497,25 @@ RCT_EXPORT_METHOD(getPhotoByInternalID:(NSString *)internalId
   BOOL const convertHeic = [RCTConvert BOOL:options[@"convertHeicImages"]];
 
   requestPhotoLibraryAccess(reject, ^(bool isLimited){
-    
+
     PHFetchResult<PHAsset *> *fetchResult;
     PHAsset *asset;
-    
+
     NSString *mediaIdentifier = internalId;
-    
+
     if ([internalId rangeOfString:@"ph://"].location != NSNotFound) {
       mediaIdentifier = [internalId stringByReplacingOccurrencesOfString:@"ph://"
                                                                    withString:@""];
     }
-    
+
     fetchResult = [PHAsset fetchAssetsWithLocalIdentifiers:@[mediaIdentifier] options:nil];
     if(fetchResult){
       asset = fetchResult.firstObject;//only object in the array.
     }
-    
+
     if(asset){
       __block NSURL *imageURL = [[NSURL alloc]initWithString:@""];
-      
+
       NSString *const assetMediaTypeLabel = (asset.mediaType == PHAssetMediaTypeVideo
                                              ? @"video"
                                              : (asset.mediaType == PHAssetMediaTypeImage
@@ -511,16 +526,16 @@ RCT_EXPORT_METHOD(getPhotoByInternalID:(NSString *)internalId
 
 
       CLLocation *const loc = asset.location;
-      
+
       NSArray<PHAssetResource *> *const assetResources = [PHAssetResource assetResourcesForAsset:asset];
       if (![assetResources firstObject]) {
         return;
       }
       PHAssetResource *const _Nonnull resource = [assetResources firstObject];
-      
+
       __block NSString *originalFilename = resource.originalFilename;
       NSString *const uniformMimeType = resource.uniformTypeIdentifier;
-      
+
       __block NSString *filePath = @"";
 
       // check if HEIC extension asset
@@ -530,7 +545,7 @@ RCT_EXPORT_METHOD(getPhotoByInternalID:(NSString *)internalId
         requestOptions.networkAccessAllowed = YES;
         requestOptions.version = PHImageRequestOptionsVersionUnadjusted;
         requestOptions.deliveryMode = PHImageRequestOptionsDeliveryModeHighQualityFormat;
-        
+
         CGSize const targetSize = CGSizeMake((CGFloat)asset.pixelWidth, (CGFloat)asset.pixelHeight);
         [[PHImageManager defaultManager] requestImageForAsset:asset
                                                      targetSize:targetSize
@@ -584,11 +599,11 @@ RCT_EXPORT_METHOD(getPhotoByInternalID:(NSString *)internalId
         PHContentEditingInputRequestOptions *const editOptions = [PHContentEditingInputRequestOptions new];
         // Download asset if on icloud.
         editOptions.networkAccessAllowed = YES;
-        
+
         [asset requestContentEditingInputWithOptions:editOptions completionHandler:^(PHContentEditingInput *contentEditingInput, NSDictionary *info) {
           imageURL = contentEditingInput.fullSizeImageURL;
           if (imageURL.absoluteString.length != 0) {
-            
+
             filePath = [imageURL.absoluteString stringByReplacingOccurrencesOfString:@"pathfile:" withString:@"file:"];
 
             resolve(@{
@@ -621,14 +636,14 @@ RCT_EXPORT_METHOD(getPhotoByInternalID:(NSString *)internalId
           }
         }];
       }
-      
+
     } else {
       NSString *errorMessage = [NSString stringWithFormat:@"Failed to load asset"
                                 " with localIdentifier %@ with no error message.", internalId];
       NSError *error = RCTErrorWithMessage(errorMessage);
       reject(@"No asset found",@"No asset found",error);
     }
-    
+
   }, false);
 }
 

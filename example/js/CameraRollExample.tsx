@@ -9,6 +9,7 @@
  */
 'use strict';
 
+
 const React = require('react');
 const ReactNative = require('react-native');
 const {
@@ -21,7 +22,7 @@ const {
   TouchableOpacity,
   Dimensions,
 } = ReactNative;
-import CameraRoll from '../../src/CameraRoll';
+import { CameraRoll } from '../../src/CameraRoll';
 import type {PhotoIdentifier, GroupTypes} from '../../src/CameraRoll';
 
 const invariant = require('invariant');
@@ -30,22 +31,22 @@ const CameraRollView = require('./CameraRollView');
 
 const AssetScaledImageExampleView = require('./AssetScaledImageExample');
 
-type Props = $ReadOnly<{|
-  navigator?: ?Array<
-    $ReadOnly<{|
+type Props = {
+  readonly navigator?: Array<
+    {
       title: string,
-      component: Class<React.Component<any, any>>,
+      component: JSX.Element,
       backButtonTitle: string,
-      passProps: $ReadOnly<{|asset: PhotoIdentifier|}>,
-    |}>,
+      passProps: {asset: PhotoIdentifier},
+    }
   >,
-|}>;
+};
 
-type State = {|
+type State = {
   groupTypes: GroupTypes,
   sliderValue: number,
   bigImages: boolean,
-|};
+};
 
 export default class CameraRollExample extends React.Component<Props, State> {
   state = {
@@ -53,7 +54,7 @@ export default class CameraRollExample extends React.Component<Props, State> {
     sliderValue: 1,
     bigImages: true,
   };
-  _cameraRollView: ?React.ElementRef<typeof CameraRollView>;
+  _cameraRollView: React.ElementRef<typeof CameraRollView>;
 
   render() {
     return (

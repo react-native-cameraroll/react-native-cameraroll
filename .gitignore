@@ -28,6 +28,7 @@ DerivedData
 *.hmap
 *.ipa
 *.xcuserstate
+.xcode.env.local
 project.xcworkspace
 
 
@@ -38,6 +39,8 @@ build/
 .gradle
 local.properties
 *.iml
+*.hprof
+.cxx/
 
 **/.settings
 **/.classpath
@@ -47,6 +50,25 @@ local.properties
 buck-out/
 \.buckd/
 debug.keystore
+
+# fastlane
+#
+# It is recommended to not store the screenshots in the git repo. Instead, use fastlane to re-generate the
+# screenshots whenever they are needed.
+# For more information about the recommended setup visit:
+# https://docs.fastlane.tools/best-practices/source-control/
+
+**/fastlane/report.xml
+**/fastlane/Preview.html
+**/fastlane/screenshots
+**/fastlane/test_output
+
+# Bundle artifact
+*.jsbundle
+
+# Ruby / CocoaPods
+/ios/Pods/
+vendor/
 
 # Editor config
 .vscode

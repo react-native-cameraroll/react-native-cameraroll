@@ -35,6 +35,7 @@ export type GroupTypes =
 export type Include =
   | 'filename'
   | 'fileSize'
+  | 'fileExtension'
   | 'location'
   | 'imageSize'
   | 'playableDuration';
@@ -101,6 +102,7 @@ export type PhotoIdentifier = {
     group_name: string;
     image: {
       filename: string | null;
+      extension: string | null;
       uri: string;
       height: number;
       width: number;
@@ -178,7 +180,7 @@ export class CameraRoll {
 
     if (type === 'auto') {
       const fileExtension = tag.split('.').slice(-1)[0] ?? '';
-      if (['mov', 'mp4'].indexOf(fileExtension) >= 0) type = 'video';
+      if (['mov', 'mp4'].indexOf(fileExtension.toLowerCase()) >= 0) type = 'video';
       else type = 'photo';
     }
     return RNCCameraRoll.saveToCameraRoll(tag, {type, album});
@@ -193,6 +195,7 @@ export class CameraRoll {
     );
     return CameraRoll.save(tag, {type});
   }
+
   static getAlbums(
     params: GetAlbumsParams = {assetType: 'All'},
   ): Promise<Album[]> {
@@ -216,7 +219,7 @@ export class CameraRoll {
    * See https://facebook.github.io/react-native/docs/cameraroll.html#getphotos
    */
   static getPhotos(params: GetPhotosParams): Promise<PhotoIdentifiersPage> {
-    params = this.getParamsWithDefaults(params);
+    params = CameraRoll.getParamsWithDefaults(params);
     return RNCCameraRoll.getPhotos(params);
   }
 

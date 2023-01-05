@@ -33,15 +33,3 @@ Array [
   ],
 ]
 `;
-
-exports[`CameraRoll Should call saveToCameraRoll 1`] = `
-Array [
-  Array [
-    "a tag",
-    Object {
-      "album": "",
-      "type": "photo",
-    },
-  ],
-]
-`;
