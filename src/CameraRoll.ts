@@ -102,6 +102,7 @@ export type PhotoIdentifier = {
     group_name: string;
     image: {
       filename: string | null;
+      filepath: string | null;
       extension: string | null;
       uri: string;
       height: number;
