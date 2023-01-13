@@ -241,6 +241,7 @@ Returns a Promise with photo identifier objects from the local camera roll of th
   * `location`: Ensures `location` is available in each node. This has a large performance impact on Android.
   * `imageSize` : Ensures `image.width` and `image.height` are available in each node. This has a small performance impact on Android.
   * `playableDuration` : Ensures `image.playableDuration` is available in each node. This has a medium peformance impact on Android.
+  * `orientation` : Ensures `image.orientation` is available in each node. This has a small peformance impact on Android. **Android only**
 
 Returns a Promise which when resolved will be of the following shape:
 
@@ -256,6 +257,7 @@ Returns a Promise which when resolved will be of the following shape:
       * `width`: {number | null} : Only set if the `include` parameter contains `imageSize`
       * `fileSize`: {number | null} : Only set if the `include` parameter contains `fileSize`
       * `playableDuration`: {number | null} : Only set for videos if the `include` parameter contains `playableDuration`. Will be null for images.
+      * `orientation`: {number | null} : Only set for images if the `include` parameter contains `orientation`. **Android only**
     * `timestamp`: {number}
     * `location`: {object | null} : Only set if the `include` parameter contains `location`. An object with the following shape:
       * `latitude`: {number}
