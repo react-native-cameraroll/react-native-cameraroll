@@ -60,7 +60,8 @@ import java.util.Set;
 import javax.annotation.Nullable;
 
 /**
- * {@link NativeModule} that allows JS to interact with the photos and videos on the device (i.e.
+ * {@link NativeModule} that allows JS to interact with the photos and videos on
+ * the device (i.e.
  * {@link MediaStore.Images}).
  */
 @ReactModule(name = CameraRollModule.NAME)
@@ -112,7 +113,8 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
   }
 
   /**
-   * Save an image to the gallery (i.e. {@link MediaStore.Images}). This copies the original file
+   * Save an image to the gallery (i.e. {@link MediaStore.Images}). This copies
+   * the original file
    * from wherever it may be to the external storage pictures directory, so that
    * it can be scanned
    * by the MediaScanner.
@@ -587,7 +589,8 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
     for (int i = 0; i < limit && !media.isAfterLast(); i++) {
       WritableMap edge = new WritableNativeMap();
       WritableMap node = new WritableNativeMap();
-      boolean imageInfoSuccess = putImageInfo(resolver, media, node, widthIndex, heightIndex, sizeIndex, dataIndex, orientationIndex,
+      boolean imageInfoSuccess = putImageInfo(resolver, media, node, widthIndex, heightIndex, sizeIndex, dataIndex,
+          orientationIndex,
           mimeTypeIndex, includeFilename, includeFileSize, includeFileExtension, includeImageSize,
           includePlayableDuration, includeOrientation);
       if (imageInfoSuccess) {
@@ -654,7 +657,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
     String mimeType = media.getString(mimeTypeIndex);
 
     boolean isVideo = mimeType != null && mimeType.startsWith("video");
-    boolean putImageSizeSuccess = putImageSize(resolver, media, image, widthIndex, heightIndex,
+    boolean putImageSizeSuccess = putImageSize(resolver, media, image, widthIndex, heightIndex, orientationIndex,
         photoUri, isVideo, includeImageSize);
     boolean putPlayableDurationSuccess = putPlayableDuration(resolver, image, photoUri, isVideo,
         includePlayableDuration);
@@ -765,6 +768,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
       WritableMap image,
       int widthIndex,
       int heightIndex,
+      int orientationIndex,
       Uri photoUri,
       boolean isVideo,
       boolean includeImageSize) {
@@ -837,6 +841,13 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
         }
       }
 
+    }
+
+    int orientation = media.getInt(orientationIndex);
+    if (orientation % 180 != 0) {
+      int temp = width;
+      width = height;
+      height = temp;
     }
 
     image.putInt("width", width);
