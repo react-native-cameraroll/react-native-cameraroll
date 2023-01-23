@@ -84,6 +84,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
   private static final String INCLUDE_LOCATION = "location";
   private static final String INCLUDE_IMAGE_SIZE = "imageSize";
   private static final String INCLUDE_PLAYABLE_DURATION = "playableDuration";
+  private static final String INCLUDE_ORIENTATION = "orientation";
 
   private static final String[] PROJECTION = {
           Images.Media._ID,
@@ -95,7 +96,8 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
           MediaStore.MediaColumns.WIDTH,
           MediaStore.MediaColumns.HEIGHT,
           MediaStore.MediaColumns.SIZE,
-          MediaStore.MediaColumns.DATA
+          MediaStore.MediaColumns.DATA,
+          MediaStore.MediaColumns.ORIENTATION,
   };
 
   private static final String SELECTION_BUCKET = Images.Media.BUCKET_DISPLAY_NAME + " = ?";
@@ -569,6 +571,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
     int heightIndex = media.getColumnIndex(MediaStore.MediaColumns.HEIGHT);
     int sizeIndex = media.getColumnIndex(MediaStore.MediaColumns.SIZE);
     int dataIndex = media.getColumnIndex(MediaStore.MediaColumns.DATA);
+    int orientationIndex = media.getColumnIndex(MediaStore.MediaColumns.ORIENTATION);
 
     boolean includeLocation = include.contains(INCLUDE_LOCATION);
     boolean includeFilename = include.contains(INCLUDE_FILENAME);
@@ -576,17 +579,18 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
     boolean includeFileExtension = include.contains(INCLUDE_FILE_EXTENSION);
     boolean includeImageSize = include.contains(INCLUDE_IMAGE_SIZE);
     boolean includePlayableDuration = include.contains(INCLUDE_PLAYABLE_DURATION);
+    boolean includeOrientation = include.contains(INCLUDE_ORIENTATION);
 
     for (int i = 0; i < limit && !media.isAfterLast(); i++) {
       WritableMap edge = new WritableNativeMap();
       WritableMap node = new WritableNativeMap();
       boolean imageInfoSuccess =
-              putImageInfo(resolver, media, node, widthIndex, heightIndex, sizeIndex, dataIndex,
+              putImageInfo(resolver, media, node, widthIndex, heightIndex, sizeIndex, dataIndex, orientationIndex,
                       mimeTypeIndex, includeFilename, includeFileSize, includeFileExtension, includeImageSize,
-                      includePlayableDuration);
+                      includePlayableDuration, includeOrientation);
       if (imageInfoSuccess) {
         putBasicNodeInfo(media, node, mimeTypeIndex, groupNameIndex, dateTakenIndex, dateAddedIndex, dateModifiedIndex);
-        putLocationInfo(media, node, dataIndex, includeLocation,mimeTypeIndex,resolver);
+        putLocationInfo(media, node, dataIndex, includeLocation, mimeTypeIndex, resolver);
 
         edge.putMap("node", node);
         edges.pushMap(edge);
@@ -631,19 +635,21 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
           int heightIndex,
           int sizeIndex,
           int dataIndex,
+          int orientationIndex,
           int mimeTypeIndex,
           boolean includeFilename,
           boolean includeFileSize,
           boolean includeFileExtension,
           boolean includeImageSize,
-          boolean includePlayableDuration) {
+          boolean includePlayableDuration,
+          boolean includeOrientation) {
     WritableMap image = new WritableNativeMap();
     Uri photoUri = Uri.parse("file://" + media.getString(dataIndex));
     image.putString("uri", photoUri.toString());
     String mimeType = media.getString(mimeTypeIndex);
 
     boolean isVideo = mimeType != null && mimeType.startsWith("video");
-    boolean putImageSizeSuccess = putImageSize(resolver, media, image, widthIndex, heightIndex,
+    boolean putImageSizeSuccess = putImageSize(resolver, media, image, widthIndex, heightIndex, orientationIndex,
             photoUri, isVideo, includeImageSize);
     boolean putPlayableDurationSuccess = putPlayableDuration(resolver, image, photoUri, isVideo,
             includePlayableDuration);
@@ -666,6 +672,12 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
       image.putString("extension", Utils.getExtension(mimeType));
     } else {
       image.putNull("extension");
+    }
+
+    if (includeOrientation) {
+      image.putInt("orientation", media.getInt(orientationIndex));
+    } else {
+      image.putNull("orientation");
     }
 
     node.putMap("image", image);
@@ -743,6 +755,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
           WritableMap image,
           int widthIndex,
           int heightIndex,
+          int orientationIndex,
           Uri photoUri,
           boolean isVideo,
           boolean includeImageSize) {
@@ -812,6 +825,13 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
         }
       }
 
+    }
+
+    int orientation = media.getInt(orientationIndex);
+    if (orientation % 180 != 0) {
+      int temp = width;
+      width = height;
+      height = temp;
     }
 
     image.putInt("width", width);

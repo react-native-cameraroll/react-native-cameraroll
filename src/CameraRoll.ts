@@ -4,7 +4,7 @@
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  */
-import {Platform} from 'react-native';
+import { Platform } from 'react-native';
 import RNCCameraRoll from './nativeInterface';
 
 const GROUP_TYPES_OPTIONS = {
@@ -38,7 +38,8 @@ export type Include =
   | 'fileExtension'
   | 'location'
   | 'imageSize'
-  | 'playableDuration';
+  | 'playableDuration'
+  | 'orientation';
 
 export type AssetType = 'All' | 'Videos' | 'Photos';
 
@@ -108,6 +109,7 @@ export type PhotoIdentifier = {
       width: number;
       fileSize: number | null;
       playableDuration: number;
+      orientation: number | null;
     };
     timestamp: number;
     location: {
@@ -174,8 +176,8 @@ export class CameraRoll {
     tag: string,
     options: SaveToCameraRollOptions = {},
   ): Promise<string> {
-    let {type = 'auto'} = options;
-    const {album = ''} = options;
+    let { type = 'auto' } = options;
+    const { album = '' } = options;
     if (tag === '') throw new Error('tag must be a valid string');
 
     if (type === 'auto') {
@@ -183,7 +185,7 @@ export class CameraRoll {
       if (['mov', 'mp4'].indexOf(fileExtension.toLowerCase()) >= 0) type = 'video';
       else type = 'photo';
     }
-    return RNCCameraRoll.saveToCameraRoll(tag, {type, album});
+    return RNCCameraRoll.saveToCameraRoll(tag, { type, album });
   }
 
   static saveToCameraRoll(
@@ -193,17 +195,17 @@ export class CameraRoll {
     console.warn(
       'CameraRoll.saveToCameraRoll(tag, type) is deprecated.  Use the save function instead',
     );
-    return CameraRoll.save(tag, {type});
+    return CameraRoll.save(tag, { type });
   }
 
   static getAlbums(
-    params: GetAlbumsParams = {assetType: 'All'},
+    params: GetAlbumsParams = { assetType: 'All' },
   ): Promise<Album[]> {
     return RNCCameraRoll.getAlbums(params);
   }
 
   static getParamsWithDefaults(params: GetPhotosParams): GetPhotosParams {
-    const newParams = {...params};
+    const newParams = { ...params };
     if (newParams.assetType === undefined) newParams.assetType = 'All';
 
     if (newParams.groupTypes === undefined && Platform.OS !== 'android')
