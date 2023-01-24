@@ -675,7 +675,11 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
     }
 
     if (includeOrientation) {
-      image.putInt("orientation", media.getInt(orientationIndex));
+      if(media.isNull(orientationIndex)) {
+        image.putInt("orientation", media.getInt(orientationIndex));
+      } else {
+        image.putInt("orientation", 0);
+      }
     } else {
       image.putNull("orientation");
     }
@@ -827,11 +831,13 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
 
     }
 
-    int orientation = media.getInt(orientationIndex);
-    if (orientation % 180 != 0) {
-      int temp = width;
-      width = height;
-      height = temp;
+    if(!media.isNull(orientationIndex)) {
+      int orientation = media.getInt(orientationIndex);
+      if (orientation >= 0 && orientation % 180 != 0) {
+        int temp = width;
+        width = height;
+        height = temp;
+      }
     }
 
     image.putInt("width", width);
