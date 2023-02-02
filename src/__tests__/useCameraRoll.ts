@@ -1,6 +1,6 @@
 import {renderHook} from '@testing-library/react-hooks';
 import {useCameraRoll} from '../useCameraRoll';
-import RNCCameraRoll from '../nativeInterface';
+import RNCCameraRoll from '../NativeCameraRollModule';
 
 jest.mock('../nativeInterface', () => ({
   getPhotos: jest.fn(),

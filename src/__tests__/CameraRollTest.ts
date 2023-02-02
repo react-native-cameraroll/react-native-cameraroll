@@ -1,6 +1,6 @@
 import {CameraRoll} from '../CameraRoll';
 
-import NativeModule from '../nativeInterface';
+import NativeModule from '../NativeCameraRollModule';
 
 jest.mock('../nativeInterface');
 

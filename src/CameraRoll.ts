@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 import { Platform } from 'react-native';
-import RNCCameraRoll from './nativeInterface';
+import RNCCameraRoll from './NativeCameraRollModule';
 
 const GROUP_TYPES_OPTIONS = {
   Album: 'Album',

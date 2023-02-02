@@ -1,5 +1,5 @@
 import {NativeEventEmitter, Platform} from 'react-native';
-import CameraRollPermissionModule from './cameraRollPermissionNativeInterface';
+import CameraRollPermissionModule from './NativeCameraRollPermissionModule';
 
 /** Defines ios permission access levels for gallery */
 export type AccessLevel = 'addOnly' | 'readWrite';
