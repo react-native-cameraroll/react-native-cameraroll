@@ -112,6 +112,14 @@
       "<rootDir>/jest.setup.js"
     ]
   },
+  "codegenConfig": {
+    "name": "rncameraroll",
+    "type": "modules",
+    "jsSrcsDir": "./src",
+    "android": {
+      "javaPackageName": "com.reactnativecommunity.cameraroll"
+    }
+  },
   "detox": {
     "test-runner": "jest",
     "runner-config": "example/e2e/config.json",
