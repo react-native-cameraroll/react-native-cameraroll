@@ -40,4 +40,12 @@ public abstract class NativeCameraRollPermissionModuleSpec extends ReactContextB
   @ReactMethod
   @DoNotStrip
   public abstract void refreshPhotoSelection(Promise promise);
+
+  @ReactMethod
+  @DoNotStrip
+  public abstract void addListener(String eventName);
+
+  @ReactMethod
+  @DoNotStrip
+  public abstract void removeListeners(double count);
 }
