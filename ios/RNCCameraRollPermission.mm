@@ -96,14 +96,9 @@ RCT_EXPORT_METHOD(requestAddOnlyPermission:
   }];
 }
 
-- (void)refreshPhotoSelection:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
-    
-}
-
-
 RCT_EXPORT_METHOD(refreshPhotoSelection:
                  (RCTPromiseResolveBlock)resolve
-                 rejecter:(RCTPromiseRejectBlock)reject) {
+                 reject:(RCTPromiseRejectBlock)reject) {
   [RNCPermissionHelper refreshLimitedPhotoselection:resolve rejecter:reject];
 }
 
