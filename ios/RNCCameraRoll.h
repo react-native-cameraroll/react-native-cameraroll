@@ -7,7 +7,11 @@
 
 #import <Photos/Photos.h>
 
-#import <React/RCTBridgeModule.h>
+#ifdef RCT_NEW_ARCH_ENABLED
+#import <rncameraroll/rncameraroll.h>
+#else
+#import <React/RCTBridge.h>
+#endif
 #import <React/RCTConvert.h>
 
 @interface RCTConvert (PHFetchOptions)
@@ -19,6 +23,11 @@
 @end
 
 
-@interface RNCCameraRollManager : NSObject <RCTBridgeModule>
+@interface RNCCameraRoll : NSObject
+#ifdef RCT_NEW_ARCH_ENABLED
+                                   <NativeCameraRollModuleSpec>
+#else
+                                   <RCTBridgeModule>
+#endif
 
 @end
