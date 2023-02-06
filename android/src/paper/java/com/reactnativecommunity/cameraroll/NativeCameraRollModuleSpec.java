@@ -29,7 +29,7 @@ public abstract class NativeCameraRollModuleSpec extends ReactContextBaseJavaMod
 
   @ReactMethod
   @DoNotStrip
-  public abstract void saveToCameraRoll(String uri, ReadableMap params, Promise promise);
+  public abstract void saveToCameraRoll(String uri, ReadableMap options, Promise promise);
 
   @ReactMethod
   @DoNotStrip
@@ -42,4 +42,8 @@ public abstract class NativeCameraRollModuleSpec extends ReactContextBaseJavaMod
   @ReactMethod
   @DoNotStrip
   public abstract void deletePhotos(ReadableArray photoUris, Promise promise);
+
+  @ReactMethod
+  @DoNotStrip
+  public abstract void getPhotoByInternalID(String internalID, ReadableMap options, Promise promise);
 }

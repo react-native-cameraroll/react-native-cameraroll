@@ -939,6 +939,11 @@ public class CameraRollModule extends NativeCameraRollModuleSpec {
     }
   }
 
+  @ReactMethod
+  public void getPhotoByInternalID(String internalID, ReadableMap options, Promise promise) {
+    promise.reject("CameraRoll:getPhotoByInternalID", "getPhotoByInternalID is not supported on Android");
+  }
+
   private static class DeletePhotos extends GuardedAsyncTask<Void, Void> {
 
     private final Context mContext;
