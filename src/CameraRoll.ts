@@ -165,7 +165,7 @@ export class CameraRoll {
    * On Android: Deletes a set of photos from the camera roll.
    *
    */
-  static deletePhotos(photoUris: Array<string>): void {
+  static deletePhotos(photoUris: Array<string>): Promise<void> {
     return RNCCameraRoll.deletePhotos(photoUris);
   }
 
