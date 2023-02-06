@@ -4,6 +4,7 @@ import {
   // @ts-ignore - remove this comment when RN in the repo & example app is upgraded
   TurboModule,
 } from 'react-native';
+  // @ts-ignore - remove this comment when RN in the repo & example app is upgraded
 import type {Int32} from 'react-native/Libraries/Types/CodegenTypes';
 
 type CameraRollAuthorizationStatus =
