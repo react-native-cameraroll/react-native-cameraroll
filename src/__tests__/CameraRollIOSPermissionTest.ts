@@ -3,7 +3,7 @@ let mockRequestReadWritePermission: jest.Mock;
 let mockRequestAddOnlyPermission: jest.Mock;
 let mockRefreshPhotoSelection: jest.Mock;
 
-jest.mock('../cameraRollPermissionNativeInterface', () => {
+jest.mock('../NativeCameraRollPermissionModule', () => {
   mockCheckPermission = jest.fn();
   mockRequestReadWritePermission = jest.fn();
   mockRequestAddOnlyPermission = jest.fn();

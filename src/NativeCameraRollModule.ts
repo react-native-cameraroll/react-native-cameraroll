@@ -1,9 +1,7 @@
-import {
-  // @ts-ignore - remove this comment when RN in the repo & example app is upgraded
-  TurboModuleRegistry,
-  // @ts-ignore - remove this comment when RN in the repo & example app is upgraded
-  TurboModule,
-} from 'react-native';
+/* eslint-disable @typescript-eslint/ban-types */
+// we use Object type because methods on the native side use NSDictionary and ReadableMap
+// and we want to stay compatible with those
+import {TurboModuleRegistry, TurboModule} from 'react-native';
 
 type Album = {
   title: string;

@@ -2,7 +2,20 @@ import {CameraRoll} from '../CameraRoll';
 
 import NativeModule from '../NativeCameraRollModule';
 
-jest.mock('../nativeInterface');
+let mockDeletePhotos: jest.Mock;
+let mockSaveToCameraRoll: jest.Mock;
+let mockGetPhotos: jest.Mock;
+
+jest.mock('../NativeCameraRollModule', () => {
+  mockDeletePhotos = jest.fn();
+  mockSaveToCameraRoll = jest.fn();
+  mockGetPhotos = jest.fn();
+  return {
+    deletePhotos: mockDeletePhotos,
+    saveToCameraRoll: mockSaveToCameraRoll,
+    getPhotos: mockGetPhotos,
+  };
+});
 
 describe('CameraRoll', () => {
   it('Should call deletePhotos', () => {

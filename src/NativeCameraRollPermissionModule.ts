@@ -1,10 +1,4 @@
-import {
-  // @ts-ignore - remove this comment when RN in the repo & example app is upgraded
-  TurboModuleRegistry,
-  // @ts-ignore - remove this comment when RN in the repo & example app is upgraded
-  TurboModule,
-} from 'react-native';
-  // @ts-ignore - remove this comment when RN in the repo & example app is upgraded
+import {TurboModuleRegistry, TurboModule} from 'react-native';
 import type {Int32} from 'react-native/Libraries/Types/CodegenTypes';
 
 type CameraRollAuthorizationStatus =
@@ -25,4 +19,5 @@ export interface Spec extends TurboModule {
 }
 
 // we call get here since on Android this module does not exist and it would throw
+// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 export default TurboModuleRegistry.get<Spec>('RNCCameraRollPermission')!;
