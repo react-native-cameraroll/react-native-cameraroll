@@ -41,6 +41,35 @@ def getExtOrIntegerDefault(name) {
 
 apply plugin: 'com.android.library'
 
+
+def resolveReactNativeDirectory() {
+    // monorepo workaround
+    // react-native can be hoisted or in project's own node_modules
+    def reactNativeFromProjectNodeModules = file("${rootProject.projectDir}/../node_modules/react-native")
+    if (reactNativeFromProjectNodeModules.exists()) {
+        return reactNativeFromProjectNodeModules
+    }
+
+    def reactNativeFromNodeModulesWithLibrary = file("${projectDir}/../../react-native")
+    if (reactNativeFromNodeModulesWithLibrary.exists()) {
+        return reactNativeFromNodeModulesWithLibrary
+    }
+
+    throw new Exception(
+            "[react-native-clipboard] Unable to resolve react-native location in " +
+                    "node_modules. You should add project extension property (in app/build.gradle) " +
+                    "`REACT_NATIVE_NODE_MODULES_DIR` with path to react-native."
+    )
+}
+
+def REACT_NATIVE_DIR = resolveReactNativeDirectory()
+
+def reactProperties = new Properties()
+file("$REACT_NATIVE_DIR/ReactAndroid/gradle.properties").withInputStream { reactProperties.load(it) }
+
+def REACT_NATIVE_VERSION = reactProperties.getProperty("VERSION_NAME")
+def REACT_NATIVE_MINOR_VERSION = REACT_NATIVE_VERSION.startsWith("0.0.0-") ? 1000 : REACT_NATIVE_VERSION.split("\\.")[1].toInteger()
+
 def isNewArchitectureEnabled() {
     // To opt-in for the New Architecture, you can either:
     // - Set `newArchEnabled` to true inside the `gradle.properties` file
@@ -99,7 +128,10 @@ repositories {
 }
 
 dependencies {
-  //noinspection GradleDynamicVersion
-  implementation 'com.facebook.react:react-native:+'
-
+    if (isNewArchitectureEnabled() && REACT_NATIVE_MINOR_VERSION < 71) {
+        implementation project(":ReactAndroid")
+    } else {
+        //noinspection GradleDynamicVersion
+        implementation 'com.facebook.react:react-native:+'
+    }
 }
