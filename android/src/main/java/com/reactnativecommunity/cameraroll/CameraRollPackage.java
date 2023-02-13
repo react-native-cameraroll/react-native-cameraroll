@@ -97,7 +97,7 @@ public class CameraRollPackage extends TurboReactPackage implements ViewManagerO
             };
         } catch (InstantiationException | IllegalAccessException e) {
             throw new RuntimeException(
-                    "No ReactModuleInfoProvider for com.reactnativecommunity.clipboard.ClipboardPackage$$ReactModuleInfoProvider", e);
+                    "No ReactModuleInfoProvider for com.reactnativecommunity.cameraroll.CameraRollPackage$$ReactModuleInfoProvider", e);
         }
     }
 
