@@ -146,7 +146,7 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
       FileInputStream input = null;
       OutputStream output = null;
 
-      String mimeType = Utils.getMimeType(mUri.getPath());
+      String mimeType = Utils.getMimeType(mUri.toString());
       Boolean isVideo = mimeType != null && mimeType.contains("video");
 
       try {
