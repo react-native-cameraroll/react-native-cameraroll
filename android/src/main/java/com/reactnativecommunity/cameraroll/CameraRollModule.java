@@ -541,6 +541,78 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
       promise.reject(ERROR_UNABLE_TO_LOAD, "Could not get media", e);
     }
   }
+  @ReactMethod
+  public void getSmartAlbums(final ReadableMap params, final Promise promise) {
+    String assetType = params.hasKey("assetType") ? params.getString("assetType") : ASSET_TYPE_ALL;
+    StringBuilder selection = new StringBuilder("1");
+    List<String> selectionArgs = new ArrayList<>();
+    if (assetType.equals(ASSET_TYPE_PHOTOS)) {
+      selection.append(" AND " + MediaStore.Files.FileColumns.MEDIA_TYPE + " = "
+              + MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE);
+    } else if (assetType.equals(ASSET_TYPE_VIDEOS)) {
+      selection.append(" AND " + MediaStore.Files.FileColumns.MEDIA_TYPE + " = "
+              + MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO);
+    } else if (assetType.equals(ASSET_TYPE_ALL)) {
+      selection.append(" AND " + MediaStore.Files.FileColumns.MEDIA_TYPE + " IN ("
+              + MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO + ","
+              + MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE + ")");
+    } else {
+      promise.reject(
+              ERROR_UNABLE_TO_FILTER,
+              "Invalid filter option: '" + assetType + "'. Expected one of '"
+                      + ASSET_TYPE_PHOTOS + "', '" + ASSET_TYPE_VIDEOS + "' or '" + ASSET_TYPE_ALL + "'."
+      );
+      return;
+    }
+
+    final String[] projection = {MediaStore.Images.ImageColumns.BUCKET_DISPLAY_NAME};
+
+    try {
+      Cursor media = getReactApplicationContext().getContentResolver().query(
+              MediaStore.Files.getContentUri("external"),
+              projection,
+              selection.toString(),
+              selectionArgs.toArray(new String[selectionArgs.size()]),
+              null);
+      if (media == null) {
+        promise.reject(ERROR_UNABLE_TO_LOAD, "Could not get media");
+      } else {
+        WritableArray response = new WritableNativeArray();
+        try {
+          if (media.moveToFirst()) {
+            Map<String, Integer> albums = new HashMap<>();
+            do {
+              int column = media.getColumnIndex(MediaStore.Images.ImageColumns.BUCKET_DISPLAY_NAME);
+              if (column < 0) {
+                throw new IndexOutOfBoundsException();
+              }
+              String albumName = media.getString(column);
+              if (albumName != null) {
+                Integer albumCount = albums.get(albumName);
+                if (albumCount == null) {
+                  albums.put(albumName, 1);
+                } else {
+                  albums.put(albumName, albumCount + 1);
+                }
+              }
+            } while (media.moveToNext());
+
+            for (Map.Entry<String, Integer> albumEntry : albums.entrySet()) {
+              WritableMap album = new WritableNativeMap();
+              album.putString("title", albumEntry.getKey());
+              album.putInt("count", albumEntry.getValue());
+              response.pushMap(album);
+            }
+          }
+        } finally {
+          media.close();
+          promise.resolve(response);
+        }
+      }
+    } catch (Exception e) {
+      promise.reject(ERROR_UNABLE_TO_LOAD, "Could not get media", e);
+    }
+  }
 
   private static void putPageInfo(Cursor media, WritableMap response, int limit, int offset) {
     WritableMap pageInfo = new WritableNativeMap();

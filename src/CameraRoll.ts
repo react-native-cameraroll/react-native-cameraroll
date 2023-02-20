@@ -145,6 +145,9 @@ export type SaveToCameraRollOptions = {
 export type GetAlbumsParams = {
   assetType?: AssetType;
 };
+export type GetSmartAlbumsParams = {
+  assetType?: AssetType;
+};
 
 export type Album = {
   title: string;
@@ -203,6 +206,11 @@ export class CameraRoll {
     params: GetAlbumsParams = { assetType: 'All' },
   ): Promise<Album[]> {
     return RNCCameraRoll.getAlbums(params);
+  }
+  static getSmartAlbums(
+    params: GetSmartAlbumsParams = { assetType: 'All' },
+  ): Promise<Album[]> {
+    return RNCCameraRoll.getSmartAlbums(params);
   }
 
   static getParamsWithDefaults(params: GetPhotosParams): GetPhotosParams {
