@@ -76,10 +76,10 @@ import com.android.build.OutputFile
  */
 
 project.ext.react = [
-    cliPath: "../../../node_modules/react-native/local-cli/cli.js",
-    entryFile: "example/index.tsx",
-    root: "../../../",
-    enableHermes: false,  // clean and rebuild if changing
+        cliPath     : "../../../node_modules/react-native/local-cli/cli.js",
+        entryFile   : "example/index.tsx",
+        root        : "../../../",
+        enableHermes: false,  // clean and rebuild if changing
 ]
 
 apply from: "../../../node_modules/react-native/react.gradle"
@@ -122,16 +122,16 @@ def jscFlavor = 'org.webkit:android-jsc:+'
 def enableHermes = project.ext.react.get("enableHermes", false);
 
 task downloadDependencies() {
-  description 'Download all dependencies to the Gradle cache'
-  doLast {
-    configurations.findAll().each { config ->
-      if (config.name.contains("minReactNative") && config.canBeResolved) {
-        print config.name
-        print '\n'
-        config.files
-      }
+    description 'Download all dependencies to the Gradle cache'
+    doLast {
+        configurations.findAll().each { config ->
+            if (config.name.contains("minReactNative") && config.canBeResolved) {
+                print config.name
+                print '\n'
+                config.files
+            }
+        }
     }
-  }
 }
 
 android {
@@ -199,6 +199,10 @@ android {
 
         }
     }
+
+    packagingOptions {
+        pickFirst 'META-INF/com.android.tools/proguard/coroutines.pro'
+    }
 }
 
 dependencies {
@@ -214,6 +218,23 @@ dependencies {
     } else {
         implementation jscFlavor
     }
+
+    debugImplementation('com.facebook.flipper:flipper:0.182.0') {
+        exclude group: 'com.facebook.fbjni'
+    }
+    debugImplementation 'com.facebook.soloader:soloader:0.10.4'
+    debugImplementation('com.facebook.flipper:flipper-fresco-plugin:0.182.0') {
+        exclude group: 'com.facebook.flipper'
+        exclude group: 'com.facebook.fbjni'
+        exclude group: 'com.squareup.okhttp3', module: 'okhttp'
+    }
+    debugImplementation('com.facebook.flipper:flipper-network-plugin:0.182.0') {
+        exclude group: 'com.facebook.flipper'
+        exclude group: 'com.facebook.fbjni'
+        exclude group: 'com.squareup.okhttp3', module: 'okhttp'
+    }
+
+    releaseImplementation 'com.facebook.flipper:flipper-noop:0.182.0'
 
     androidTestImplementation 'junit:junit:4.12'
 }
