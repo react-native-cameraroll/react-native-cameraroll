@@ -13,13 +13,17 @@ export type CameraRollAuthorizationStatus =
   | 'not-determined';
 
 const isIOS = Platform.OS === 'ios';
+var nativeCameraRollPermissionModule;
+if (isIOS) {
+  nativeCameraRollPermissionModule = CameraRollPermissionModule;
+}
 if (isIOS && CameraRollPermissionModule == null) {
   console.error(
     "photoLibraryPermissionModule: Native Module 'photoLibraryPermissionModule' was null! Did you run pod install?",
   );
 }
 export const cameraRollEventEmitter = new NativeEventEmitter(
-  isIOS ? CameraRollPermissionModule : undefined,
+  nativeCameraRollPermissionModule
 );
 
 export const iosReadGalleryPermission = (
