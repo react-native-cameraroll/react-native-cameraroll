@@ -1,68 +1,16 @@
-//
-//  CameraRollPermissionModule.m
-//  RNCCameraRoll
-//
-//  Created by sakhi idris on 16/08/2022.
-//  Copyright © 2022 Facebook. All rights reserved.
-//
-#import "RNCCameraRollPermissionModule.h"
 #import <React/RCTUtils.h>
-#import <React/RCTConvert.h>
+#import "RNCPermissionHelper.h"
 
 @import Photos;
 @import PhotosUI;
 
-@implementation RNCCameraRollPermissionModule
-
-{
-  bool hasListeners;
-}
+@implementation RNCPermissionHelper
 
 #pragma mark - Access Levels
 static NSString * const ADD_ONLY = @"addOnly";
 static NSString * const READ_WRITE = @"readWrite";
 
-// Will be called when this module's first listener is added.
--(void)startObserving {
-  hasListeners = YES;
-  [[PHPhotoLibrary sharedPhotoLibrary] registerChangeObserver:self];
-}
-
-// Will be called when this module's last listener is removed, or on dealloc.
--(void)stopObserving {
-  hasListeners = NO;
-  [[PHPhotoLibrary sharedPhotoLibrary] unregisterChangeObserver:self];
-}
-
-RCT_EXPORT_MODULE()
-
-- (dispatch_queue_t)methodQueue
-{
-  return dispatch_get_main_queue();
-}
-
-- (NSArray<NSString *> *)supportedEvents {
-    return @[@"onLibrarySelectionChange"];
-}
-
-- (NSString *)stringForStatus:(RNPermissionStatus)status {
-  switch (status) {
-    case RNPermissionStatusRestricted:
-      return @"unavailable";
-    case RNPermissionStatusNotDetermined:
-      return @"not-determined";
-    case RNPermissionStatusDenied:
-      return @"denied";
-    case RNPermissionStatusLimited:
-      return @"limited";
-    case RNPermissionStatusAuthorized:
-      return @"granted";
-  }
-}
-
-
-
-- (void)checkCameraRollPermission:(NSString *) accessLevel
++ (void)checkCameraRollPermission:(NSString *) accessLevel
                          resolver:(void (^ _Nonnull)(RNPermissionStatus))resolve
                          rejecter:(void (^ _Nonnull)(NSString *code, NSString *message))reject {
   PHAuthorizationStatus status;
@@ -96,7 +44,7 @@ RCT_EXPORT_MODULE()
 
 }
 
-- (void)requestCameraRollReadWritePermission:(void (^ _Nonnull)(RNPermissionStatus))resolve
++ (void)requestCameraRollReadWritePermission:(void (^ _Nonnull)(RNPermissionStatus))resolve
                                     rejecter:(void (^ _Nonnull)(NSString *code, NSString *message))reject {
   if (@available(iOS 14.0, *)) {
     [PHPhotoLibrary requestAuthorizationForAccessLevel:PHAccessLevelReadWrite handler:^(__unused PHAuthorizationStatus status) {
@@ -109,7 +57,7 @@ RCT_EXPORT_MODULE()
   }
 }
 
-- (void)requestCameraRollAddOnlyPermission:(void (^ _Nonnull)(RNPermissionStatus))resolve
++ (void)requestCameraRollAddOnlyPermission:(void (^ _Nonnull)(RNPermissionStatus))resolve
                                     rejecter:(void (^ _Nonnull)(NSString *code, NSString *message))reject {
   if (@available(iOS 14.0, *)) {
     [PHPhotoLibrary requestAuthorizationForAccessLevel:PHAccessLevelAddOnly handler:^(__unused PHAuthorizationStatus status) {
@@ -123,7 +71,7 @@ RCT_EXPORT_MODULE()
 }
 
 
-- (void)refreshLimitedPhotoselection:(RCTPromiseResolveBlock _Nonnull)resolve
++ (void)refreshLimitedPhotoselection:(RCTPromiseResolveBlock _Nonnull)resolve
                                          rejecter:(RCTPromiseRejectBlock _Nonnull)reject {
   if (@available(iOS 14, *)) {
     if ([PHPhotoLibrary authorizationStatusForAccessLevel:PHAccessLevelReadWrite] != PHAuthorizationStatusLimited) {
@@ -139,54 +87,4 @@ RCT_EXPORT_MODULE()
   }
 }
 
-- (void)photoLibraryDidChange:(PHChange *)changeInstance
-{
-  if (hasListeners && changeInstance != nil) {
-    [self sendEventWithName:@"onLibrarySelectionChange" body:@"Changes occured"];
-  }
-}
-
-RCT_EXPORT_METHOD(checkPermission:
-                  (NSString *) accessLevel
-                  resolve: (RCTPromiseResolveBlock)resolve
-                  reject: (RCTPromiseRejectBlock)reject) {
-
-  [self checkCameraRollPermission:accessLevel resolver:^(RNPermissionStatus status) {
-    resolve([self stringForStatus:status]);
-  } rejecter:^(NSString *code, NSString *message) {
-    reject(code, message, nil);
-  }];
-}
-
-
-RCT_EXPORT_METHOD(requestReadWritePermission:
-                  (RCTPromiseResolveBlock)resolve
-                  reject:(RCTPromiseRejectBlock)reject) {
-
-  [self requestCameraRollReadWritePermission:^(RNPermissionStatus status) {
-    resolve([self stringForStatus:status]);
-  } rejecter:^(NSString *code, NSString *message) {
-    reject(code, message, nil);
-  }];
-}
-
-RCT_EXPORT_METHOD(requestAddOnlyPermission:
-                  (RCTPromiseResolveBlock)resolve
-                  reject:(RCTPromiseRejectBlock)reject) {
-
-  [self requestCameraRollAddOnlyPermission:^(RNPermissionStatus status) {
-    resolve([self stringForStatus:status]);
-  } rejecter:^(NSString *code, NSString *message) {
-    reject(code, message, nil);
-  }];
-}
-
-
-RCT_REMAP_METHOD(refreshPhotoSelection,
-                 refreshLimitedPhotoselectionWithResolver:(RCTPromiseResolveBlock)resolve
-                 rejecter:(RCTPromiseRejectBlock)reject) {
-  [self refreshLimitedPhotoselection:resolve rejecter:reject];
-}
-
 @end
-

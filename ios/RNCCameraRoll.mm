@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#import "RNCCameraRollManager.h"
+#import "RNCCameraRoll.h"
 
 #import <CoreLocation/CoreLocation.h>
 #import <Foundation/Foundation.h>
@@ -84,9 +84,9 @@ RCT_ENUM_CONVERTER(PHAssetCollectionSubtype, (@{
 
 @end
 
-@implementation RNCCameraRollManager
+@implementation RNCCameraRoll
 
-RCT_EXPORT_MODULE(RNCCameraRoll)
+RCT_EXPORT_MODULE()
 
 @synthesize bridge = _bridge;
 
@@ -655,5 +655,13 @@ static void checkPhotoLibraryConfig()
   }
 #endif
 }
+
+#if RCT_NEW_ARCH_ENABLED
+- (std::shared_ptr<facebook::react::TurboModule>)getTurboModule:
+    (const facebook::react::ObjCTurboModule::InitParams &)params
+{
+  return std::make_shared<facebook::react::NativeCameraRollModuleSpecJSI>(params);
+}
+#endif
 
 @end

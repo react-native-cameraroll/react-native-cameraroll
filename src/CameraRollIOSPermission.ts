@@ -1,5 +1,5 @@
 import {NativeEventEmitter, Platform} from 'react-native';
-import CameraRollPermissionModule from './cameraRollPermissionNativeInterface';
+import CameraRollPermissionModule from './NativeCameraRollPermissionModule';
 
 /** Defines ios permission access levels for gallery */
 export type AccessLevel = 'addOnly' | 'readWrite';
@@ -13,6 +13,7 @@ export type CameraRollAuthorizationStatus =
   | 'not-determined';
 
 const isIOS = Platform.OS === 'ios';
+// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 if (isIOS && CameraRollPermissionModule == null) {
   console.error(
     "photoLibraryPermissionModule: Native Module 'photoLibraryPermissionModule' was null! Did you run pod install?",

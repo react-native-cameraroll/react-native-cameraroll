@@ -7,9 +7,10 @@
 
 #import <React/RCTBridge.h>
 #import <React/RCTURLRequestHandler.h>
+//#import <ReactCommon/RCTTurboModule.h>
 
 @class PHPhotoLibrary;
 
-@interface RNCAssetsLibraryRequestHandler : NSObject <RCTURLRequestHandler>
+@interface RNCAssetsLibraryRequestHandler : NSObject <RCTURLRequestHandler>//, RCTTurboModule>
 
 @end
