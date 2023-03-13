@@ -56,7 +56,7 @@ def resolveReactNativeDirectory() {
     }
 
     throw new Exception(
-            "[react-native-clipboard] Unable to resolve react-native location in " +
+            "[react-native-cameraroll] Unable to resolve react-native location in " +
                     "node_modules. You should add project extension property (in app/build.gradle) " +
                     "`REACT_NATIVE_NODE_MODULES_DIR` with path to react-native."
     )
