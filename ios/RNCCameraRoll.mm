@@ -149,9 +149,18 @@ RCT_EXPORT_METHOD(saveToCameraRoll:(NSURLRequest *)request
   // URLs, `data:` URIs, etc. Video URLs are passed directly through for now; it may be nice to support
   // more ways of loading videos in the future.
   __block NSURL *inputURI = nil;
+  __block NSURL *tmpFileURI = nil;
   __block PHFetchResult *photosAsset;
   __block PHAssetCollection *collection;
   __block PHObjectPlaceholder *placeholder;
+
+  void (^removeTmpFile)(void) = ^void() {
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    NSString *path = tmpFileURI.path;
+    if ([fileManager fileExistsAtPath:path]) {
+      [fileManager removeItemAtPath:path error:nil];
+    }
+  };
 
   void (^saveBlock)(void) = ^void() {
     // performChanges and the completionHandler are called on
@@ -163,15 +172,8 @@ RCT_EXPORT_METHOD(saveToCameraRoll:(NSURLRequest *)request
       PHAssetChangeRequest *assetRequest ;
       if ([options[@"type"] isEqualToString:@"video"]) {
         assetRequest = [PHAssetChangeRequest creationRequestForAssetFromVideoAtFileURL:inputURI];
-      } else if ([[inputURI.pathExtension lowercaseString] isEqualToString:@"gif"]) {
-        NSData *data = [NSData dataWithContentsOfURL:inputURI];
-        PHAssetCreationRequest *request = [PHAssetCreationRequest creationRequestForAsset];
-        [request addResourceWithType:PHAssetResourceTypePhoto data:data options:NULL];
-        assetRequest = request;
       } else {
-        NSData *data = [NSData dataWithContentsOfURL:inputURI];
-        UIImage *image = [UIImage imageWithData:data];
-        assetRequest = [PHAssetChangeRequest creationRequestForAssetFromImage:image];
+        assetRequest = [PHAssetChangeRequest creationRequestForAssetFromImageAtFileURL:tmpFileURI];
       }
       placeholder = [assetRequest placeholderForCreatedAsset];
       if (![options[@"album"] isEqualToString:@""]) {
@@ -180,6 +182,7 @@ RCT_EXPORT_METHOD(saveToCameraRoll:(NSURLRequest *)request
         [albumChangeRequest addAssets:@[placeholder]];
       }
     } completionHandler:^(BOOL success, NSError *error) {
+      removeTmpFile();
       if (success) {
         NSString *uri = [NSString stringWithFormat:@"ph://%@", [placeholder localIdentifier]];
         resolve(uri);
@@ -208,6 +211,7 @@ RCT_EXPORT_METHOD(saveToCameraRoll:(NSURLRequest *)request
             collection = collectionFetchResult.firstObject;
             saveBlock();
           } else {
+            removeTmpFile();
             reject(kErrorUnableToSave, nil, error);
           }
         }];
@@ -221,7 +225,25 @@ RCT_EXPORT_METHOD(saveToCameraRoll:(NSURLRequest *)request
 
   void (^loadBlock)(bool isLimited) = ^void(bool isLimited) {
     inputURI = request.URL;
-    saveWithOptions();
+    if ([options[@"type"] isEqualToString:@"video"]) {
+      saveWithOptions();
+    } else {
+      NSURLSession *session = [NSURLSession sharedSession];
+      [[session dataTaskWithURL:inputURI completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+        if (error) {
+          reject(kErrorUnableToSave, nil, error);
+        } else {
+          NSString *mimeType = [response MIMEType];
+          NSString *uti = (__bridge_transfer NSString*)UTTypeCreatePreferredIdentifierForTag(kUTTagClassMIMEType, (__bridge CFStringRef)mimeType, NULL);
+          NSString *extension = (__bridge_transfer NSString*)UTTypeCopyPreferredTagWithClass((__bridge CFStringRef)uti, kUTTagClassFilenameExtension);
+          NSString *uuid = [[NSUUID UUID] UUIDString];
+          NSString *fileName = [NSString stringWithFormat:@"%@.%@", uuid, extension];
+          tmpFileURI = [NSURL fileURLWithPath:[NSTemporaryDirectory() stringByAppendingPathComponent:fileName]];
+          [data writeToURL:tmpFileURI atomically:YES];
+          saveWithOptions();
+        }
+      }] resume];
+    }
   };
 
   requestPhotoLibraryAccess(reject, loadBlock, true);
