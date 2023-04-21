@@ -22,6 +22,11 @@
 
 #import "RNCAssetsLibraryRequestHandler.h"
 
+#if __has_include(<SDWebImageWebPCoder/SDWebImageWebPCoder.h>)
+  #import <SDWebImageWebPCoder/SDWebImageWebPCoder.h>
+  #define SD_WEB_IMAGE_WEBP_CODER_AVAILABLE 1
+#endif
+
 @implementation RCTConvert (PHAssetCollectionSubtype)
 
 RCT_ENUM_CONVERTER(PHAssetCollectionSubtype, (@{
@@ -170,6 +175,21 @@ RCT_EXPORT_METHOD(saveToCameraRoll:(NSURLRequest *)request
         assetRequest = request;
       } else {
         NSData *data = [NSData dataWithContentsOfURL:inputURI];
+        if ([[inputURI.pathExtension lowercaseString] isEqualToString:@"webp"]) {
+          UIImage *webpImage;
+
+          #ifdef SD_WEB_IMAGE_WEBP_CODER_AVAILABLE 
+            webpImage = [[SDImageWebPCoder sharedCoder] decodedImageWithData:data options:nil];
+          #else
+            if (@available(iOS 14, *)) {
+              webpImage = [UIImage imageWithData:data];
+            }
+          #endif
+          
+          if (webpImage) {
+            data = UIImageJPEGRepresentation(webpImage, 1.0);
+          }
+        }
         UIImage *image = [UIImage imageWithData:data];
         assetRequest = [PHAssetChangeRequest creationRequestForAssetFromImage:image];
       }
