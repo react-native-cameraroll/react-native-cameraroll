@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import {useRef, useState} from 'react';
 import type {
   GetPhotosParams,
   PhotoIdentifiersPage,
@@ -29,27 +29,28 @@ type UseCameraRollResult = [
 export function useCameraRoll(): UseCameraRollResult {
   const [photos, setPhotos] = useState<PhotoIdentifiersPage>(initialState);
 
-  async function getPhotos(
-    config: GetPhotosParams = defaultConfig,
-  ): Promise<void> {
-    try {
-      const result = await CameraRoll.getPhotos(config);
-      setPhotos(result);
-    } catch (error) {
-      if (__DEV__) console.log('[useCameraRoll] Error getting photos: ', error);
-    }
-  }
+  const getPhotos = useRef(
+    async (config: GetPhotosParams = defaultConfig): Promise<void> => {
+      try {
+        const result = await CameraRoll.getPhotos(config);
+        setPhotos(result);
+      } catch (error) {
+        if (__DEV__)
+          console.log('[useCameraRoll] Error getting photos: ', error);
+      }
+    },
+  ).current;
 
-  async function save(
-    ...args: Parameters<typeof CameraRoll.save>
-  ): Promise<void> {
-    try {
-      await CameraRoll.save(...args);
-    } catch (error) {
-      if (__DEV__)
-        console.log('[useCameraRoll] Error saving to camera roll: ', error);
-    }
-  }
+  const save = useRef(
+    async (...args: Parameters<typeof CameraRoll.save>): Promise<void> => {
+      try {
+        await CameraRoll.save(...args);
+      } catch (error) {
+        if (__DEV__)
+          console.log('[useCameraRoll] Error saving to camera roll: ', error);
+      }
+    },
+  ).current;
 
   return [photos, getPhotos, save];
 }
