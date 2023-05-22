@@ -622,7 +622,7 @@ public class CameraRollModule extends NativeCameraRollModuleSpec {
       dateTaken = media.getLong(dateAddedIndex) * 1000;
     }
     node.putDouble("timestamp", dateTaken / 1000d);
-    node.putDouble("modified", media.getLong(dateModifiedIndex));
+    node.putDouble("modificationTimestamp", media.getLong(dateModifiedIndex));
   }
 
   /**

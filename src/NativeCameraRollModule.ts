@@ -24,6 +24,7 @@ type PhotoIdentifier = {
       orientation: number | null;
     };
     timestamp: number;
+    modificationTimestamp: number;
     location: {
       latitude?: number;
       longitude?: number;

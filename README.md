@@ -259,6 +259,7 @@ Returns a Promise which when resolved will be of the following shape:
       * `playableDuration`: {number | null} : Only set for videos if the `include` parameter contains `playableDuration`. Will be null for images.
       * `orientation`: {number | null} : Only set for images if the `include` parameter contains `orientation`. **Android only**
     * `timestamp`: {number}
+    * `modificationTimestamp`: {number}
     * `location`: {object | null} : Only set if the `include` parameter contains `location`. An object with the following shape:
       * `latitude`: {number}
       * `longitude`: {number}
