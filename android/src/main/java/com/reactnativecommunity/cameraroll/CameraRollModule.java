@@ -40,6 +40,7 @@ import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.WritableNativeArray;
 import com.facebook.react.bridge.WritableNativeMap;
+import com.facebook.react.bridge.Arguments;
 import com.facebook.react.common.ReactConstants;
 import com.facebook.react.module.annotations.ReactModule;
 
@@ -615,6 +616,8 @@ public class CameraRollModule extends NativeCameraRollModuleSpec {
           int dateAddedIndex,
           int dateModifiedIndex) {
     node.putString("type", media.getString(mimeTypeIndex));
+    WritableArray subTypes = Arguments.createArray();
+    node.putArray("subTypes", subTypes);
     node.putString("group_name", media.getString(groupNameIndex));
     long dateTaken = media.getLong(dateTakenIndex);
     if (dateTaken == 0L) {
