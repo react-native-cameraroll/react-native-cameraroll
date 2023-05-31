@@ -248,6 +248,7 @@ Returns a Promise which when resolved will be of the following shape:
 * `edges` : {Array<node>} An array of node objects
   * `node`: {object} An object with the following shape:
     * `type`: {string}
+    * `subTypes`: {Array<string>} : An array of subtype strings (see `SubTypes` type). Always [] on Android.
     * `group_name`: {string}
     * `image`: {object} : An object with the following shape:
       * `uri`: {string}

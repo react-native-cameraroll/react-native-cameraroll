@@ -422,6 +422,8 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
                                                   ? @"audio"
                                                   : @"unknown")));
 
+      NSArray<NSString*> *const assetMediaSubtypesLabel = [self mediaSubTypeLabelsForAsset:asset];
+
       if (includeFileExtension) {
         NSString *name = [asset valueForKey:@"filename"];
         NSString *extension = [name pathExtension];
@@ -433,6 +435,7 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
       [assets addObject:@{
         @"node": @{
           @"type": assetMediaTypeLabel, // TODO: switch to mimeType?
+          @"subTypes":assetMediaSubtypesLabel,
           @"group_name": currentCollectionName,
           @"image": @{
               @"uri": uri,
@@ -559,6 +562,8 @@ RCT_EXPORT_METHOD(getPhotoByInternalID:(NSString *)internalId
 
       __block NSString *filePath = @"";
 
+      NSArray<NSString*> *const assetMediaSubtypesLabel = [self mediaSubTypeLabelsForAsset:asset];
+
       // check if HEIC extension asset
       if (convertHeic && asset.mediaType == PHAssetMediaTypeImage && [uniformMimeType  isEqual: @"public.heic"]) {
         // convert to JPEG
@@ -589,6 +594,7 @@ RCT_EXPORT_METHOD(getPhotoByInternalID:(NSString *)internalId
             resolve(@{
                       @"node": @{
                           @"type": assetMediaTypeLabel,
+                          @"subTypes":assetMediaSubtypesLabel,
                           @"image": @{
                               @"filepath": fullPath,
                               @"filename": originalFilename,
@@ -631,6 +637,7 @@ RCT_EXPORT_METHOD(getPhotoByInternalID:(NSString *)internalId
             resolve(@{
                       @"node": @{
                           @"type": assetMediaTypeLabel,
+                          @"subTypes":assetMediaSubtypesLabel,
                           @"image": @{
                               @"filepath": filePath,
                               @"filename": originalFilename,
@@ -668,6 +675,38 @@ RCT_EXPORT_METHOD(getPhotoByInternalID:(NSString *)internalId
     }
 
   }, false);
+}
+
+- (NSArray<NSString *> *) mediaSubTypeLabelsForAsset:(PHAsset *)asset {
+    PHAssetMediaSubtype subtype = asset.mediaSubtypes;
+    NSMutableArray<NSString*> *mediaSubTypeLabels = [NSMutableArray array];
+    
+    if (subtype & PHAssetMediaSubtypePhotoPanorama) {
+        [mediaSubTypeLabels addObject:@"PhotoPanorama"];
+    }
+    if (subtype & PHAssetMediaSubtypePhotoHDR) {
+        [mediaSubTypeLabels addObject:@"PhotoHDR"];
+    }
+    if (subtype & PHAssetMediaSubtypePhotoScreenshot) {
+        [mediaSubTypeLabels addObject:@"PhotoScreenshot"];
+    }
+    if (subtype & PHAssetMediaSubtypePhotoLive) {
+        [mediaSubTypeLabels addObject:@"PhotoLive"];
+    }
+    if (subtype & PHAssetMediaSubtypePhotoDepthEffect) {
+        [mediaSubTypeLabels addObject:@"PhotoDepthEffect"];
+    }
+    if (subtype & PHAssetMediaSubtypeVideoStreamed) {
+        [mediaSubTypeLabels addObject:@"VideoStreamed"];
+    }
+    if (subtype & PHAssetMediaSubtypeVideoHighFrameRate) {
+        [mediaSubTypeLabels addObject:@"VideoHighFrameRate"];
+    }
+    if (subtype & PHAssetMediaSubtypeVideoTimelapse) {
+        [mediaSubTypeLabels addObject:@"VideoTimelapse"];
+    }
+
+    return mediaSubTypeLabels;
 }
 
 static void checkPhotoLibraryConfig()

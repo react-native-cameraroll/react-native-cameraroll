@@ -32,6 +32,16 @@ export type GroupTypes =
   | 'PhotoStream'
   | 'SavedPhotos';
 
+export type SubTypes =
+  | 'PhotoPanorama'
+  | 'PhotoHDR'
+  | 'PhotoScreenshot'
+  | 'PhotoLive'
+  | 'PhotoDepthEffect'
+  | 'VideoStreamed'
+  | 'VideoHighFrameRate'
+  | 'VideoTimelapse';
+
 export type Include =
   | 'filename'
   | 'fileSize'
@@ -100,6 +110,7 @@ export type GetPhotosParams = {
 export type PhotoIdentifier = {
   node: {
     type: string;
+    subTypes: SubTypes;
     group_name: string;
     image: {
       filename: string | null;
