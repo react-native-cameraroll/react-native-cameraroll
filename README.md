@@ -123,7 +123,7 @@ async function savePicture() {
 };
 ```
 
-**Andoid 13**
+**Android 13**
 
 On Android 13 the `READ_EXTERNAL_STORAGE` has been [replace](https://developer.android.com/about/versions/13/behavior-changes-13#granular-media-permissions) by `READ_MEDIA_IMAGES` and `READ_MEDIA_VIDEO`.
 
