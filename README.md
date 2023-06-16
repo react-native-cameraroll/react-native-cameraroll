@@ -480,6 +480,21 @@ CameraRoll.iosGetImageDataById(internalID, true);
 | internalID   | string                  | Yes        | Ios internal ID 'PH://xxxx'.                         |
 | convertHeic  | boolean                 | False      | Whether to convert or not to JPEG image.             |
 
+Upload photo/video with `iosGetImageDataById` method
+
+```javascript
+
+try {
+// uri 'PH://xxxx'          
+const fileData = await CameraRoll.iosGetImageDataById(uri);
+if (!fileData?.node?.image?.filepath) return undefined;
+const uploadPath = imageData.node.image.filepath; // output should be file://...
+// fetch or ReactNativeBlobUtil.fetch to upload 
+}
+catch (error) {}
+
+```          
+          
 
 
 ### `useCameraRoll()`
