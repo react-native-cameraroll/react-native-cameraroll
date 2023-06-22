@@ -3,12 +3,20 @@
 // and we want to stay compatible with those
 import {TurboModuleRegistry, TurboModule} from 'react-native';
 
-import type {SubTypes} from './CameraRoll';
-
 type Album = {
   title: string;
   count: number;
 };
+
+type SubTypes =
+  | 'PhotoPanorama'
+  | 'PhotoHDR'
+  | 'PhotoScreenshot'
+  | 'PhotoLive'
+  | 'PhotoDepthEffect'
+  | 'VideoStreamed'
+  | 'VideoHighFrameRate'
+  | 'VideoTimelapse';
 
 type PhotoIdentifier = {
   node: {
