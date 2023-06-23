@@ -629,7 +629,13 @@ RCT_EXPORT_METHOD(getPhotoByInternalID:(NSString *)internalId
         editOptions.networkAccessAllowed = YES;
 
         [asset requestContentEditingInputWithOptions:editOptions completionHandler:^(PHContentEditingInput *contentEditingInput, NSDictionary *info) {
-          imageURL = contentEditingInput.fullSizeImageURL;
+          if (contentEditingInput.mediaType == PHAssetMediaTypeImage) {
+              imageURL = contentEditingInput.fullSizeImageURL;
+          } else {
+              AVURLAsset *avURLAsset = (AVURLAsset*)contentEditingInput.audiovisualAsset;
+              imageURL = [avURLAsset URL];
+          }
+
           if (imageURL.absoluteString.length != 0) {
 
             filePath = [imageURL.absoluteString stringByReplacingOccurrencesOfString:@"pathfile:" withString:@"file:"];
