@@ -44,15 +44,7 @@ New package name: @react-native-camera-roll/camera-roll
   	```
       implementation project(':@react-native-camera-roll_camera-roll')
   	```
-Starting with Android 10, the concept of [scoped storage](https://developer.android.com/training/data-storage#scoped-storage) is introduced. Currently, to make it working with that change, you have to add `android:requestLegacyExternalStorage="true"` to `AndroidManifest.xml`:
 
-```xml
-<manifest ... >
-  <application android:requestLegacyExternalStorage="true" ... >
-    ...
-  </application>
-</manifest>
-```
 ## Migrating from the core `react-native` module
 This module was created when the CameraRoll was split out from the core of React Native. To migrate to this module you need to follow the installation instructions above and then change you imports from:
 
@@ -89,12 +81,14 @@ On react-native-cli or ejected apps, adding the following lines will add the cap
 ```xml
 <manifest>
 ...
-<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+  <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+  <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+  <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+    android:maxSdkVersion="32" />
+  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 ...
 <application>
 ```
-Add the `android:requestLegacyExternalStorage="true"` attribute to the `<application>` tag for Android 10 support.
 
 Then you have to explicitly ask for the permission
 
@@ -103,15 +97,42 @@ import { PermissionsAndroid, Platform } from "react-native";
 import { CameraRoll } from "@react-native-camera-roll/camera-roll";
 
 async function hasAndroidPermission() {
-  const permission = Platform.Version >= 33 ? PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES : PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE;
+  const getCheckPermissionPromise = () => {
+    if (Platform.Version >= 33) {
+      return Promise.all([
+        PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES),
+        PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.READ_MEDIA_VIDEO),
+      ]).then(
+        ([hasReadMediaImagesPermission, hasReadMediaVideoPermission]) =>
+          hasReadMediaImagesPermission && hasReadMediaVideoPermission,
+      );
+    } else {
+      return PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE);
+    }
+  };
 
-  const hasPermission = await PermissionsAndroid.check(permission);
+  const hasPermission = await getCheckPermissionPromise();
   if (hasPermission) {
     return true;
   }
+  const getRequestPermissionPromise = () => {
+    if (Platform.Version >= 33) {
+      return PermissionsAndroid.requestMultiple([
+        PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES,
+        PermissionsAndroid.PERMISSIONS.READ_MEDIA_VIDEO,
+      ]).then(
+        (statuses) =>
+          statuses[PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES] ===
+            PermissionsAndroid.RESULTS.GRANTED &&
+          statuses[PermissionsAndroid.PERMISSIONS.READ_MEDIA_VIDEO] ===
+            PermissionsAndroid.RESULTS.GRANTED,
+      );
+    } else {
+      return PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE).then((status) => status === PermissionsAndroid.RESULTS.GRANTED);
+    }
+  };
 
-  const status = await PermissionsAndroid.request(permission);
-  return status === 'granted';
+  return await getRequestPermissionPromise();
 }
 
 async function savePicture() {
@@ -121,20 +142,6 @@ async function savePicture() {
 
   CameraRoll.save(tag, { type, album })
 };
-```
-
-**Android 13**
-
-On Android 13 the `READ_EXTERNAL_STORAGE` has been [replace](https://developer.android.com/about/versions/13/behavior-changes-13#granular-media-permissions) by `READ_MEDIA_IMAGES` and `READ_MEDIA_VIDEO`.
-
-```xml
-<manifest>
-...
-<uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
-<uses-permission android:name="android.permission.READ_MEDIA_VIDEO"/>
-<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-...
-<application>
 ```
 
 ### Methods
