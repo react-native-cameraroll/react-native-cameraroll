@@ -136,7 +136,7 @@ manifestOutFile.write(manifestContent)
 
 android {
   if(shouldUseNameSpace){
-    namespace = "com.reactnativecommunity.webview"
+    namespace = "com.reactnativecommunity.cameraroll"
   }
   compileSdkVersion getExtOrIntegerDefault('compileSdkVersion')
 
