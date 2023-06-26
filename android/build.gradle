@@ -113,7 +113,31 @@ if (isNewArchitectureEnabled()) {
     apply plugin: "com.facebook.react"
 }
 
+def agpVersion = com.android.Version.ANDROID_GRADLE_PLUGIN_VERSION.tokenize('.')[0].toInteger()
+def shouldUseNameSpace = agpVersion >= 7
+def PACKAGE_PROP = "package=\"com.reactnativecommunity.cameraroll\""
+def manifestOutFile = file("${projectDir}/src/main/AndroidManifest.xml")
+def manifestContent = manifestOutFile.getText()
+if(shouldUseNameSpace){
+      manifestContent = manifestContent.replaceAll(
+        PACKAGE_PROP,
+        ''
+    )  
+} else {
+    if(!manifestContent.contains("$PACKAGE_PROP")){
+        manifestContent = manifestContent.replace(
+            '<manifest',
+            "<manifest $PACKAGE_PROP "
+        )
+    }
+}
+manifestContent.replaceAll("  ", " ")
+manifestOutFile.write(manifestContent)
+
 android {
+  if(shouldUseNameSpace){
+    namespace = "com.reactnativecommunity.webview"
+  }
   compileSdkVersion getExtOrIntegerDefault('compileSdkVersion')
 
     // Used to override the NDK path/version on internal CI or by allowing
