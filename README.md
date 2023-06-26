@@ -323,7 +323,7 @@ render() {
 Loading images with listeners and refetchs:
 
 ```javascript
-import { PhotoGallery, cameraRollEventEmitter } from '@react-native-camera-roll/camera-roll';
+import { CameraRoll, cameraRollEventEmitter } from '@react-native-camera-roll/camera-roll';
 
 import { useCallback, useEffect, useState } from 'react';
 
@@ -366,7 +366,7 @@ export const useGallery = ({
   const loadNextPagePictures = useCallback(async () => {
     try {
       nextCursor ? setIsLoadingNextPage(true) : setIsLoading(true);
-      const { edges, page_info } = await PhotoGallery.getPhotos({
+      const { edges, page_info } = await CameraRoll.getPhotos({
         first: pageSize,
         after: nextCursor,
         assetType: 'Photos',
@@ -389,7 +389,7 @@ export const useGallery = ({
   const getUnloadedPictures = useCallback(async () => {
     try {
       setIsReloading(true);
-      const { edges, page_info } = await PhotoGallery.getPhotos({
+      const { edges, page_info } = await CameraRoll.getPhotos({
         first: !photos || photos.length < pageSize ? pageSize : photos.length,
         assetType: 'Photos',
         mimeTypes: mimeTypeFilter,
