@@ -13,7 +13,6 @@ const React = require('react');
 const ReactNative = require('react-native');
 const {
   Image,
-  Slider,
   StyleSheet,
   Switch,
   Text,
@@ -22,6 +21,7 @@ const {
   Dimensions,
 } = ReactNative;
 import { CameraRoll } from "@react-native-camera-roll/camera-roll";
+import Slider from '@react-native-community/slider';
 import type {PhotoIdentifier, GroupTypes} from '@react-native-camera-roll/camera-roll';
 
 const invariant = require('invariant');

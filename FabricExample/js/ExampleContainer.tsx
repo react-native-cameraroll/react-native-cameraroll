@@ -26,12 +26,12 @@ interface Example {
 
 const examples: Example[] = [
   {
-    label: 'CameraRollExample',
-    Component: CameraRollExample,
-  },
-  {
     label: 'GetPhotosPerformanceExample',
     Component: GetPhotosPerformanceExample,
+  },
+  {
+    label: 'CameraRollExample',
+    Component: CameraRollExample,
   },
 ];
 

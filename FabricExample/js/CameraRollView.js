@@ -25,7 +25,7 @@ const {
   Linking,
 } = ReactNative;
 
-import { CameraRoll } from "@react-native-camera-roll/camera-roll";
+import {CameraRoll} from '@react-native-camera-roll/camera-roll';
 
 const groupByEveryN = function groupByEveryN(num) {
   const n = num;
