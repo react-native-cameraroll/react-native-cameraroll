@@ -30,6 +30,8 @@ type PhotoIdentifier = {
       uri: string;
       height: number;
       width: number;
+      mediaId:number;
+      contentUri:string;
       fileSize: number | null;
       playableDuration: number;
       orientation: number | null;

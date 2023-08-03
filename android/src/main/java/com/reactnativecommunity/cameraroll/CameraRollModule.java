@@ -679,6 +679,14 @@ public class CameraRollModule extends NativeCameraRollModuleSpec {
       image.putNull("extension");
     }
 
+
+    int idx =media.getColumnIndex(Images.ImageColumns._ID);
+    int _thumpId = media.getInt(idx);
+    image.putInt("mediaId", _thumpId);
+
+    Uri imageUri_t = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,_thumpId);
+    image.putString("contentUri",imageUri_t.toString());
+
     if (includeOrientation) {
       if(media.isNull(orientationIndex)) {
         image.putInt("orientation", media.getInt(orientationIndex));
