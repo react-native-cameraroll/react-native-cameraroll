@@ -8,7 +8,7 @@ import {
   TextInput,
   Keyboard,
 } from 'react-native';
-import {CameraRoll} from '@react-native-camera-roll/camera-roll';
+import {CameraRoll} from '@cisiwen/react-native-camera-roll';
 
 interface State {
   fetchingPhotos: boolean;

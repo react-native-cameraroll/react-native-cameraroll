@@ -14,7 +14,7 @@ const React = require('react');
 const ReactNative = require('react-native');
 const {Image, StyleSheet, View, ScrollView} = ReactNative;
 
-import type {PhotoIdentifier} from '@react-native-camera-roll/camera-roll';
+import type {PhotoIdentifier} from '@cisiwen/react-native-camera-roll';
 
 type Props = $ReadOnly<{|
   asset: PhotoIdentifier,

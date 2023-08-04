@@ -93,7 +93,7 @@ export default class ExamplesContainer extends Component<Props, State> {
 const styles = StyleSheet.create({
   modalScrim: {
     flex: 1,
-    backgroundColor: '#00000080',
+    backgroundColor: '#fff',
   },
   flex1: {
     flex: 1,

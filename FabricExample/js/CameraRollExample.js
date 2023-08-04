@@ -20,9 +20,9 @@ const {
   TouchableOpacity,
   Dimensions,
 } = ReactNative;
-import { CameraRoll } from "@react-native-camera-roll/camera-roll";
+import { CameraRoll } from "@cisiwen/react-native-camera-roll";
 import Slider from '@react-native-community/slider';
-import type {PhotoIdentifier, GroupTypes} from '@react-native-camera-roll/camera-roll';
+import type {PhotoIdentifier, GroupTypes} from '@cisiwen/react-native-camera-roll';
 
 const invariant = require('invariant');
 

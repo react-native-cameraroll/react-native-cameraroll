@@ -62,3 +62,4 @@ index.ios.bundle
 
 # Bob generated files
 lib/
+.npmrc
