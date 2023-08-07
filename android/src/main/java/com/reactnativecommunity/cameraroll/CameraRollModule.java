@@ -193,7 +193,8 @@ public class CameraRollModule extends ReactContextBaseJavaModule {
             newSource.saveAttributes();
           } catch (Exception e) {
             FLog.e(ReactConstants.TAG, "Could not　modify photo created or modified", e);
-            return;
+            // fix KR-23761 如果拍摄时间修改不了，也允许继续执行保存动作。
+            // return;
           }
         }
          
