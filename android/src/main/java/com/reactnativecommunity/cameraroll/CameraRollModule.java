@@ -56,6 +56,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
 
@@ -894,10 +896,18 @@ public class CameraRollModule extends NativeCameraRollModuleSpec {
             String videoGeoTag = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_LOCATION);
             if (videoGeoTag!=null){
               String filtered = videoGeoTag.replaceAll("/","");
-              WritableMap location = new WritableNativeMap();
-              location.putDouble("latitude", Double.parseDouble(filtered.split("[+]|[-]")[1]));
-              location.putDouble("longitude", Double.parseDouble(filtered.split("[+]|[-]")[2]));
-              node.putMap("location", location);
+              Pattern pattern = Pattern.compile("([-+][0-9]+.[0-9]+)", Pattern.CASE_INSENSITIVE);
+              Matcher matcher = pattern.matcher(filtered);
+              ArrayList<String> matched = new ArrayList<>();
+              while (matcher.find()){
+                matched.add(matcher.group(1));
+              }
+              if(matched.size()==2) {
+                WritableMap location = new WritableNativeMap();
+                location.putDouble("latitude", Double.parseDouble(matched.get(0)));
+                location.putDouble("longitude", Double.parseDouble(matched.get(1)));
+                node.putMap("location", location);
+              }
             }
           } catch (NumberFormatException e) {
             FLog.e(ReactConstants.TAG,"Number format exception occurred while trying to fetch video metadata for "+ photoUri.toString(),e);
