@@ -256,7 +256,7 @@ Returns a Promise which when resolved will be of the following shape:
   * `node`: {object} An object with the following shape:
     * `type`: {string}
     * `subTypes`: {Array<string>} : An array of subtype strings (see `SubTypes` type). Always [] on Android.
-    * `group_name`: {string}
+    * `group_name`: {Array<string>} : An array of albums containing the element. 1 element on Android. 0 - n elements on iOS.
     * `image`: {object} : An object with the following shape:
       * `uri`: {string}
       * `filename`: {string | null} : Only set if the `include` parameter contains `filename`

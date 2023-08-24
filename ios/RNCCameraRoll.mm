@@ -424,6 +424,8 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
 
       NSArray<NSString*> *const assetMediaSubtypesLabel = [self mediaSubTypeLabelsForAsset:asset];
 
+      NSArray<NSString*> *const albums = [self getAlbumsForAsset:asset];
+
       if (includeFileExtension) {
         NSString *name = [asset valueForKey:@"filename"];
         NSString *extension = [name pathExtension];
@@ -435,8 +437,8 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
       [assets addObject:@{
         @"node": @{
           @"type": assetMediaTypeLabel, // TODO: switch to mimeType?
-          @"subTypes":assetMediaSubtypesLabel,
-          @"group_name": currentCollectionName,
+          @"subTypes": assetMediaSubtypesLabel,
+          @"group_name": albums,
           @"image": @{
               @"uri": uri,
               @"extension": (includeFileExtension ? fileExtension : [NSNull null]),
@@ -713,6 +715,18 @@ RCT_EXPORT_METHOD(getPhotoByInternalID:(NSString *)internalId
     }
 
     return mediaSubTypeLabels;
+}
+
+- (NSArray<NSString *> *) getAlbumsForAsset:(PHAsset *)asset {
+    NSMutableArray<NSString *> *albumTitles = [NSMutableArray array];
+
+    PHFetchResult<PHAssetCollection *> *collections = [PHAssetCollection fetchAssetCollectionsContainingAsset:asset withType:PHAssetCollectionTypeAlbum options:nil];
+
+    for (PHAssetCollection *collection in collections) {
+        [albumTitles addObject:collection.localizedTitle];
+    }
+
+    return [albumTitles copy];
 }
 
 static void checkPhotoLibraryConfig()

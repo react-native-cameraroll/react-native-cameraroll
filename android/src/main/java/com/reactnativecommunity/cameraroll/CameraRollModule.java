@@ -618,7 +618,9 @@ public class CameraRollModule extends NativeCameraRollModuleSpec {
     node.putString("type", media.getString(mimeTypeIndex));
     WritableArray subTypes = Arguments.createArray();
     node.putArray("subTypes", subTypes);
-    node.putString("group_name", media.getString(groupNameIndex));
+    WritableArray group_name = Arguments.createArray();
+    group_name.pushString(media.getString(groupNameIndex));
+    node.putArray("group_name", group_name);
     long dateTaken = media.getLong(dateTakenIndex);
     if (dateTaken == 0L) {
       //date added is in seconds, date taken in milliseconds, thus the multiplication
