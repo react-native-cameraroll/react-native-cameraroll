@@ -354,7 +354,6 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
   }
 
   BOOL __block stopCollections_;
-  NSString __block *currentCollectionName;
 
   requestPhotoLibraryAccess(reject, ^(bool isLimited){
     void (^collectAsset)(PHAsset*, NSUInteger, BOOL*) = ^(PHAsset * _Nonnull asset, NSUInteger assetIdx, BOOL * _Nonnull stopAssets) {
@@ -465,14 +464,12 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
 
     if ([groupTypes isEqualToString:@"all"]) {
       PHFetchResult <PHAsset *> *const assetFetchResult = [PHAsset fetchAssetsWithOptions: assetFetchOptions];
-      currentCollectionName = @"All Photos";
       [assetFetchResult enumerateObjectsUsingBlock:collectAsset];
     } else {
       PHFetchResult<PHAssetCollection *> *const assetCollectionFetchResult = [PHAssetCollection fetchAssetCollectionsWithType:collectionType subtype:collectionSubtype options:collectionFetchOptions];
       [assetCollectionFetchResult enumerateObjectsUsingBlock:^(PHAssetCollection * _Nonnull assetCollection, NSUInteger collectionIdx, BOOL * _Nonnull stopCollections) {
         // Enumerate assets within the collection
         PHFetchResult<PHAsset *> *const assetsFetchResult = [PHAsset fetchAssetsInAssetCollection:assetCollection options:assetFetchOptions];
-        currentCollectionName = [assetCollection localizedTitle];
         [assetsFetchResult enumerateObjectsUsingBlock:collectAsset];
         *stopCollections = stopCollections_;
       }];
