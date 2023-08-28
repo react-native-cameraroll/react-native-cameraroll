@@ -311,6 +311,8 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
   NSArray<NSString *> *const mimeTypes = [RCTConvert NSStringArray:params[@"mimeTypes"]];
   NSArray<NSString *> *const include = [RCTConvert NSStringArray:params[@"include"]];
 
+  BOOL __block includeSharedAlbums = [params[@"includeSharedAlbums"] boolValue];
+
   BOOL __block includeFilename = [include indexOfObject:@"filename"] != NSNotFound;
   BOOL __block includeFileSize = [include indexOfObject:@"fileSize"] != NSNotFound;
   BOOL __block includeFileExtension = [include indexOfObject:@"fileExtension"] != NSNotFound;
@@ -340,6 +342,10 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
     assetFetchOptions.fetchLimit = first + 1;
   }
   assetFetchOptions.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:NO]];
+
+  if (includeSharedAlbums) {
+    assetFetchOptions.includeAssetSourceTypes = PHAssetSourceTypeUserLibrary | PHAssetSourceTypeCloudShared;
+  }
 
   BOOL __block foundAfter = NO;
   BOOL __block hasNextPage = NO;

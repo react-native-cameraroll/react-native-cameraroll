@@ -81,6 +81,11 @@ export type GetPhotosParams = {
   groupName?: string;
 
   /**
+   * Include assets originating from an iCloud Shared Album. iOS only.
+   */
+  includeSharedAlbums?: boolean;
+
+  /**
    * Specifies filter on asset type
    */
   assetType?: AssetType;
