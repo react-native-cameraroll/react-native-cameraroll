@@ -158,9 +158,20 @@ export type GetAlbumsParams = {
   assetType?: AssetType;
 };
 
+export type AlbumSubType =
+  | 'AlbumRegular'
+  | 'AlbumSyncedEvent'
+  | 'AlbumSyncedFaces'
+  | 'AlbumSyncedAlbum'
+  | 'AlbumImported'
+  | 'AlbumMyPhotoStream'
+  | 'AlbumCloudShared'
+  | 'Unknown';
+
 export type Album = {
   title: string;
   count: number;
+  subtype?: AlbumSubType;
 };
 
 /**
