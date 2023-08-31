@@ -11,6 +11,7 @@ import {
 // @ts-ignore: CameraRollExample has no typings in same folder
 import CameraRollExample from './CameraRollExample';
 import GetPhotosPerformanceExample from './GetPhotosPerformanceExample';
+import GetAlbumsExample from './GetAlbumsExample';
 
 interface Props {}
 
@@ -28,6 +29,10 @@ const examples: Example[] = [
   {
     label: 'GetPhotosPerformanceExample',
     Component: GetPhotosPerformanceExample,
+  },
+  {
+    label: 'GetAlbumsExample',
+    Component: GetAlbumsExample,
   },
   {
     label: 'CameraRollExample',
