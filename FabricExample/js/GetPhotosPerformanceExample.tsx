@@ -1,14 +1,14 @@
+import { CameraRoll } from '@react-native-camera-roll/camera-roll';
 import * as React from 'react';
 import {
-  StyleSheet,
-  View,
   Button,
-  Text,
-  Switch,
-  TextInput,
   Keyboard,
+  StyleSheet,
+  Switch,
+  Text,
+  TextInput,
+  View,
 } from 'react-native';
-import {CameraRoll} from '@react-native-camera-roll/camera-roll';
 
 interface State {
   fetchingPhotos: boolean;
@@ -20,6 +20,7 @@ interface State {
    * with `this.first()` before using.
    */
   firstStr: string;
+  includeSharedAlbums: boolean;
 }
 
 const includeValues: CameraRoll.Include[] = [
@@ -44,6 +45,7 @@ export default class GetPhotosPerformanceExample extends React.PureComponent<
     output: null,
     include: [],
     firstStr: '1000',
+    includeSharedAlbums: false,
   };
 
   first = () => {
@@ -55,14 +57,18 @@ export default class GetPhotosPerformanceExample extends React.PureComponent<
   };
 
   startFetchingPhotos = async () => {
-    const {include} = this.state;
+    const {include, includeSharedAlbums} = this.state;
     const first = this.first();
     if (first === null) {
       return;
     }
     this.setState({fetchingPhotos: true});
     Keyboard.dismiss();
-    const params: CameraRoll.GetPhotosParams = {first, include};
+    const params: CameraRoll.GetPhotosParams = {
+      first,
+      include,
+      includeSharedAlbums,
+    };
     const startTime = Date.now();
     const output: CameraRoll.PhotoIdentifiersPage = await CameraRoll.getPhotos(
       params,
@@ -91,8 +97,14 @@ export default class GetPhotosPerformanceExample extends React.PureComponent<
   };
 
   render() {
-    const {fetchingPhotos, timeTakenMillis, output, include, firstStr} =
-      this.state;
+    const {
+      fetchingPhotos,
+      timeTakenMillis,
+      output,
+      include,
+      firstStr,
+      includeSharedAlbums,
+    } = this.state;
     const first = this.first();
 
     return (
@@ -108,6 +120,15 @@ export default class GetPhotosPerformanceExample extends React.PureComponent<
             />
           </View>
         ))}
+        <View key="includeSharedAlbums" style={styles.inputRow}>
+          <Text>includeSharedAlbums</Text>
+          <Switch
+            value={includeSharedAlbums}
+            onValueChange={(changedTo: boolean) =>
+              this.setState({includeSharedAlbums: changedTo})
+            }
+          />
+        </View>
         <View style={styles.inputRow}>
           <Text>
             first
@@ -130,7 +151,7 @@ export default class GetPhotosPerformanceExample extends React.PureComponent<
           <Text>Time taken: {timeTakenMillis} ms</Text>
         )}
         <View>
-          <Text>Output</Text>
+          <Text>Output : {output?.edges?.length || '0'} elements</Text>
         </View>
         <TextInput
           value={JSON.stringify(output, null, 2)}
