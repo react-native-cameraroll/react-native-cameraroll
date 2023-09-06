@@ -206,6 +206,7 @@ Returns a Promise with a list of albums
 Array of `Album` object
   * title: {string}
   * count: {number}
+  * subtype: {string | undefined} : See AlbumSubType type for possible values. iOS only.
 
 ---
 

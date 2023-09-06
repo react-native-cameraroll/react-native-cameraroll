@@ -252,7 +252,9 @@ RCT_EXPORT_METHOD(getAlbums:(NSDictionary *)params
                   reject:(RCTPromiseRejectBlock)reject)
 {
   NSString *const mediaType = [params objectForKey:@"assetType"] ? [RCTConvert NSString:params[@"assetType"]] : @"All";
+    NSLog(@"type: %@", mediaType);
   PHFetchOptions* options = [[PHFetchOptions alloc] init];
+    NSLog(@"Options: %@", options);
   PHFetchResult<PHAssetCollection *> *const assetCollectionFetchResult = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeAlbum subtype:PHAssetCollectionSubtypeAny options:options];
   NSMutableArray * result = [NSMutableArray new];
   [assetCollectionFetchResult enumerateObjectsUsingBlock:^(PHAssetCollection * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
@@ -260,9 +262,11 @@ RCT_EXPORT_METHOD(getAlbums:(NSDictionary *)params
     // Enumerate assets within the collection
     PHFetchResult<PHAsset *> *const assetsFetchResult = [PHAsset fetchAssetsInAssetCollection:obj options:assetFetchOptions];
     if (assetsFetchResult.count > 0) {
+      NSString *subtypeString = subTypeLabelForCollection(obj);
       [result addObject:@{
         @"title": [obj localizedTitle],
-        @"count": @(assetsFetchResult.count)
+        @"count": @(assetsFetchResult.count),
+        @"subtype": subtypeString
       }];
     }
   }];
@@ -687,6 +691,29 @@ RCT_EXPORT_METHOD(getPhotoByInternalID:(NSString *)internalId
     }
 
   }, false);
+}
+
+NSString *subTypeLabelForCollection(PHAssetCollection *assetCollection) {
+    PHAssetCollectionSubtype subtype = assetCollection.assetCollectionSubtype;
+  
+    switch (subtype) {
+        case PHAssetCollectionSubtypeAlbumRegular:
+            return @"AlbumRegular";
+        case PHAssetCollectionSubtypeAlbumSyncedEvent:
+            return @"AlbumSyncedEvent";
+        case PHAssetCollectionSubtypeAlbumSyncedFaces:
+          return @"AlbumSyncedFaces";
+      case PHAssetCollectionSubtypeAlbumSyncedAlbum:
+          return @"AlbumSyncedAlbum";
+      case PHAssetCollectionSubtypeAlbumImported:
+          return @"AlbumImported";
+      case PHAssetCollectionSubtypeAlbumMyPhotoStream:
+          return @"AlbumMyPhotoStream";
+      case PHAssetCollectionSubtypeAlbumCloudShared:
+          return @"AlbumCloudShared";      
+      default:
+          return @"Unknown";
+  }
 }
 
 - (NSArray<NSString *> *) mediaSubTypeLabelsForAsset:(PHAsset *)asset {

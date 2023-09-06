@@ -9,12 +9,17 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import type {
+  GetPhotosParams,
+  Include,
+  PhotoIdentifiersPage,
+} from '@react-native-camera-roll/camera-roll';
 
 interface State {
   fetchingPhotos: boolean;
   timeTakenMillis: number | null;
-  output: CameraRoll.PhotoIdentifiersPage | null;
-  include: CameraRoll.Include[];
+  output: PhotoIdentifiersPage | null;
+  include: Include[];
   /**
    * `first` argument passed into `getPhotos`, but as a string. Validate it
    * with `this.first()` before using.
@@ -23,7 +28,7 @@ interface State {
   includeSharedAlbums: boolean;
 }
 
-const includeValues: CameraRoll.Include[] = [
+const includeValues: Include[] = [
   'filename',
   'fileSize',
   'location',
@@ -64,15 +69,13 @@ export default class GetPhotosPerformanceExample extends React.PureComponent<
     }
     this.setState({fetchingPhotos: true});
     Keyboard.dismiss();
-    const params: CameraRoll.GetPhotosParams = {
+    const params: GetPhotosParams = {
       first,
       include,
       includeSharedAlbums,
     };
     const startTime = Date.now();
-    const output: CameraRoll.PhotoIdentifiersPage = await CameraRoll.getPhotos(
-      params,
-    );
+    const output: PhotoIdentifiersPage = await CameraRoll.getPhotos(params);
     const endTime = Date.now();
     this.setState({
       output,
@@ -81,10 +84,7 @@ export default class GetPhotosPerformanceExample extends React.PureComponent<
     });
   };
 
-  handleIncludeChange = (
-    includeValue: CameraRoll.Include,
-    changedTo: boolean,
-  ) => {
+  handleIncludeChange = (includeValue: Include, changedTo: boolean) => {
     if (changedTo === false) {
       const include = this.state.include.filter(
         value => value !== includeValue,
@@ -156,6 +156,7 @@ export default class GetPhotosPerformanceExample extends React.PureComponent<
         <TextInput
           value={JSON.stringify(output, null, 2)}
           multiline
+          editable={false}
           style={styles.outputBox}
         />
       </View>
