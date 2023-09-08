@@ -235,6 +235,7 @@ Returns a Promise with photo identifier objects from the local camera roll of th
   * `PhotoStream`
   * `SavedPhotos`
 * `groupName` : {string} : Specifies filter on group names, like 'Recent Photos' or custom album titles.
+* `includeSharedAlbums` : {boolean} : Include assets originating from an iCloud Shared Album. iOS only.
 * `assetType` : {string} : Specifies filter on asset type. Valid values are:
   * `All`
   * `Videos`
