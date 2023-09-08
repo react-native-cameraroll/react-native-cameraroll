@@ -6,6 +6,7 @@ import {
   Text,
   TextInput,
   Keyboard,
+  Appearance,
 } from 'react-native';
 import {CameraRoll} from '@react-native-camera-roll/camera-roll';
 import type {
@@ -14,6 +15,7 @@ import type {
 } from '@react-native-camera-roll/camera-roll';
 
 interface State {
+  colorScheme: 'light' | 'dark';
   fetchingAlbums: boolean;
   timeTakenMillis: number | null;
   output: Album[] | null;
@@ -28,6 +30,7 @@ export default class GetPhotosPerformanceExample extends React.PureComponent<
   State
 > {
   state: State = {
+    colorScheme: Appearance.getColorScheme() === 'light' ? 'light' : 'dark',
     fetchingAlbums: false,
     timeTakenMillis: null,
     output: null,
@@ -47,27 +50,44 @@ export default class GetPhotosPerformanceExample extends React.PureComponent<
     });
   };
 
+  componentDidMount(): void {
+    Appearance.addChangeListener(({colorScheme}) => {
+      this.setState({colorScheme: colorScheme === 'light' ? 'light' : 'dark'});
+    });
+  }
+
+  get styles() {
+    return {
+      container: {
+        backgroundColor: this.state.colorScheme === 'light' ? '#fff' : '#000',
+      },
+      text: {
+        color: this.state.colorScheme === 'light' ? '#000' : '#fff',
+      },
+    };
+  }
+
   render() {
     const {fetchingAlbums, timeTakenMillis, output} = this.state;
 
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, this.styles.container]}>
         <Button
           disabled={fetchingAlbums}
           title={'Run getAlbums'}
           onPress={this.startFetchingAlbums}
         />
         {timeTakenMillis !== null && (
-          <Text>Time taken: {timeTakenMillis} ms</Text>
+          <Text style={this.styles.text}>Time taken: {timeTakenMillis} ms</Text>
         )}
         <View>
-          <Text>Output</Text>
+          <Text style={this.styles.text}>Output</Text>
         </View>
         <TextInput
           value={JSON.stringify(output, null, 2)}
           multiline
           editable={false}
-          style={styles.outputBox}
+          style={[styles.outputBox, this.styles.text]}
         />
       </View>
     );
