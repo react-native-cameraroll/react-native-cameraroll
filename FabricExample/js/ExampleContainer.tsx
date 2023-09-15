@@ -7,10 +7,12 @@ import {
   Button,
   Modal,
   TouchableWithoutFeedback,
+  Appearance,
 } from 'react-native';
 // @ts-ignore: CameraRollExample has no typings in same folder
 import CameraRollExample from './CameraRollExample';
 import GetPhotosPerformanceExample from './GetPhotosPerformanceExample';
+import GetAlbumsExample from './GetAlbumsExample';
 
 interface Props {}
 
@@ -28,6 +30,10 @@ const examples: Example[] = [
   {
     label: 'GetPhotosPerformanceExample',
     Component: GetPhotosPerformanceExample,
+  },
+  {
+    label: 'GetAlbumsExample',
+    Component: GetAlbumsExample,
   },
   {
     label: 'CameraRollExample',
@@ -93,13 +99,14 @@ export default class ExamplesContainer extends Component<Props, State> {
 const styles = StyleSheet.create({
   modalScrim: {
     flex: 1,
-    backgroundColor: '#00000080',
+    backgroundColor:
+      Appearance.getColorScheme() === 'light' ? '#00000080' : '#ffffff80',
   },
   flex1: {
     flex: 1,
   },
   modalInner: {
     margin: 20,
-    backgroundColor: '#fff',
+    backgroundColor: Appearance.getColorScheme() === 'light' ? '#fff' : '#000',
   },
 });

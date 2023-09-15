@@ -3,9 +3,20 @@
 // and we want to stay compatible with those
 import {TurboModuleRegistry, TurboModule} from 'react-native';
 
+export type AlbumSubType =
+  | 'AlbumRegular'
+  | 'AlbumSyncedEvent'
+  | 'AlbumSyncedFaces'
+  | 'AlbumSyncedAlbum'
+  | 'AlbumImported'
+  | 'AlbumMyPhotoStream'
+  | 'AlbumCloudShared'
+  | 'Unknown';
+
 type Album = {
   title: string;
   count: number;
+  subtype?: AlbumSubType;
 };
 
 type SubTypes =

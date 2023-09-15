@@ -252,7 +252,9 @@ RCT_EXPORT_METHOD(getAlbums:(NSDictionary *)params
                   reject:(RCTPromiseRejectBlock)reject)
 {
   NSString *const mediaType = [params objectForKey:@"assetType"] ? [RCTConvert NSString:params[@"assetType"]] : @"All";
+    NSLog(@"type: %@", mediaType);
   PHFetchOptions* options = [[PHFetchOptions alloc] init];
+    NSLog(@"Options: %@", options);
   PHFetchResult<PHAssetCollection *> *const assetCollectionFetchResult = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeAlbum subtype:PHAssetCollectionSubtypeAny options:options];
   NSMutableArray * result = [NSMutableArray new];
   [assetCollectionFetchResult enumerateObjectsUsingBlock:^(PHAssetCollection * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
@@ -260,9 +262,11 @@ RCT_EXPORT_METHOD(getAlbums:(NSDictionary *)params
     // Enumerate assets within the collection
     PHFetchResult<PHAsset *> *const assetsFetchResult = [PHAsset fetchAssetsInAssetCollection:obj options:assetFetchOptions];
     if (assetsFetchResult.count > 0) {
+      NSString *subtypeString = subTypeLabelForCollection(obj);
       [result addObject:@{
         @"title": [obj localizedTitle],
-        @"count": @(assetsFetchResult.count)
+        @"count": @(assetsFetchResult.count),
+        @"subtype": subtypeString
       }];
     }
   }];
@@ -311,6 +315,8 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
   NSArray<NSString *> *const mimeTypes = [RCTConvert NSStringArray:params[@"mimeTypes"]];
   NSArray<NSString *> *const include = [RCTConvert NSStringArray:params[@"include"]];
 
+  BOOL __block includeSharedAlbums = [params[@"includeSharedAlbums"] boolValue];
+
   BOOL __block includeFilename = [include indexOfObject:@"filename"] != NSNotFound;
   BOOL __block includeFileSize = [include indexOfObject:@"fileSize"] != NSNotFound;
   BOOL __block includeFileExtension = [include indexOfObject:@"fileExtension"] != NSNotFound;
@@ -340,6 +346,10 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
     assetFetchOptions.fetchLimit = first + 1;
   }
   assetFetchOptions.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:NO]];
+
+  if (includeSharedAlbums) {
+    assetFetchOptions.includeAssetSourceTypes = PHAssetSourceTypeUserLibrary | PHAssetSourceTypeCloudShared;
+  }
 
   BOOL __block foundAfter = NO;
   BOOL __block hasNextPage = NO;
@@ -680,6 +690,29 @@ RCT_EXPORT_METHOD(getPhotoByInternalID:(NSString *)internalId
     }
 
   }, false);
+}
+
+NSString *subTypeLabelForCollection(PHAssetCollection *assetCollection) {
+    PHAssetCollectionSubtype subtype = assetCollection.assetCollectionSubtype;
+  
+    switch (subtype) {
+        case PHAssetCollectionSubtypeAlbumRegular:
+            return @"AlbumRegular";
+        case PHAssetCollectionSubtypeAlbumSyncedEvent:
+            return @"AlbumSyncedEvent";
+        case PHAssetCollectionSubtypeAlbumSyncedFaces:
+          return @"AlbumSyncedFaces";
+      case PHAssetCollectionSubtypeAlbumSyncedAlbum:
+          return @"AlbumSyncedAlbum";
+      case PHAssetCollectionSubtypeAlbumImported:
+          return @"AlbumImported";
+      case PHAssetCollectionSubtypeAlbumMyPhotoStream:
+          return @"AlbumMyPhotoStream";
+      case PHAssetCollectionSubtypeAlbumCloudShared:
+          return @"AlbumCloudShared";      
+      default:
+          return @"Unknown";
+  }
 }
 
 - (NSArray<NSString *> *) mediaSubTypeLabelsForAsset:(PHAsset *)asset {

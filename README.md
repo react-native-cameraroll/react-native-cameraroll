@@ -206,6 +206,7 @@ Returns a Promise with a list of albums
 Array of `Album` object
   * title: {string}
   * count: {number}
+  * subtype: {string | undefined} : See AlbumSubType type for possible values. iOS only.
 
 ---
 
@@ -234,6 +235,7 @@ Returns a Promise with photo identifier objects from the local camera roll of th
   * `PhotoStream`
   * `SavedPhotos`
 * `groupName` : {string} : Specifies filter on group names, like 'Recent Photos' or custom album titles.
+* `includeSharedAlbums` : {boolean} : Include assets originating from an iCloud Shared Album. iOS only.
 * `assetType` : {string} : Specifies filter on asset type. Valid values are:
   * `All`
   * `Videos`

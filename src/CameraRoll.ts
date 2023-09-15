@@ -81,6 +81,11 @@ export type GetPhotosParams = {
   groupName?: string;
 
   /**
+   * Include assets originating from an iCloud Shared Album. iOS only.
+   */
+  includeSharedAlbums?: boolean;
+
+  /**
    * Specifies filter on asset type
    */
   assetType?: AssetType;
@@ -158,9 +163,20 @@ export type GetAlbumsParams = {
   assetType?: AssetType;
 };
 
+export type AlbumSubType =
+  | 'AlbumRegular'
+  | 'AlbumSyncedEvent'
+  | 'AlbumSyncedFaces'
+  | 'AlbumSyncedAlbum'
+  | 'AlbumImported'
+  | 'AlbumMyPhotoStream'
+  | 'AlbumCloudShared'
+  | 'Unknown';
+
 export type Album = {
   title: string;
   count: number;
+  subtype?: AlbumSubType;
 };
 
 /**
