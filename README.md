@@ -251,6 +251,7 @@ Returns a Promise with photo identifier objects from the local camera roll of th
   * `imageSize` : Ensures `image.width` and `image.height` are available in each node. This has a small performance impact on Android.
   * `playableDuration` : Ensures `image.playableDuration` is available in each node. This has a medium peformance impact on Android.
   * `orientation` : Ensures `image.orientation` is available in each node. This has a small peformance impact on Android. **Android only**
+  * `albums` : Ensures `group_name` is available in iOS. This has a large peformance impact on iOS. group_name is always included on Android because it has no cost.
 
 Returns a Promise which when resolved will be of the following shape:
 

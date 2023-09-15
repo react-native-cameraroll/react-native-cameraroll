@@ -323,6 +323,7 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
   BOOL __block includeLocation = [include indexOfObject:@"location"] != NSNotFound;
   BOOL __block includeImageSize = [include indexOfObject:@"imageSize"] != NSNotFound;
   BOOL __block includePlayableDuration = [include indexOfObject:@"playableDuration"] != NSNotFound;
+  BOOL __block includeAlbums = [include indexOfObject:@"albums"] != NSNotFound;
 
   // If groupTypes is "all", we want to fetch the SmartAlbum "all photos". Otherwise, all
   // other groupTypes values require the "album" collection type.
@@ -433,7 +434,11 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
 
       NSArray<NSString*> *const assetMediaSubtypesLabel = [self mediaSubTypeLabelsForAsset:asset];
 
-      NSArray<NSString*> *const albums = [self getAlbumsForAsset:asset];
+      NSArray<NSString*> *albums = @[];
+      
+      if (includeAlbums) {
+        albums = [self getAlbumsForAsset:asset];
+      }
 
       if (includeFileExtension) {
         NSString *name = [asset valueForKey:@"filename"];

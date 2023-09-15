@@ -29,6 +29,7 @@ const includeValues: CameraRoll.Include[] = [
   'location',
   'imageSize',
   'playableDuration',
+  'albums',
 ];
 
 /**

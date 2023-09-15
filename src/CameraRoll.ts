@@ -49,7 +49,8 @@ export type Include =
   | 'location'
   | 'imageSize'
   | 'playableDuration'
-  | 'orientation';
+  | 'orientation'
+  | 'albums';
 
 export type AssetType = 'All' | 'Videos' | 'Photos';
 
