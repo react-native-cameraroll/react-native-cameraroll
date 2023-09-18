@@ -693,6 +693,70 @@ RCT_EXPORT_METHOD(getPhotoByInternalID:(NSString *)internalId
   }, false);
 }
 
+RCT_EXPORT_METHOD(getPhotoThumbnail:(NSString *)internalId
+                  options:(NSDictionary *)options
+                  resolve:(RCTPromiseResolveBlock)resolve
+                  reject:(RCTPromiseRejectBlock)reject)
+{
+    checkPhotoLibraryConfig();
+
+    BOOL const allowNetworkAccess = options[@"allowNetworkAccess"] == nil ? NO : [RCTConvert BOOL:options[@"allowNetworkAccess"]];
+    
+    NSDictionary *const targetSize = [RCTConvert NSDictionary:options[@"targetSize"]];
+    CGFloat const targetHeight = targetSize[@"height"] == nil ? 400 : [RCTConvert CGFloat:targetSize[@"height"]];
+    CGFloat const targetWidth = targetSize[@"width"] == nil ? 400 : [RCTConvert CGFloat:targetSize[@"width"]];
+    
+    CGFloat quality = options[@"quality"] == nil ? 1.0 : [RCTConvert CGFloat:options[@"quality"]];
+
+    requestPhotoLibraryAccess(reject, ^(bool isLimited){
+    
+        PHFetchResult<PHAsset *> *fetchResult;
+        PHAsset *asset;
+        NSString *mediaIdentifier = internalId;
+
+        if ([internalId rangeOfString:@"ph://"].location != NSNotFound) {
+          mediaIdentifier = [internalId stringByReplacingOccurrencesOfString:@"ph://"
+                                                                       withString:@""];
+        }
+
+        fetchResult = [PHAsset fetchAssetsWithLocalIdentifiers:@[mediaIdentifier] options:nil];
+        if(fetchResult){
+          asset = fetchResult.firstObject;//only object in the array.
+        }
+
+        if(asset){
+            PHImageRequestOptions *const requestOptions = [PHImageRequestOptions new];
+            requestOptions.networkAccessAllowed = allowNetworkAccess;
+            requestOptions.version = PHImageRequestOptionsVersionUnadjusted;
+            requestOptions.deliveryMode = PHImageRequestOptionsDeliveryModeHighQualityFormat;
+            
+            CGSize const thumbnailSize = CGSizeMake(targetWidth, targetHeight);
+            [[PHImageManager defaultManager] requestImageForAsset:asset
+                                                       targetSize:thumbnailSize
+                                                      contentMode:PHImageContentModeAspectFill
+                                                          options:requestOptions
+                                                    resultHandler:^(UIImage * _Nullable image,
+                                                                    NSDictionary * _Nullable info) {
+                NSError *const error = [info objectForKey:PHImageErrorKey];
+                if (error) {
+                    reject(@"Error while getting thumbnail image",@"Error while getting thumbnail image",error);
+                }
+                
+                NSString *thumbnailBase64 = [UIImageJPEGRepresentation(image, quality) base64EncodedStringWithOptions:NSDataBase64EncodingEndLineWithLineFeed];
+                
+                resolve(@{
+                    @"thumbnailBase64": thumbnailBase64
+                });
+            }];
+        } else {
+            NSString *errorMessage = [NSString stringWithFormat:@"Failed to load asset"
+                                      " with localIdentifier %@ with no error message.", internalId];
+            NSError *error = RCTErrorWithMessage(errorMessage);
+            reject(@"No asset found",@"No asset found",error);
+        }
+    }, false);
+}
+
 NSString *subTypeLabelForCollection(PHAssetCollection *assetCollection) {
     PHAssetCollectionSubtype subtype = assetCollection.assetCollectionSubtype;
   

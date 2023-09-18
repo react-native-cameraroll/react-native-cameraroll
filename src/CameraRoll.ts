@@ -179,6 +179,21 @@ export type Album = {
   subtype?: AlbumSubType;
 };
 
+export type ThumbnailSize = {
+  height: number,
+  width: number
+};
+
+export type PhotoThumbnailOptions = {
+  allowNetworkAccess: boolean,  //iOS only
+  targetSize: ThumbnailSize,
+  quality: number
+};
+
+export type PhotoThumbnail = {
+  thumbnailBase64: string,
+};
+
 /**
  * `CameraRoll` provides access to the local camera roll or photo library.
  *
@@ -272,4 +287,15 @@ export class CameraRoll {
     };
     return RNCCameraRoll.getPhotoByInternalID(internalID, conversionOption);
   }
+
+    /**
+   * Returns a Promise with thumbnail photo.
+   *
+   * @param internalID - PH photo internal ID.
+   * @param options - thumbnail photo options.
+   * @returns Promise<PhotoThumbnail>
+   */
+    static getPhotoThumbnail(internalID: string, options: PhotoThumbnailOptions): Promise<PhotoThumbnail> {
+      return RNCCameraRoll.getPhotoThumbnail(internalID, options);
+    }
 }
