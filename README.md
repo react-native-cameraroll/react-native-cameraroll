@@ -488,7 +488,10 @@ CameraRoll.iosGetImageDataById(internalID, true);
 | Name         | Type                    | Required   | Description                                          |
 | ------------ | ----------------------- | ---------- | ---------------------------------------------------- |
 | internalID   | string                  | Yes        | Ios internal ID 'PH://xxxx'.                         |
-| convertHeic  | boolean                 | False      | Whether to convert or not to JPEG image.             |
+| options      | PhotoConvertionOptions  | False      | Expects an options with the shape described below.   |
+
+* `convertHeic` : {boolean} : **default = false** : Whether to convert or not to JPEG image.
+* `quality` : {number} : **default = 1.0** : jpeg quality used for compression (a value from 0.0 to 1.0).  A value of 0.0 is maximum compression (or lowest quality).  A value of 1.0 is least compression (or best quality).
 
 Upload photo/video with `iosGetImageDataById` method
 

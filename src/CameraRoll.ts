@@ -141,7 +141,8 @@ export type PhotoIdentifier = {
 };
 
 export type PhotoConvertionOptions = {
-  convertHeicImages: boolean;
+  convertHeicImages?: boolean;
+  quality?: number
 };
 
 export type PhotoIdentifiersPage = {
@@ -275,17 +276,18 @@ export class CameraRoll {
    * if conversion is requested from HEIC then temporary file is created.
    *
    * @param internalID - PH photo internal ID.
-   * @param convertHeicImages - whether to convert or not heic images to JPEG.
+   * @param options - photo conversion options.
    * @returns Promise<PhotoIdentifier>
    */
   static iosGetImageDataById(
     internalID: string,
-    convertHeicImages = false,
+    options: PhotoConvertionOptions = {},
   ): Promise<PhotoIdentifier> {
-    const conversionOption: PhotoConvertionOptions = {
-      convertHeicImages: convertHeicImages,
-    };
-    return RNCCameraRoll.getPhotoByInternalID(internalID, conversionOption);
+    const conversionOptions = {
+      convertHeicImages: false,
+      ...options
+    }
+    return RNCCameraRoll.getPhotoByInternalID(internalID, conversionOptions);
   }
 
     /**
