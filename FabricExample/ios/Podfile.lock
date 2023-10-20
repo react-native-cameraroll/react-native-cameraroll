@@ -931,7 +931,7 @@ PODS:
   - React-jsinspector (0.72.1)
   - React-logger (0.72.1):
     - glog
-  - react-native-cameraroll (5.7.2):
+  - react-native-cameraroll (5.10.0):
     - RCT-Folly
     - RCTRequired
     - RCTTypeSafety
@@ -1293,7 +1293,7 @@ SPEC CHECKSUMS:
   React-jsiexecutor: 184eae1ecdedc7a083194bd9ff809c93f08fd34c
   React-jsinspector: d0b5bfd1085599265f4212034321e829bdf83cc0
   React-logger: b8103c9b04e707b50cdd2b1aeb382483900cbb37
-  react-native-cameraroll: 5d9523136a929b58f092fd7f0a9a13367a4b46e3
+  react-native-cameraroll: fcaeb6794de226b68946631b956b8725bc2a8b3a
   react-native-slider: 5469a8940a754f73c26ea4bb97c0faace6170f01
   React-NativeModulesApple: 4f31a812364443cee6ef768d256c594ad3b20f53
   React-perflogger: 3d501f34c8d4b10cb75f348e43591765788525ad
