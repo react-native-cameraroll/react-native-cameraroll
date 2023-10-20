@@ -529,6 +529,7 @@ RCT_EXPORT_METHOD(getPhotoByInternalID:(NSString *)internalId
   checkPhotoLibraryConfig();
 
   BOOL const convertHeic = [RCTConvert BOOL:options[@"convertHeicImages"]];
+  CGFloat quality = options[@"quality"] == nil ? 1.0 : [RCTConvert CGFloat:options[@"quality"]];
 
   requestPhotoLibraryAccess(reject, ^(bool isLimited){
 
@@ -595,7 +596,7 @@ RCT_EXPORT_METHOD(getPhotoByInternalID:(NSString *)internalId
           }
 
           originalFilename = [originalFilename stringByReplacingOccurrencesOfString:@"HEIC" withString:@"JPEG" options:NSCaseInsensitiveSearch range:NSMakeRange(0, [originalFilename length])];
-          NSData *const imageData = UIImageJPEGRepresentation(image, 1.0);
+          NSData *const imageData = UIImageJPEGRepresentation(image, quality);
           NSFileManager *fileManager = [NSFileManager defaultManager];
           NSString *fullPath = [NSTemporaryDirectory() stringByAppendingPathComponent:originalFilename];
           if ([fileManager createFileAtPath:fullPath contents:imageData attributes:nil]) {
