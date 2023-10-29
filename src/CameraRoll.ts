@@ -81,6 +81,11 @@ export type GetPhotosParams = {
   groupName?: string;
 
   /**
+   * Include assets originating from an iCloud Shared Album. iOS only.
+   */
+  includeSharedAlbums?: boolean;
+
+  /**
    * Specifies filter on asset type
    */
   assetType?: AssetType;
@@ -138,7 +143,8 @@ export type PhotoIdentifier = {
 };
 
 export type PhotoConvertionOptions = {
-  convertHeicImages: boolean;
+  convertHeicImages?: boolean;
+  quality?: number
 };
 
 export type PhotoIdentifiersPage = {
@@ -160,9 +166,35 @@ export type GetAlbumsParams = {
   assetType?: AssetType;
 };
 
+export type AlbumSubType =
+  | 'AlbumRegular'
+  | 'AlbumSyncedEvent'
+  | 'AlbumSyncedFaces'
+  | 'AlbumSyncedAlbum'
+  | 'AlbumImported'
+  | 'AlbumMyPhotoStream'
+  | 'AlbumCloudShared'
+  | 'Unknown';
+
 export type Album = {
   title: string;
   count: number;
+  subtype?: AlbumSubType;
+};
+
+export type ThumbnailSize = {
+  height: number,
+  width: number
+};
+
+export type PhotoThumbnailOptions = {
+  allowNetworkAccess: boolean,  //iOS only
+  targetSize: ThumbnailSize,
+  quality: number
+};
+
+export type PhotoThumbnail = {
+  thumbnailBase64: string,
 };
 
 /**
@@ -246,16 +278,28 @@ export class CameraRoll {
    * if conversion is requested from HEIC then temporary file is created.
    *
    * @param internalID - PH photo internal ID.
-   * @param convertHeicImages - whether to convert or not heic images to JPEG.
+   * @param options - photo conversion options.
    * @returns Promise<PhotoIdentifier>
    */
   static iosGetImageDataById(
     internalID: string,
-    convertHeicImages = false,
+    options: PhotoConvertionOptions = {},
   ): Promise<PhotoIdentifier> {
-    const conversionOption: PhotoConvertionOptions = {
-      convertHeicImages: convertHeicImages,
-    };
-    return RNCCameraRoll.getPhotoByInternalID(internalID, conversionOption);
+    const conversionOptions = {
+      convertHeicImages: false,
+      ...options
+    }
+    return RNCCameraRoll.getPhotoByInternalID(internalID, conversionOptions);
   }
+
+    /**
+   * Returns a Promise with thumbnail photo.
+   *
+   * @param internalID - PH photo internal ID.
+   * @param options - thumbnail photo options.
+   * @returns Promise<PhotoThumbnail>
+   */
+    static getPhotoThumbnail(internalID: string, options: PhotoThumbnailOptions): Promise<PhotoThumbnail> {
+      return RNCCameraRoll.getPhotoThumbnail(internalID, options);
+    }
 }

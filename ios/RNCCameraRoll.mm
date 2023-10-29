@@ -252,7 +252,9 @@ RCT_EXPORT_METHOD(getAlbums:(NSDictionary *)params
                   reject:(RCTPromiseRejectBlock)reject)
 {
   NSString *const mediaType = [params objectForKey:@"assetType"] ? [RCTConvert NSString:params[@"assetType"]] : @"All";
+    NSLog(@"type: %@", mediaType);
   PHFetchOptions* options = [[PHFetchOptions alloc] init];
+    NSLog(@"Options: %@", options);
   PHFetchResult<PHAssetCollection *> *const assetCollectionFetchResult = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeAlbum subtype:PHAssetCollectionSubtypeAny options:options];
   NSMutableArray * result = [NSMutableArray new];
   [assetCollectionFetchResult enumerateObjectsUsingBlock:^(PHAssetCollection * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
@@ -260,9 +262,11 @@ RCT_EXPORT_METHOD(getAlbums:(NSDictionary *)params
     // Enumerate assets within the collection
     PHFetchResult<PHAsset *> *const assetsFetchResult = [PHAsset fetchAssetsInAssetCollection:obj options:assetFetchOptions];
     if (assetsFetchResult.count > 0) {
+      NSString *subtypeString = subTypeLabelForCollection(obj);
       [result addObject:@{
         @"title": [obj localizedTitle],
-        @"count": @(assetsFetchResult.count)
+        @"count": @(assetsFetchResult.count),
+        @"subtype": subtypeString
       }];
     }
   }];
@@ -311,6 +315,8 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
   NSArray<NSString *> *const mimeTypes = [RCTConvert NSStringArray:params[@"mimeTypes"]];
   NSArray<NSString *> *const include = [RCTConvert NSStringArray:params[@"include"]];
 
+  BOOL __block includeSharedAlbums = [params[@"includeSharedAlbums"] boolValue];
+
   BOOL __block includeFilename = [include indexOfObject:@"filename"] != NSNotFound;
   BOOL __block includeFileSize = [include indexOfObject:@"fileSize"] != NSNotFound;
   BOOL __block includeFileExtension = [include indexOfObject:@"fileExtension"] != NSNotFound;
@@ -340,6 +346,10 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
     assetFetchOptions.fetchLimit = first + 1;
   }
   assetFetchOptions.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:NO]];
+
+  if (includeSharedAlbums) {
+    assetFetchOptions.includeAssetSourceTypes = PHAssetSourceTypeUserLibrary | PHAssetSourceTypeCloudShared;
+  }
 
   BOOL __block foundAfter = NO;
   BOOL __block hasNextPage = NO;
@@ -519,6 +529,7 @@ RCT_EXPORT_METHOD(getPhotoByInternalID:(NSString *)internalId
   checkPhotoLibraryConfig();
 
   BOOL const convertHeic = [RCTConvert BOOL:options[@"convertHeicImages"]];
+  CGFloat quality = options[@"quality"] == nil ? 1.0 : [RCTConvert CGFloat:options[@"quality"]];
 
   requestPhotoLibraryAccess(reject, ^(bool isLimited){
 
@@ -585,7 +596,7 @@ RCT_EXPORT_METHOD(getPhotoByInternalID:(NSString *)internalId
           }
 
           originalFilename = [originalFilename stringByReplacingOccurrencesOfString:@"HEIC" withString:@"JPEG" options:NSCaseInsensitiveSearch range:NSMakeRange(0, [originalFilename length])];
-          NSData *const imageData = UIImageJPEGRepresentation(image, 1.0);
+          NSData *const imageData = UIImageJPEGRepresentation(image, quality);
           NSFileManager *fileManager = [NSFileManager defaultManager];
           NSString *fullPath = [NSTemporaryDirectory() stringByAppendingPathComponent:originalFilename];
           if ([fileManager createFileAtPath:fullPath contents:imageData attributes:nil]) {
@@ -681,6 +692,93 @@ RCT_EXPORT_METHOD(getPhotoByInternalID:(NSString *)internalId
     }
 
   }, false);
+}
+
+RCT_EXPORT_METHOD(getPhotoThumbnail:(NSString *)internalId
+                  options:(NSDictionary *)options
+                  resolve:(RCTPromiseResolveBlock)resolve
+                  reject:(RCTPromiseRejectBlock)reject)
+{
+    checkPhotoLibraryConfig();
+
+    BOOL const allowNetworkAccess = options[@"allowNetworkAccess"] == nil ? NO : [RCTConvert BOOL:options[@"allowNetworkAccess"]];
+    
+    NSDictionary *const targetSize = [RCTConvert NSDictionary:options[@"targetSize"]];
+    CGFloat const targetHeight = targetSize[@"height"] == nil ? 400 : [RCTConvert CGFloat:targetSize[@"height"]];
+    CGFloat const targetWidth = targetSize[@"width"] == nil ? 400 : [RCTConvert CGFloat:targetSize[@"width"]];
+    
+    CGFloat quality = options[@"quality"] == nil ? 1.0 : [RCTConvert CGFloat:options[@"quality"]];
+
+    requestPhotoLibraryAccess(reject, ^(bool isLimited){
+    
+        PHFetchResult<PHAsset *> *fetchResult;
+        PHAsset *asset;
+        NSString *mediaIdentifier = internalId;
+
+        if ([internalId rangeOfString:@"ph://"].location != NSNotFound) {
+          mediaIdentifier = [internalId stringByReplacingOccurrencesOfString:@"ph://"
+                                                                       withString:@""];
+        }
+
+        fetchResult = [PHAsset fetchAssetsWithLocalIdentifiers:@[mediaIdentifier] options:nil];
+        if(fetchResult){
+          asset = fetchResult.firstObject;//only object in the array.
+        }
+
+        if(asset){
+            PHImageRequestOptions *const requestOptions = [PHImageRequestOptions new];
+            requestOptions.networkAccessAllowed = allowNetworkAccess;
+            requestOptions.version = PHImageRequestOptionsVersionUnadjusted;
+            requestOptions.deliveryMode = PHImageRequestOptionsDeliveryModeHighQualityFormat;
+            
+            CGSize const thumbnailSize = CGSizeMake(targetWidth, targetHeight);
+            [[PHImageManager defaultManager] requestImageForAsset:asset
+                                                       targetSize:thumbnailSize
+                                                      contentMode:PHImageContentModeAspectFill
+                                                          options:requestOptions
+                                                    resultHandler:^(UIImage * _Nullable image,
+                                                                    NSDictionary * _Nullable info) {
+                NSError *const error = [info objectForKey:PHImageErrorKey];
+                if (error) {
+                    reject(@"Error while getting thumbnail image",@"Error while getting thumbnail image",error);
+                }
+                
+                NSString *thumbnailBase64 = [UIImageJPEGRepresentation(image, quality) base64EncodedStringWithOptions:NSDataBase64EncodingEndLineWithLineFeed];
+                
+                resolve(@{
+                    @"thumbnailBase64": thumbnailBase64
+                });
+            }];
+        } else {
+            NSString *errorMessage = [NSString stringWithFormat:@"Failed to load asset"
+                                      " with localIdentifier %@ with no error message.", internalId];
+            NSError *error = RCTErrorWithMessage(errorMessage);
+            reject(@"No asset found",@"No asset found",error);
+        }
+    }, false);
+}
+
+NSString *subTypeLabelForCollection(PHAssetCollection *assetCollection) {
+    PHAssetCollectionSubtype subtype = assetCollection.assetCollectionSubtype;
+  
+    switch (subtype) {
+        case PHAssetCollectionSubtypeAlbumRegular:
+            return @"AlbumRegular";
+        case PHAssetCollectionSubtypeAlbumSyncedEvent:
+            return @"AlbumSyncedEvent";
+        case PHAssetCollectionSubtypeAlbumSyncedFaces:
+          return @"AlbumSyncedFaces";
+      case PHAssetCollectionSubtypeAlbumSyncedAlbum:
+          return @"AlbumSyncedAlbum";
+      case PHAssetCollectionSubtypeAlbumImported:
+          return @"AlbumImported";
+      case PHAssetCollectionSubtypeAlbumMyPhotoStream:
+          return @"AlbumMyPhotoStream";
+      case PHAssetCollectionSubtypeAlbumCloudShared:
+          return @"AlbumCloudShared";      
+      default:
+          return @"Unknown";
+  }
 }
 
 - (NSArray<NSString *> *) mediaSubTypeLabelsForAsset:(PHAsset *)asset {

@@ -7,10 +7,12 @@ import {
   Button,
   Modal,
   TouchableWithoutFeedback,
+  Appearance,
 } from 'react-native';
 // @ts-ignore: CameraRollExample has no typings in same folder
 import CameraRollExample from './CameraRollExample';
 import GetPhotosPerformanceExample from './GetPhotosPerformanceExample';
+import GetAlbumsExample from './GetAlbumsExample';
 
 interface Props {}
 
@@ -28,6 +30,10 @@ const examples: Example[] = [
   {
     label: 'GetPhotosPerformanceExample',
     Component: GetPhotosPerformanceExample,
+  },
+  {
+    label: 'GetAlbumsExample',
+    Component: GetAlbumsExample,
   },
   {
     label: 'CameraRollExample',
@@ -100,6 +106,6 @@ const styles = StyleSheet.create({
   },
   modalInner: {
     margin: 20,
-    backgroundColor: '#fff',
+    backgroundColor: Appearance.getColorScheme() === 'light' ? '#fff' : '#000',
   },
 });

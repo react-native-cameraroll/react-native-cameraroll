@@ -931,7 +931,7 @@ PODS:
   - React-jsinspector (0.72.1)
   - React-logger (0.72.1):
     - glog
-  - react-native-cameraroll (5.6.0):
+  - react-native-cameraroll (5.10.0):
     - RCT-Folly
     - RCTRequired
     - RCTTypeSafety
@@ -1293,13 +1293,13 @@ SPEC CHECKSUMS:
   React-jsiexecutor: 184eae1ecdedc7a083194bd9ff809c93f08fd34c
   React-jsinspector: d0b5bfd1085599265f4212034321e829bdf83cc0
   React-logger: b8103c9b04e707b50cdd2b1aeb382483900cbb37
-  react-native-cameraroll: b7684c1ad15c30ebf1992614e68cd2dab1b1b335
+  react-native-cameraroll: fcaeb6794de226b68946631b956b8725bc2a8b3a
   react-native-slider: 5469a8940a754f73c26ea4bb97c0faace6170f01
   React-NativeModulesApple: 4f31a812364443cee6ef768d256c594ad3b20f53
   React-perflogger: 3d501f34c8d4b10cb75f348e43591765788525ad
   React-RCTActionSheet: f5335572c979198c0c3daff67b07bd1ad8370c1d
   React-RCTAnimation: 5d0d31a4f9c49a70f93f32e4da098fb49b5ae0b3
-  React-RCTAppDelegate: 253a4d5bb7444c5b238ec7d7e08a3d48f202138d
+  React-RCTAppDelegate: 9a91823a3be70f4d9ec345bd88d0474f1af48175
   React-RCTBlob: 280d2605ba10b8f2282f1e8a849584368577251a
   React-RCTFabric: 9c4ff9a5bb3373146cff554d07f05956cd981658
   React-RCTImage: e15d22db53406401cdd1407ce51080a66a9c7ed4

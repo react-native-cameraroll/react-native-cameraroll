@@ -152,6 +152,7 @@ async function savePicture() {
 * [`deletePhotos`](#deletephotos)
 * [`iosGetImageDataById`](#iosgetimagedatabyid)
 * [`useCameraRoll`](#usecameraroll)
+* [`getPhotoThumbnail`](#getphotothumbnail) **iOS only**
 
 ---
 
@@ -206,6 +207,7 @@ Returns a Promise with a list of albums
 Array of `Album` object
   * title: {string}
   * count: {number}
+  * subtype: {string | undefined} : See AlbumSubType type for possible values. iOS only.
 
 ---
 
@@ -234,6 +236,7 @@ Returns a Promise with photo identifier objects from the local camera roll of th
   * `PhotoStream`
   * `SavedPhotos`
 * `groupName` : {string} : Specifies filter on group names, like 'Recent Photos' or custom album titles.
+* `includeSharedAlbums` : {boolean} : Include assets originating from an iCloud Shared Album. iOS only.
 * `assetType` : {string} : Specifies filter on asset type. Valid values are:
   * `All`
   * `Videos`
@@ -482,10 +485,13 @@ CameraRoll.iosGetImageDataById(internalID, true);
 
 **Parameters:**
 
-| Name         | Type                    | Required   | Description                                          |
-| ------------ | ----------------------- | ---------- | ---------------------------------------------------- |
-| internalID   | string                  | Yes        | Ios internal ID 'PH://xxxx'.                         |
-| convertHeic  | boolean                 | False      | Whether to convert or not to JPEG image.             |
+| Name         | Type                    | Required   | Description                                               |
+| ------------ | ----------------------- | ---------- | --------------------------------------------------------- |
+| internalID   | string                  | Yes        | Ios internal ID 'PH://xxxx'.                              |
+| options      | PhotoConvertionOptions  | False      | Expects an options object with the shape described below. |
+
+* `convertHeic` : {boolean} : **default = false** : Whether to convert or not to JPEG image.
+* `quality` : {number} : **default = 1.0** : jpeg quality used for compression (a value from 0.0 to 1.0).  A value of 0.0 is maximum compression (or lowest quality).  A value of 1.0 is least compression (or best quality).
 
 Upload photo/video with `iosGetImageDataById` method
 
@@ -523,6 +529,82 @@ function Example() {
     }
   </>;
 };
+```
+
+
+### `getPhotoThumbnail()`
+
+**iOS only**
+
+Returns a Promise with thumbnail photo.
+
+**Parameters:**
+
+| Name         | Type                  | Required | Description                                               |
+| ------------ | --------------------- | -------- | --------------------------------------------------------- |
+| internalID   | string                | Yes      | Ios internal ID 'PH://xxxx'.                              |
+| options      | PhotoThumbnailOptions | Yes      | Expects an options object with the shape described below. |
+
+* `allowNetworkAccess` : {boolean} : **default = false** : Specifies whether the requested image can be downloaded from iCloud. **iOS only**
+* `targetSize` : {ThumbnailSize} : Expects a targetSize with the shape desribed below:
+  * `height` : {number} : **default = 400**
+  * `width` : {number} : **default = 400**
+* `quality` : {number} : **default = 1.0** : jpeg quality used for compression (a value from 0.0 to 1.0).  A value of 0.0 is maximum compression (or lowest quality).  A value of 1.0 is least compression (or best quality).
+
+**Returns:**
+
+| Type                      | Description                                                   |
+| ------------------------- | ------------------------------------------------------------- |
+| Promise\<PhotoThumbnail\> | A Promise with PhotoThumbnail with the shape described below. |
+
+* `thumbnailBase64` : {string}
+
+#### Example
+
+Loading a thumbnail:
+
+```javascript
+export default function Thumbnail(props) {
+  const [base64Image, setBase64Image] = useState(null);
+
+  useEffect(() => {
+    const getThumbnail = async () => {
+      const options = {
+        allowNetworkAccess: true,
+        targetSize: {
+          height: 80,
+          width: 80
+        },
+        quality: 1.0
+      };
+
+      const thumbnailResponse = await CameraRoll.getPhotoThumbnail(props.image.uri, options);
+
+      setBase64Image(thumbnailResponse.thumbnailBase64);
+    };
+
+    getThumbnail();
+  }, []);
+
+  const extension = props.image.extension;
+  let prefix;
+
+  switch (extension) {
+    case 'png':
+      prefix = 'data:image/png;base64,';
+      break;
+    default:
+      //all others can use jpeg
+      prefix = 'data:image/jpeg;base64,';
+      break;
+  }
+
+  return (
+    <Image
+      source={{ uri: `${prefix}${base64Image}` }}
+    />
+  );
+}
 ```
 
 ### Known issues
