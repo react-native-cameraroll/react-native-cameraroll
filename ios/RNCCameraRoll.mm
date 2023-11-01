@@ -270,6 +270,22 @@ RCT_EXPORT_METHOD(getAlbums:(NSDictionary *)params
       }];
     }
   }];
+
+  PHFetchResult<PHAssetCollection *> *const smartAlbumsFetchResult = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeSmartAlbum subtype:PHAssetCollectionSubtypeAny options:options];
+  [smartAlbumsFetchResult enumerateObjectsUsingBlock:^(PHAssetCollection * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+    PHFetchOptions *const assetFetchOptions = [RCTConvert PHFetchOptionsFromMediaType:mediaType fromTime:0 toTime:0];
+    // Enumerate assets within the collection
+    PHFetchResult<PHAsset *> *const assetsFetchResult = [PHAsset fetchAssetsInAssetCollection:obj options:assetFetchOptions];
+    if (assetsFetchResult.count > 0) {
+      NSString *subtypeString = subTypeLabelForCollection(obj);
+      [result addObject:@{
+        @"title": [obj localizedTitle],
+        @"count": @(assetsFetchResult.count),
+        @"subtype": subtypeString
+      }];
+    }
+  }];
+
   resolve(result);
 }
 
@@ -775,7 +791,11 @@ NSString *subTypeLabelForCollection(PHAssetCollection *assetCollection) {
       case PHAssetCollectionSubtypeAlbumMyPhotoStream:
           return @"AlbumMyPhotoStream";
       case PHAssetCollectionSubtypeAlbumCloudShared:
-          return @"AlbumCloudShared";      
+          return @"AlbumCloudShared";
+      case PHAssetCollectionSubtypeSmartAlbumUserLibrary:
+          return @"AlbumUserLibrary";
+      case PHAssetCollectionSubtypeSmartAlbumFavorites:
+          return @"AlbumFavorites";
       default:
           return @"Unknown";
   }
