@@ -201,6 +201,7 @@ Returns a Promise with a list of albums
   * `All` // default
   * `Videos`
   * `Photos`
+* `includeSmartAlbums` : {boolean} : **default = false** : Specifies whether or not to include smart albums (e.g. Favorites, etc...). **iOS only**
 
 **Returns:**
 
