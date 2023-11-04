@@ -22,8 +22,8 @@ const {
   TouchableOpacity,
   Dimensions,
 } = ReactNative;
-import CameraRoll from '../../js/CameraRoll';
-import type {PhotoIdentifier, GroupTypes} from '../../js/CameraRoll';
+import CameraRoll from '../../src/CameraRoll';
+import type {PhotoIdentifier, GroupTypes} from '../../src/CameraRoll';
 
 const invariant = require('fbjs/lib/invariant');
 
@@ -122,6 +122,8 @@ export default class CameraRollExample extends React.Component<Props, State> {
             <Text>{locationStr}</Text>
             <Text>{asset.node.group_name}</Text>
             <Text>{new Date(asset.node.timestamp * 1000).toString()}</Text>
+            <Text>{new Date(asset.node.modificationTimestamp * 1000).toString()}</Text>
+            <Text>Subtypes: {asset.node.subTypes.join(' ')}</Text>
           </View>
         </View>
       </TouchableOpacity>
