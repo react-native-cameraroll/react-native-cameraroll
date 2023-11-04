@@ -17,14 +17,15 @@ const {
   StyleSheet,
   Switch,
   Text,
+  TextInput,
   View,
   TouchableOpacity,
   Dimensions,
 } = ReactNative;
-import CameraRoll from '../../src/CameraRoll';
-import type {PhotoIdentifier, GroupTypes} from '../../src/CameraRoll';
+import CameraRoll from '../../js/CameraRoll';
+import type {PhotoIdentifier, GroupTypes} from '../../js/CameraRoll';
 
-const invariant = require('invariant');
+const invariant = require('fbjs/lib/invariant');
 
 const CameraRollView = require('./CameraRollView');
 
@@ -43,6 +44,7 @@ type Props = $ReadOnly<{|
 
 type State = {|
   groupTypes: GroupTypes,
+  groupName: string,
   sliderValue: number,
   bigImages: boolean,
 |};
@@ -50,6 +52,7 @@ type State = {|
 export default class CameraRollExample extends React.Component<Props, State> {
   state = {
     groupTypes: 'All',
+    groupName: '',
     sliderValue: 1,
     bigImages: true,
   };
@@ -69,6 +72,12 @@ export default class CameraRollExample extends React.Component<Props, State> {
             onValueChange={this._onSliderChange}
           />
           <Text>{'Group Type: ' + this.state.groupTypes}</Text>
+          <Text>Group Name:</Text>
+          <TextInput
+            value={this.state.groupName}
+            onChangeText={this._onGroupNameChange}
+            style={styles.input}
+          />
         </View>
         <CameraRollView
           ref={ref => {
@@ -76,6 +85,7 @@ export default class CameraRollExample extends React.Component<Props, State> {
           }}
           batchSize={20}
           groupTypes={this.state.groupTypes}
+          groupName={this.state.groupName}
           renderImage={this._renderImage}
           bigImages={this.state.bigImages}
         />
@@ -112,8 +122,6 @@ export default class CameraRollExample extends React.Component<Props, State> {
             <Text>{locationStr}</Text>
             <Text>{asset.node.group_name}</Text>
             <Text>{new Date(asset.node.timestamp * 1000).toString()}</Text>
-            <Text>{new Date(asset.node.modificationTimestamp * 1000).toString()}</Text>
-            <Text>Subtypes: {asset.node.subTypes.join(' ')}</Text>
           </View>
         </View>
       </TouchableOpacity>
@@ -127,6 +135,10 @@ export default class CameraRollExample extends React.Component<Props, State> {
     if (groupTypes !== this.state.groupTypes) {
       this.setState({groupTypes: groupTypes});
     }
+  };
+
+  _onGroupNameChange = value => {
+    this.setState({groupName: value});
   };
 
   _onSwitchChange = value => {
@@ -153,5 +165,11 @@ const styles = StyleSheet.create({
   },
   flex1: {
     flex: 1,
+  },
+  input: {
+    padding: 3,
+    height: 40,
+    borderColor: '#ccc',
+    borderWidth: 1,
   },
 });

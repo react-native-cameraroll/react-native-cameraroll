@@ -20,12 +20,9 @@ const {
   Platform,
   StyleSheet,
   View,
-  TouchableOpacity,
-  Text,
-  Linking,
 } = ReactNative;
 
-import {CameraRoll} from '../../src';
+import CameraRoll from '../../js/CameraRoll';
 
 const groupByEveryN = function groupByEveryN(num) {
   const n = num;
@@ -44,6 +41,7 @@ const logError = console.error;
 class CameraRollView extends React.Component {
   static defaultProps = {
     groupTypes: 'All',
+    groupName: '',
     batchSize: 5,
     imagesPerRow: 1,
     assetType: 'Photos',
@@ -64,7 +62,6 @@ class CameraRollView extends React.Component {
       lastCursor: null,
       noMore: false,
       loadingMore: false,
-      isLimited: false,
     };
   }
 
@@ -73,7 +70,10 @@ class CameraRollView extends React.Component {
   }
 
   UNSAFE_componentWillReceiveProps(nextProps) {
-    if (this.props.groupTypes !== nextProps.groupTypes) {
+    if (
+      this.props.groupTypes !== nextProps.groupTypes ||
+      this.props.groupName !== nextProps.groupName
+    ) {
       this.fetch(true);
     }
   }
@@ -101,6 +101,7 @@ class CameraRollView extends React.Component {
     const fetchParams = {
       first: this.props.batchSize,
       groupTypes: this.props.groupTypes,
+      groupName: this.props.groupName,
       assetType: this.props.assetType,
     };
     if (Platform.OS === 'android') {
@@ -133,6 +134,7 @@ class CameraRollView extends React.Component {
   };
 
   render() {
+    console.log({data: this.state.data});
     return (
       <FlatList
         keyExtractor={(_, idx) => String(idx)}
@@ -151,20 +153,11 @@ class CameraRollView extends React.Component {
     if (!this.state.noMore) {
       return <ActivityIndicator />;
     }
-    if (this.state.isLimited) {
-      return (
-        <TouchableOpacity onPress={Linking.openSettings}>
-          <Text style={styles.footerText}>
-            Not all pictures are available. Tap here to go to Settings and
-            change which media the app is allowed to access.
-          </Text>
-        </TouchableOpacity>
-      );
-    }
     return null;
   };
 
   _renderItem = ({item}) => {
+    console.log({item});
     return (
       <View style={styles.row}>
         {item.map(image => (image ? this.props.renderImage(image) : null))}
@@ -174,7 +167,7 @@ class CameraRollView extends React.Component {
 
   _appendAssets(data) {
     const assets = data.edges;
-    const newState = {loadingMore: false, isLimited: data.limited};
+    const newState = {loadingMore: false};
 
     if (!data.page_info.has_next_page) {
       newState.noMore = true;
@@ -221,10 +214,6 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-  },
-  footerText: {
-    padding: 20,
-    textAlign: 'center',
   },
 });
 
