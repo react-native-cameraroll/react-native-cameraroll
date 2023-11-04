@@ -4,6 +4,8 @@
 import {TurboModuleRegistry, TurboModule} from 'react-native';
 import type { PhotoThumbnail } from './CameraRoll';
 
+export type AlbumType = 'All' | 'Album' | 'SmartAlbum';
+
 export type AlbumSubType =
   | 'AlbumRegular'
   | 'AlbumSyncedEvent'
@@ -17,6 +19,7 @@ export type AlbumSubType =
 type Album = {
   title: string;
   count: number;
+  type: AlbumType;
   subtype?: AlbumSubType;
 };
 

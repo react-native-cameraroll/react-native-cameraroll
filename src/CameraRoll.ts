@@ -258,7 +258,7 @@ export class CameraRoll {
   }
 
   static getAlbums(
-    params: GetAlbumsParams = {assetType: 'All', albumType: ALBUM_TYPE_OPTIONS.Album},
+    params: GetAlbumsParams = {assetType: 'All', albumType: 'Album'},
   ): Promise<Album[]> {
     return RNCCameraRoll.getAlbums(params);
   }
