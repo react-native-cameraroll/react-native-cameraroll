@@ -270,12 +270,12 @@ RCT_EXPORT_METHOD(getAlbums:(NSDictionary *)params
       }
     };
 
+  PHFetchOptions* options = [[PHFetchOptions alloc] init];
   if ([albumType isEqualToString:@"SmartAlbum"] || [albumType isEqualToString:@"All"]) {
     fetchedAlbumType = @"SmartAlbum";
     PHFetchResult<PHAssetCollection *> *const assets = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeSmartAlbum subtype:PHAssetCollectionSubtypeAny options:options];
     [assets enumerateObjectsUsingBlock:convertAsset];
   }
-  PHFetchOptions* options = [[PHFetchOptions alloc] init];
   if ([albumType isEqualToString:@"Album"] || [albumType isEqualToString:@"All"]) {
     fetchedAlbumType = @"Album";
     PHFetchResult<PHAssetCollection *> *const assets = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeAlbum subtype:PHAssetCollectionSubtypeAny options:options];
