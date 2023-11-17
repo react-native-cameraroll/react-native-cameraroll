@@ -85,6 +85,7 @@ public class CameraRollModule extends NativeCameraRollModuleSpec {
   private static final String INCLUDE_IMAGE_SIZE = "imageSize";
   private static final String INCLUDE_PLAYABLE_DURATION = "playableDuration";
   private static final String INCLUDE_ORIENTATION = "orientation";
+  private static final String INCLUDE_ALBUMS = "albums";
 
   private static final String[] PROJECTION = {
           Images.Media._ID,
@@ -583,6 +584,7 @@ public class CameraRollModule extends NativeCameraRollModuleSpec {
     boolean includeImageSize = include.contains(INCLUDE_IMAGE_SIZE);
     boolean includePlayableDuration = include.contains(INCLUDE_PLAYABLE_DURATION);
     boolean includeOrientation = include.contains(INCLUDE_ORIENTATION);
+    boolean includeAlbums = include.contains(INCLUDE_ALBUMS);
 
     for (int i = 0; i < limit && !media.isAfterLast(); i++) {
       WritableMap edge = new WritableNativeMap();
@@ -592,7 +594,7 @@ public class CameraRollModule extends NativeCameraRollModuleSpec {
                       mimeTypeIndex, includeFilename, includeFileSize, includeFileExtension, includeImageSize,
                       includePlayableDuration, includeOrientation);
       if (imageInfoSuccess) {
-        putBasicNodeInfo(media, node, mimeTypeIndex, groupNameIndex, dateTakenIndex, dateAddedIndex, dateModifiedIndex);
+        putBasicNodeInfo(media, node, mimeTypeIndex, groupNameIndex, dateTakenIndex, dateAddedIndex, dateModifiedIndex, includeAlbums);
         putLocationInfo(media, node, dataIndex, includeLocation, mimeTypeIndex, resolver);
 
         edge.putMap("node", node);
@@ -614,12 +616,15 @@ public class CameraRollModule extends NativeCameraRollModuleSpec {
           int groupNameIndex,
           int dateTakenIndex,
           int dateAddedIndex,
-          int dateModifiedIndex) {
+          int dateModifiedIndex,
+          boolean includeAlbums) {
     node.putString("type", media.getString(mimeTypeIndex));
     WritableArray subTypes = Arguments.createArray();
     node.putArray("subTypes", subTypes);
     WritableArray group_name = Arguments.createArray();
-    group_name.pushString(media.getString(groupNameIndex));
+    if (includeAlbums) {
+      group_name.pushString(media.getString(groupNameIndex));
+    }
     node.putArray("group_name", group_name);
     long dateTaken = media.getLong(dateTakenIndex);
     if (dateTaken == 0L) {
