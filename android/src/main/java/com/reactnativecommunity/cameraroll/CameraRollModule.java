@@ -1010,4 +1010,9 @@ public class CameraRollModule extends NativeCameraRollModuleSpec {
       }
     }
   }
+
+  @ReactMethod
+  public void getPhotoThumbnail(String internalID, ReadableMap options, Promise promise) {
+    promise.reject("CameraRoll:getPhotoThumbnail", "getPhotoThumbnail is not supported on Android");
+  }
 }
