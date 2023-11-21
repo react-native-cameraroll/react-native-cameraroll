@@ -323,6 +323,7 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
   BOOL __block includeLocation = [include indexOfObject:@"location"] != NSNotFound;
   BOOL __block includeImageSize = [include indexOfObject:@"imageSize"] != NSNotFound;
   BOOL __block includePlayableDuration = [include indexOfObject:@"playableDuration"] != NSNotFound;
+  BOOL __block includeAlbums = [include indexOfObject:@"albums"] != NSNotFound;
 
   // If groupTypes is "all", we want to fetch the SmartAlbum "all photos". Otherwise, all
   // other groupTypes values require the "album" collection type.
@@ -364,7 +365,6 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
   }
 
   BOOL __block stopCollections_;
-  NSString __block *currentCollectionName;
 
   requestPhotoLibraryAccess(reject, ^(bool isLimited){
     void (^collectAsset)(PHAsset*, NSUInteger, BOOL*) = ^(PHAsset * _Nonnull asset, NSUInteger assetIdx, BOOL * _Nonnull stopAssets) {
@@ -434,6 +434,12 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
 
       NSArray<NSString*> *const assetMediaSubtypesLabel = [self mediaSubTypeLabelsForAsset:asset];
 
+      NSArray<NSString*> *albums = @[];
+      
+      if (includeAlbums) {
+        albums = [self getAlbumsForAsset:asset];
+      }
+
       if (includeFileExtension) {
         NSString *name = [asset valueForKey:@"filename"];
         NSString *extension = [name pathExtension];
@@ -445,8 +451,8 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
       [assets addObject:@{
         @"node": @{
           @"type": assetMediaTypeLabel, // TODO: switch to mimeType?
-          @"subTypes":assetMediaSubtypesLabel,
-          @"group_name": currentCollectionName,
+          @"subTypes": assetMediaSubtypesLabel,
+          @"group_name": albums,
           @"image": @{
               @"uri": uri,
               @"extension": (includeFileExtension ? fileExtension : [NSNull null]),
@@ -473,14 +479,12 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
 
     if ([groupTypes isEqualToString:@"all"]) {
       PHFetchResult <PHAsset *> *const assetFetchResult = [PHAsset fetchAssetsWithOptions: assetFetchOptions];
-      currentCollectionName = @"All Photos";
       [assetFetchResult enumerateObjectsUsingBlock:collectAsset];
     } else {
       PHFetchResult<PHAssetCollection *> *const assetCollectionFetchResult = [PHAssetCollection fetchAssetCollectionsWithType:collectionType subtype:collectionSubtype options:collectionFetchOptions];
       [assetCollectionFetchResult enumerateObjectsUsingBlock:^(PHAssetCollection * _Nonnull assetCollection, NSUInteger collectionIdx, BOOL * _Nonnull stopCollections) {
         // Enumerate assets within the collection
         PHFetchResult<PHAsset *> *const assetsFetchResult = [PHAsset fetchAssetsInAssetCollection:assetCollection options:assetFetchOptions];
-        currentCollectionName = [assetCollection localizedTitle];
         [assetsFetchResult enumerateObjectsUsingBlock:collectAsset];
         *stopCollections = stopCollections_;
       }];
@@ -811,6 +815,18 @@ NSString *subTypeLabelForCollection(PHAssetCollection *assetCollection) {
     }
 
     return mediaSubTypeLabels;
+}
+
+- (NSArray<NSString *> *) getAlbumsForAsset:(PHAsset *)asset {
+    NSMutableArray<NSString *> *albumTitles = [NSMutableArray array];
+
+    PHFetchResult<PHAssetCollection *> *collections = [PHAssetCollection fetchAssetCollectionsContainingAsset:asset withType:PHAssetCollectionTypeAlbum options:nil];
+
+    for (PHAssetCollection *collection in collections) {
+        [albumTitles addObject:collection.localizedTitle];
+    }
+
+    return [albumTitles copy];
 }
 
 static void checkPhotoLibraryConfig()

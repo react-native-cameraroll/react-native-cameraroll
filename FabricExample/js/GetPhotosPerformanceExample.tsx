@@ -36,6 +36,7 @@ const includeValues: Include[] = [
   'location',
   'imageSize',
   'playableDuration',
+  'albums',
 ];
 
 /**

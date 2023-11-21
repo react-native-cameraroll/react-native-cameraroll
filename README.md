@@ -252,6 +252,7 @@ Returns a Promise with photo identifier objects from the local camera roll of th
   * `imageSize` : Ensures `image.width` and `image.height` are available in each node. This has a small performance impact on Android.
   * `playableDuration` : Ensures `image.playableDuration` is available in each node. This has a medium peformance impact on Android.
   * `orientation` : Ensures `image.orientation` is available in each node. This has a small peformance impact on Android. **Android only**
+  * `albums` : Ensures `group_name` is available in each node. This has a large peformance impact on iOS.
 
 Returns a Promise which when resolved will be of the following shape:
 
@@ -259,7 +260,7 @@ Returns a Promise which when resolved will be of the following shape:
   * `node`: {object} An object with the following shape:
     * `type`: {string}
     * `subTypes`: {Array<string>} : An array of subtype strings (see `SubTypes` type). Always [] on Android.
-    * `group_name`: {string}
+    * `group_name`: {Array<string>} : An array of albums containing the element. Always 1 element on Android. 0 to n elements on iOS.
     * `image`: {object} : An object with the following shape:
       * `uri`: {string}
       * `filename`: {string | null} : Only set if the `include` parameter contains `filename`
