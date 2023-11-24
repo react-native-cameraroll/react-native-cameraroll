@@ -258,6 +258,7 @@ Returns a Promise which when resolved will be of the following shape:
 
 * `edges` : {Array<node>} An array of node objects
   * `node`: {object} An object with the following shape:
+    * `id`: {string} : A local identifier. Correspond to `Media._ID` on Android and `localIdentifier` on iOS.
     * `type`: {string}
     * `subTypes`: {Array<string>} : An array of subtype strings (see `SubTypes` type). Always [] on Android.
     * `group_name`: {Array<string>} : An array of albums containing the element. Always 1 element on Android. 0 to n elements on iOS.

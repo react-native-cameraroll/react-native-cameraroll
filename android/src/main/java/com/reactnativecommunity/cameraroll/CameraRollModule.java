@@ -566,6 +566,7 @@ public class CameraRollModule extends NativeCameraRollModuleSpec {
           Set<String> include) {
     WritableArray edges = new WritableNativeArray();
     media.moveToFirst();
+    int idIndex = media.getColumnIndex(Images.Media._ID);
     int mimeTypeIndex = media.getColumnIndex(Images.Media.MIME_TYPE);
     int groupNameIndex = media.getColumnIndex(Images.Media.BUCKET_DISPLAY_NAME);
     int dateTakenIndex = media.getColumnIndex(Images.Media.DATE_TAKEN);
@@ -594,7 +595,7 @@ public class CameraRollModule extends NativeCameraRollModuleSpec {
                       mimeTypeIndex, includeFilename, includeFileSize, includeFileExtension, includeImageSize,
                       includePlayableDuration, includeOrientation);
       if (imageInfoSuccess) {
-        putBasicNodeInfo(media, node, mimeTypeIndex, groupNameIndex, dateTakenIndex, dateAddedIndex, dateModifiedIndex, includeAlbums);
+        putBasicNodeInfo(media, node, idIndex, mimeTypeIndex, groupNameIndex, dateTakenIndex, dateAddedIndex, dateModifiedIndex, includeAlbums);
         putLocationInfo(media, node, dataIndex, includeLocation, mimeTypeIndex, resolver);
 
         edge.putMap("node", node);
@@ -612,12 +613,14 @@ public class CameraRollModule extends NativeCameraRollModuleSpec {
   private static void putBasicNodeInfo(
           Cursor media,
           WritableMap node,
+          int idIndex,
           int mimeTypeIndex,
           int groupNameIndex,
           int dateTakenIndex,
           int dateAddedIndex,
           int dateModifiedIndex,
           boolean includeAlbums) {
+    node.putString("id", Long.toString(media.getLong(idIndex)));
     node.putString("type", media.getString(mimeTypeIndex));
     WritableArray subTypes = Arguments.createArray();
     node.putArray("subTypes", subTypes);

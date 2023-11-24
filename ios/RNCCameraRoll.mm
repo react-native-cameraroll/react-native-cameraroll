@@ -447,9 +447,11 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
       }
 
       CLLocation *const loc = asset.location;
+      NSString *localIdentifier = asset.localIdentifier;
 
       [assets addObject:@{
         @"node": @{
+          @"id": localIdentifier,
           @"type": assetMediaTypeLabel, // TODO: switch to mimeType?
           @"subTypes": assetMediaSubtypesLabel,
           @"group_name": albums,
