@@ -57,7 +57,8 @@ export type Include =
   | 'location'
   | 'imageSize'
   | 'playableDuration'
-  | 'orientation';
+  | 'orientation'
+  | 'albums';
 
 export type AssetType = 'All' | 'Videos' | 'Photos';
 
@@ -126,7 +127,7 @@ export type PhotoIdentifier = {
   node: {
     type: string;
     subTypes: SubTypes;
-    group_name: string;
+    group_name: string[];
     image: {
       filename: string | null;
       filepath: string | null;
