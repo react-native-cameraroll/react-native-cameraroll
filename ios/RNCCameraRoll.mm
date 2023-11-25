@@ -485,7 +485,6 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
         [assetCollectionFetchResult enumerateObjectsUsingBlock:^(PHAssetCollection * _Nonnull assetCollection, NSUInteger collectionIdx, BOOL * _Nonnull stopCollections) {
           if ([assetCollection.localizedTitle isEqualToString:groupName]) {
             PHFetchResult<PHAsset *> *const assetsFetchResult = [PHAsset fetchAssetsInAssetCollection:assetCollection options:assetFetchOptions];
-            currentCollectionName = [assetCollection localizedTitle];
             [assetsFetchResult enumerateObjectsUsingBlock:collectAsset];
             *stopCollections = stopCollections_;
           }
@@ -503,7 +502,6 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
         [assetCollectionFetchResult enumerateObjectsUsingBlock:^(PHAssetCollection * _Nonnull assetCollection, NSUInteger collectionIdx, BOOL * _Nonnull stopCollections) {
             // Enumerate assets within the collection
           PHFetchResult<PHAsset *> *const assetsFetchResult = [PHAsset fetchAssetsInAssetCollection:assetCollection options:assetFetchOptions];
-          currentCollectionName = [assetCollection localizedTitle];
           [assetsFetchResult enumerateObjectsUsingBlock:collectAsset];
           *stopCollections = stopCollections_;
         }];
