@@ -44,6 +44,7 @@ const logError = console.error;
 class CameraRollView extends React.Component {
   static defaultProps = {
     groupTypes: 'All',
+    groupName: '',
     batchSize: 5,
     imagesPerRow: 1,
     assetType: 'Photos',
@@ -73,7 +74,10 @@ class CameraRollView extends React.Component {
   }
 
   UNSAFE_componentWillReceiveProps(nextProps) {
-    if (this.props.groupTypes !== nextProps.groupTypes) {
+    if (
+      this.props.groupTypes !== nextProps.groupTypes ||
+      this.props.groupName !== nextProps.groupName
+    ) {
       this.fetch(true);
     }
   }
@@ -101,6 +105,7 @@ class CameraRollView extends React.Component {
     const fetchParams = {
       first: this.props.batchSize,
       groupTypes: this.props.groupTypes,
+      groupName: this.props.groupName,
       assetType: this.props.assetType,
     };
     if (Platform.OS === 'android') {

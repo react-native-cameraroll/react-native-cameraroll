@@ -201,12 +201,17 @@ Returns a Promise with a list of albums
   * `All` // default
   * `Videos`
   * `Photos`
+* `albumType` : {string} :  (iOS only) Specifies filter on type of album. Valid values are:
+  * `All`
+  * `Album` // default
+  * `SmartAlbum`
 
 **Returns:**
 
 Array of `Album` object
   * title: {string}
   * count: {number}
+  * type: {string} (iOS only)
   * subtype: {string | undefined} : See AlbumSubType type for possible values. iOS only.
 
 ---
@@ -233,6 +238,7 @@ Returns a Promise with photo identifier objects from the local camera roll of th
   * `Event`
   * `Faces`
   * `Library`
+  * `SmartAlbum`
   * `PhotoStream`
   * `SavedPhotos`
 * `groupName` : {string} : Specifies filter on group names, like 'Recent Photos' or custom album titles.
