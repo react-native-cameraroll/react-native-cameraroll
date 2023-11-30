@@ -125,6 +125,7 @@ export type GetPhotosParams = {
 
 export type PhotoIdentifier = {
   node: {
+    id: string;
     type: string;
     subTypes: SubTypes;
     group_name: string[];

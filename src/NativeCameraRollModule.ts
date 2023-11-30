@@ -35,6 +35,7 @@ type SubTypes =
 
 type PhotoIdentifier = {
   node: {
+    id: string;
     type: string;
     subTypes: SubTypes;
     group_name: string[];
