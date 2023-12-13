@@ -558,14 +558,10 @@ public class CameraRollModule extends NativeCameraRollModuleSpec {
     response.putMap("page_info", pageInfo);
   }
 
-  private static void putEdges(
+  private static @Nullable WritableMap convertMediaToMap(
           ContentResolver resolver,
           Cursor media,
-          WritableMap response,
-          int limit,
           Set<String> include) {
-    WritableArray edges = new WritableNativeArray();
-    media.moveToFirst();
     int idIndex = media.getColumnIndex(Images.Media._ID);
     int mimeTypeIndex = media.getColumnIndex(Images.Media.MIME_TYPE);
     int groupNameIndex = media.getColumnIndex(Images.Media.BUCKET_DISPLAY_NAME);
@@ -587,19 +583,36 @@ public class CameraRollModule extends NativeCameraRollModuleSpec {
     boolean includeOrientation = include.contains(INCLUDE_ORIENTATION);
     boolean includeAlbums = include.contains(INCLUDE_ALBUMS);
 
-    for (int i = 0; i < limit && !media.isAfterLast(); i++) {
-      WritableMap edge = new WritableNativeMap();
-      WritableMap node = new WritableNativeMap();
-      boolean imageInfoSuccess =
-              putImageInfo(resolver, media, node, widthIndex, heightIndex, sizeIndex, dataIndex, orientationIndex,
-                      mimeTypeIndex, includeFilename, includeFileSize, includeFileExtension, includeImageSize,
-                      includePlayableDuration, includeOrientation);
-      if (imageInfoSuccess) {
-        putBasicNodeInfo(media, node, idIndex, mimeTypeIndex, groupNameIndex, dateTakenIndex, dateAddedIndex, dateModifiedIndex, includeAlbums);
-        putLocationInfo(media, node, dataIndex, includeLocation, mimeTypeIndex, resolver);
+    WritableMap map = new WritableNativeMap();
+    WritableMap node = new WritableNativeMap();
+    boolean imageInfoSuccess =
+            putImageInfo(resolver, media, node, widthIndex, heightIndex, sizeIndex, dataIndex, orientationIndex,
+                    mimeTypeIndex, includeFilename, includeFileSize, includeFileExtension, includeImageSize,
+                    includePlayableDuration, includeOrientation);
+    if (imageInfoSuccess) {
+      putBasicNodeInfo(media, node, idIndex, mimeTypeIndex, groupNameIndex, dateTakenIndex, dateAddedIndex, dateModifiedIndex, includeAlbums);
+      putLocationInfo(media, node, dataIndex, includeLocation, mimeTypeIndex, resolver);
 
-        edge.putMap("node", node);
-        edges.pushMap(edge);
+      map.putMap("node", node);
+      return map;
+    } else {
+      return null;
+    }
+  }
+
+  private static void putEdges(
+          ContentResolver resolver,
+          Cursor media,
+          WritableMap response,
+          int limit,
+          Set<String> include) {
+    WritableArray edges = new WritableNativeArray();
+    media.moveToFirst();
+
+    for (int i = 0; i < limit && !media.isAfterLast(); i++) {
+      WritableMap map = convertMediaToMap(resolver, media, include);
+      if (map != null) {
+        edges.pushMap(map);
       } else {
         // we skipped an image because we couldn't get its details (e.g. width/height), so we
         // decrement i in order to correctly reach the limit, if the cursor has enough rows
