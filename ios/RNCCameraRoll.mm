@@ -493,59 +493,21 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
         return;
       }
 
-      NSString *const assetMediaTypeLabel = (asset.mediaType == PHAssetMediaTypeVideo
-                                            ? @"video"
-                                            : (asset.mediaType == PHAssetMediaTypeImage
-                                                ? @"image"
-                                                : (asset.mediaType == PHAssetMediaTypeAudio
-                                                  ? @"audio"
-                                                  : @"unknown")));
-
-      NSArray<NSString*> *const assetMediaSubtypesLabel = [self mediaSubTypeLabelsForAsset:asset];
-
-      NSArray<NSString*> *albums = @[];
-      
-      if (includeAlbums) {
-        albums = [self getAlbumsForAsset:asset];
-      }
-
       if (includeFileExtension) {
         NSString *name = [asset valueForKey:@"filename"];
         NSString *extension = [name pathExtension];
         fileExtension = [extension lowercaseString];
       }
 
-      CLLocation *const loc = asset.location;
-      NSString *localIdentifier = asset.localIdentifier;
-
-      [assets addObject:@{
-        @"node": @{
-          @"id": localIdentifier,
-          @"type": assetMediaTypeLabel, // TODO: switch to mimeType?
-          @"subTypes": assetMediaSubtypesLabel,
-          @"group_name": albums,
-          @"image": @{
-              @"uri": uri,
-              @"extension": (includeFileExtension ? fileExtension : [NSNull null]),
-              @"filename": (includeFilename && originalFilename ? originalFilename : [NSNull null]),
-              @"height": (includeImageSize ? @([asset pixelHeight]) : [NSNull null]),
-              @"width": (includeImageSize ? @([asset pixelWidth]) : [NSNull null]),
-              @"fileSize": (includeFileSize && fileSize ? fileSize : [NSNull null]),
-              @"playableDuration": (includePlayableDuration && asset.mediaType != PHAssetMediaTypeImage
-                                    ? @([asset duration]) // fractional seconds
-                                    : [NSNull null])
-          },
-          @"timestamp": @(asset.creationDate.timeIntervalSince1970),
-          @"modificationTimestamp": @(asset.modificationDate.timeIntervalSince1970),
-          @"location": (includeLocation && loc ? @{
-              @"latitude": @(loc.coordinate.latitude),
-              @"longitude": @(loc.coordinate.longitude),
-              @"altitude": @(loc.altitude),
-              @"heading": @(loc.course),
-              @"speed": @(loc.speed), // speed in m/s
-            } : [NSNull null])
-          }
-      }];
+      NSDictionary* dict = [self convertAssetToDictionary:asset
+                                            includeAlbums:includeAlbums
+                                          includeFilename:includeFilename
+                                     includeFileExtension:includeFileExtension
+                                         includeImageSize:includeImageSize
+                                          includeFileSize:includeFileSize
+                                  includePlayableDuration:includePlayableDuration
+                                          includeLocation:includeLocation];
+      [assets addObject:dict];
     };
 
     if ([groupTypes isEqualToString:@"all"]) {
