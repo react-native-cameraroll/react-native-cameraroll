@@ -177,7 +177,29 @@ public class CameraRollModule extends NativeCameraRollModuleSpec {
           mediaDetails.clear();
           mediaDetails.put(Images.Media.IS_PENDING, 0);
           resolver.update(mediaContentUri, mediaDetails, null, null);
-          mPromise.resolve(mediaContentUri.toString());
+
+          Cursor cursor = resolver.query(
+                  MediaStore.Files.getContentUri("external"),
+                  PROJECTION,
+                  MediaStore.Images.Media.DATA + "=?",
+                  new String[] { mediaContentUri.toString() },
+                  Images.Media.DATE_ADDED + " DESC, " + Images.Media.DATE_MODIFIED + " DESC");
+          if (cursor == null) {
+            mPromise.reject(ERROR_UNABLE_TO_LOAD, "Failed to find the photo that was just saved!");
+            return;
+          }
+          WritableMap asset = convertMediaToMap(resolver,
+                  cursor,
+                  Set.of(INCLUDE_LOCATION,
+                          INCLUDE_FILENAME,
+                          INCLUDE_FILE_SIZE,
+                          INCLUDE_FILE_EXTENSION,
+                          INCLUDE_IMAGE_SIZE,
+                          INCLUDE_PLAYABLE_DURATION,
+                          INCLUDE_ORIENTATION,
+                          INCLUDE_ALBUMS));
+          cursor.close();
+          mPromise.resolve(asset);
         } else {
           final File environment;
           // Media is not saved into an album when using Environment.DIRECTORY_DCIM.
