@@ -201,8 +201,26 @@ RCT_EXPORT_METHOD(saveToCameraRoll:(NSURLRequest *)request
       }
     } completionHandler:^(BOOL success, NSError *error) {
       if (success) {
-        NSString *uri = [NSString stringWithFormat:@"ph://%@", [placeholder localIdentifier]];
-        resolve(uri);
+        NSString* createdId = placeholder.localIdentifier;
+        PHFetchOptions *options = [PHFetchOptions new];
+        options.includeHiddenAssets = YES;
+        options.includeAllBurstAssets = YES;
+        options.fetchLimit = 1;
+        PHFetchResult<PHAsset*>* createdAsset = [PHAsset fetchAssetsWithLocalIdentifiers:@[placeholder.localIdentifier]
+                                                                                 options:options];
+        if (createdAsset.count < 1) {
+          reject(kErrorUnableToSave, nil, nil);
+          return;
+        }
+        NSDictionary* dictionary = [self convertAssetToDictionary:[createdAsset firstObject]
+                                                    includeAlbums:YES
+                                                  includeFilename:YES
+                                             includeFileExtension:YES
+                                                 includeImageSize:YES
+                                                  includeFileSize:YES
+                                          includePlayableDuration:YES
+                                                  includeLocation:YES];
+        resolve(dictionary);
       } else {
         reject(kErrorUnableToSave, nil, error);
       }
