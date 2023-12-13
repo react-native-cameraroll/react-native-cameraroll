@@ -13,7 +13,7 @@ import {NativeModules} from 'react-native';
 
 // Mock the RNCNetInfo native module to allow us to unit test the JavaScript code
 NativeModules.CameraRollManager = {
-  saveToCameraRoll: jest.fn().mockReturnValue({ node: { image: { uri: 'mock://asset.jpg' } } }),
+  saveToCameraRoll: jest.fn().mockResolvedValue({ node: { image: { uri: '' } } }),
   getPhotos: jest.fn()
 };
 

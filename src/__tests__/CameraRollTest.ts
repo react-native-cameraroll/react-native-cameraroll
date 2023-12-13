@@ -8,7 +8,9 @@ let mockGetPhotos: jest.Mock;
 
 jest.mock('../NativeCameraRollModule', () => {
   mockDeletePhotos = jest.fn();
-  mockSaveToCameraRoll = jest.fn();
+  mockSaveToCameraRoll = jest
+    .fn()
+    .mockResolvedValue({node: {image: {uri: ''}}});
   mockGetPhotos = jest.fn();
   return {
     deletePhotos: mockDeletePhotos,

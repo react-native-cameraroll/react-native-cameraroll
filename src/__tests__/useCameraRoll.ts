@@ -29,7 +29,9 @@ describe('useCameraRoll()', () => {
       const {result} = renderHook(() => useCameraRoll());
       const [, , saveToCameraRoll] = result.current;
 
-      (RNCCameraRoll.saveToCameraRoll as jest.Mock).mockResolvedValueOnce('');
+      (RNCCameraRoll.saveToCameraRoll as jest.Mock).mockResolvedValue({
+        node: {image: {uri: ''}},
+      });
       saveToCameraRoll(tag, {type, album});
 
       expect(RNCCameraRoll.saveToCameraRoll).toBeCalledWith(tag, {album, type});
