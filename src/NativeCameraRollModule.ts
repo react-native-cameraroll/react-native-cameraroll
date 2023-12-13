@@ -2,7 +2,7 @@
 // we use Object type because methods on the native side use NSDictionary and ReadableMap
 // and we want to stay compatible with those
 import {TurboModuleRegistry, TurboModule} from 'react-native';
-import type { PhotoThumbnail } from './CameraRoll';
+import type {PhotoThumbnail} from './CameraRoll';
 
 export type AlbumType = 'All' | 'Album' | 'SmartAlbum';
 
@@ -73,7 +73,7 @@ type PhotoIdentifiersPage = {
 };
 
 export interface Spec extends TurboModule {
-  saveToCameraRoll(uri: string, options: Object): Promise<string>;
+  saveToCameraRoll(uri: string, options: Object): Promise<PhotoIdentifier>;
   getPhotos(params: Object): Promise<PhotoIdentifiersPage>;
   getAlbums(params: Object): Promise<Album[]>;
   deletePhotos(photoUris: Array<string>): Promise<void>;
@@ -83,8 +83,8 @@ export interface Spec extends TurboModule {
   ): Promise<PhotoIdentifier>;
   getPhotoThumbnail(
     internalID: string,
-    options: Object
-  ): Promise<PhotoThumbnail>
+    options: Object,
+  ): Promise<PhotoThumbnail>;
 }
 
 export default TurboModuleRegistry.getEnforcing<Spec>('RNCCameraRoll');
