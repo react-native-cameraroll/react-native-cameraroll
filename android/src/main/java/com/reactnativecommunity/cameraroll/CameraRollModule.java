@@ -179,15 +179,16 @@ public class CameraRollModule extends NativeCameraRollModuleSpec {
           resolver.update(mediaContentUri, mediaDetails, null, null);
 
           Cursor cursor = resolver.query(
-                  MediaStore.Files.getContentUri("external"),
+                  mediaContentUri,
                   PROJECTION,
-                  MediaStore.Images.Media.DATA + "=?",
-                  new String[] { mediaContentUri.toString() },
-                  Images.Media.DATE_ADDED + " DESC, " + Images.Media.DATE_MODIFIED + " DESC");
+                  null,
+                  null,
+                  null);
           if (cursor == null) {
             mPromise.reject(ERROR_UNABLE_TO_LOAD, "Failed to find the photo that was just saved!");
             return;
           }
+          cursor.moveToFirst();
           WritableMap asset = convertMediaToMap(resolver,
                   cursor,
                   Set.of(INCLUDE_LOCATION,
