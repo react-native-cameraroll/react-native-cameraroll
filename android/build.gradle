@@ -114,7 +114,7 @@ if (isNewArchitectureEnabled()) {
 }
 
 def agpVersion = com.android.Version.ANDROID_GRADLE_PLUGIN_VERSION.tokenize('.')[0].toInteger()
-def shouldUseNameSpace = agpVersion >= 7 && REACT_NATIVE_VERSION.tokenize('.')[0].toInteger() >= 71
+def shouldUseNameSpace = agpVersion >= 7 && REACT_NATIVE_MINOR_VERSION >= 71
 def PACKAGE_PROP = "package=\"com.reactnativecommunity.cameraroll\""
 def manifestOutFile = file("${projectDir}/src/main/AndroidManifest.xml")
 def manifestContent = manifestOutFile.getText()
