@@ -16,6 +16,10 @@ New package name: @react-native-camera-roll/camera-roll
 
 `$ npm install @react-native-camera-roll/camera-roll --save`
 
+or
+
+`$ yarn add @react-native-camera-roll/camera-roll`
+
 ## Linking
 Linking should be automatic since react-native version 0.60. Below are instructions if auto linking does not work.
 
