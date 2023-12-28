@@ -5,7 +5,7 @@
 ![MIT License][license-badge]
 [![Lean Core Badge][lean-core-badge]][lean-core-issue]
 
-## *Notice*: The NPM package name has changed, please change your package.json dependency! 
+## *Notice*: The NPM package name has changed, please change your package.json dependency!
 
 Previous package name: @react-native-community/cameraroll
 
@@ -173,7 +173,7 @@ async function savePicture() {
 CameraRoll.save(tag, { type, album })
 ```
 
-Saves the photo or video to the photo library.
+Saves the photo or video to the photo library, and returns the URI of the newly created asset.
 
 On Android, the tag must be a local image or video URI, such as `"file:///sdcard/img.png"`.
 
@@ -193,6 +193,11 @@ Returns a Promise which will resolve with the new URI.
 | tag  | string                 | Yes      | See above.                                                 |
 | type | enum('photo', 'video') | No       | Overrides automatic detection based on the file extension. |
 | album | string                | No       | The album to save to |
+
+---
+### `saveAsset()`
+
+Same as `save()`, but returns the full asset information (`PhotoIdentifier`) instead of just the URI.
 
 ---
 ### `getAlbums()`
@@ -482,7 +487,7 @@ Requests deletion of photos in the camera roll.
 
 On Android, the uri must be a local image or video URI, such as `"file:///sdcard/img.png"`.
 
-On iOS, the uri can be any image URI (including local, remote asset-library and base64 data URIs) or a local video file URI. The user is presented with a dialog box that shows them the asset(s) and asks them to confirm deletion. This is not able to be bypassed as per Apple Developer guidelines. 
+On iOS, the uri can be any image URI (including local, remote asset-library and base64 data URIs) or a local video file URI. The user is presented with a dialog box that shows them the asset(s) and asks them to confirm deletion. This is not able to be bypassed as per Apple Developer guidelines.
 
 Returns a Promise which will resolve when the deletion request is completed, or reject if there is a problem during the deletion. On iOS the user is able to cancel the deletion request, which causes a rejection, while on Android the rejection will be due to a system error.
 
@@ -513,16 +518,16 @@ Upload photo/video with `iosGetImageDataById` method
 ```javascript
 
 try {
-// uri 'PH://xxxx'          
+// uri 'PH://xxxx'
 const fileData = await CameraRoll.iosGetImageDataById(uri);
 if (!fileData?.node?.image?.filepath) return undefined;
 const uploadPath = imageData.node.image.filepath; // output should be file://...
-// fetch or ReactNativeBlobUtil.fetch to upload 
+// fetch or ReactNativeBlobUtil.fetch to upload
 }
 catch (error) {}
 
-```          
-          
+```
+
 
 
 ### `useCameraRoll()`

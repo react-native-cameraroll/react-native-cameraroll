@@ -2,6 +2,6 @@
 
 module.exports = {
   deletePhotos: jest.fn(),
-  saveToCameraRoll: jest.fn(),
+  saveToCameraRoll: () => Promise.resolve(({ node: { image: { uri: '' } } })),
   getPhotos: jest.fn(),
 };

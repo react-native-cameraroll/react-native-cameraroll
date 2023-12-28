@@ -28,7 +28,7 @@ const ALBUM_TYPE_OPTIONS = {
   All: 'All',
   Album: 'Album',
   SmartAlbum: 'SmartAlbum',
-}
+};
 
 export type GroupTypes =
   | 'Album'
@@ -154,7 +154,7 @@ export type PhotoIdentifier = {
 
 export type PhotoConvertionOptions = {
   convertHeicImages?: boolean;
-  quality?: number
+  quality?: number;
 };
 
 export type PhotoIdentifiersPage = {
@@ -195,18 +195,18 @@ export type Album = {
 };
 
 export type ThumbnailSize = {
-  height: number,
-  width: number
+  height: number;
+  width: number;
 };
 
 export type PhotoThumbnailOptions = {
-  allowNetworkAccess: boolean,  //iOS only
-  targetSize: ThumbnailSize,
-  quality: number
+  allowNetworkAccess: boolean; //iOS only
+  targetSize: ThumbnailSize;
+  quality: number;
 };
 
 export type PhotoThumbnail = {
-  thumbnailBase64: string,
+  thumbnailBase64: string;
 };
 
 /**
@@ -229,13 +229,29 @@ export class CameraRoll {
   }
 
   /**
-   * Saves the photo or video to the camera roll or photo library.
+   * Saves the photo or video to the camera roll or photo library, and returns the URI of the newly created asset.
    *
+   * @deprecated `save(...)` is deprected - use `saveAsset(...)` instead.
    */
-  static save(
+  static async save(
     tag: string,
     options: SaveToCameraRollOptions = {},
   ): Promise<string> {
+    const asset = await this.saveAsset(tag, options);
+    return asset.node.image.uri;
+  }
+
+  /**
+   * Saves the photo or video to the camera roll or photo library, and returns the newly created asset.
+   *
+   * @param tag The URI of the file you want to save to the camera roll.
+   * @param options Custom options for saving to a specific album, or overriding the media type.
+   * @returns The newly created `PhotoIdentifier` from the camera roll.
+   */
+  static saveAsset(
+    tag: string,
+    options: SaveToCameraRollOptions = {},
+  ): Promise<PhotoIdentifier> {
     let {type = 'auto'} = options;
     const {album = ''} = options;
     if (tag === '') throw new Error('tag must be a valid string');
@@ -300,19 +316,22 @@ export class CameraRoll {
   ): Promise<PhotoIdentifier> {
     const conversionOptions = {
       convertHeicImages: false,
-      ...options
-    }
+      ...options,
+    };
     return RNCCameraRoll.getPhotoByInternalID(internalID, conversionOptions);
   }
 
-    /**
+  /**
    * Returns a Promise with thumbnail photo.
    *
    * @param internalID - PH photo internal ID.
    * @param options - thumbnail photo options.
    * @returns Promise<PhotoThumbnail>
    */
-    static getPhotoThumbnail(internalID: string, options: PhotoThumbnailOptions): Promise<PhotoThumbnail> {
-      return RNCCameraRoll.getPhotoThumbnail(internalID, options);
-    }
+  static getPhotoThumbnail(
+    internalID: string,
+    options: PhotoThumbnailOptions,
+  ): Promise<PhotoThumbnail> {
+    return RNCCameraRoll.getPhotoThumbnail(internalID, options);
+  }
 }
