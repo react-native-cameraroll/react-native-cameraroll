@@ -231,6 +231,7 @@ export class CameraRoll {
   /**
    * Saves the photo or video to the camera roll or photo library, and returns the URI of the newly created asset.
    *
+   * @deprecated `save(...)` is deprected - use `saveAsset(...)` instead.
    */
   static async save(
     tag: string,
@@ -243,6 +244,9 @@ export class CameraRoll {
   /**
    * Saves the photo or video to the camera roll or photo library, and returns the newly created asset.
    *
+   * @param tag The URI of the file you want to save to the camera roll.
+   * @param options Custom options for saving to a specific album, or overriding the media type.
+   * @returns The newly created `PhotoIdentifier` from the camera roll.
    */
   static saveAsset(
     tag: string,
