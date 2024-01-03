@@ -1,13 +1,17 @@
-import {renderHook} from '@testing-library/react-hooks';
+import {renderHook, waitFor} from '@testing-library/react-native';
 import {useCameraRoll} from '../useCameraRoll';
 import RNCCameraRoll from '../NativeCameraRollModule';
 
 jest.mock('../NativeCameraRollModule', () => ({
   getPhotos: jest.fn(),
-  saveToCameraRoll: jest.fn(),
+  saveToCameraRoll: jest.fn(() => Promise.resolve({node: {image: {uri: ''}}})),
 }));
 
 describe('useCameraRoll()', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('should return initial photos by default', () => {
     const {result} = renderHook(() => useCameraRoll());
 
@@ -22,23 +26,28 @@ describe('useCameraRoll()', () => {
   });
 
   describe('saveToCameraRoll()', () => {
-    it('should invoke save with passed params', () => {
+    it('should invoke save with passed params', async () => {
       const tag = 'mock-tag';
       const type = 'video';
       const album = 'test-album';
-      const {result} = renderHook(() => useCameraRoll());
+      const {result} = renderHook(useCameraRoll);
       const [, , saveToCameraRoll] = result.current;
 
       (RNCCameraRoll.saveToCameraRoll as jest.Mock).mockResolvedValue({
         node: {image: {uri: ''}},
       });
-      saveToCameraRoll(tag, {type, album});
 
-      expect(RNCCameraRoll.saveToCameraRoll).toBeCalledWith(tag, {album, type});
+      await saveToCameraRoll(tag, {type, album});
+
+      expect(RNCCameraRoll.saveToCameraRoll).toHaveBeenCalledWith(tag, {
+        album,
+        type,
+      });
     });
   });
 
   describe('getPhotos()', () => {
+    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     const createPhotosMock = ({
       edges = [] as Array<{node: {type: string}}>,
       has_next_page = false,
@@ -52,15 +61,14 @@ describe('useCameraRoll()', () => {
     });
 
     it('should invoke getPhotos with default params', async () => {
-      const {result, waitForNextUpdate} = renderHook(() => useCameraRoll());
+      const {result} = renderHook(useCameraRoll);
       const [, getPhotos] = result.current;
 
       (RNCCameraRoll.getPhotos as jest.Mock).mockResolvedValueOnce(
         createPhotosMock(),
       );
-      getPhotos();
 
-      await waitForNextUpdate();
+      await getPhotos();
 
       expect(RNCCameraRoll.getPhotos).toHaveBeenCalledWith({
         assetType: 'All',
@@ -75,15 +83,13 @@ describe('useCameraRoll()', () => {
         assetType: 'Photos' as const,
         include: ['filename' as const],
       };
-      const {result, waitForNextUpdate} = renderHook(() => useCameraRoll());
-      const [, getPhotos] = result.current;
-
       (RNCCameraRoll.getPhotos as jest.Mock).mockResolvedValueOnce(
         createPhotosMock(),
       );
-      getPhotos(customParams);
+      const {result} = renderHook(useCameraRoll);
+      const [, getPhotos] = result.current;
 
-      await waitForNextUpdate();
+      await getPhotos(customParams);
 
       expect(RNCCameraRoll.getPhotos).toHaveBeenCalledWith({
         assetType: 'Photos',
@@ -97,26 +103,25 @@ describe('useCameraRoll()', () => {
       const mockPhotos = createPhotosMock({
         edges: [{node: {type: 'mock-type'}}],
       });
-      const {result, waitForNextUpdate} = renderHook(() => useCameraRoll());
+      (RNCCameraRoll.getPhotos as jest.Mock).mockResolvedValueOnce(mockPhotos);
+      const {result, rerender} = renderHook(useCameraRoll);
       const [, getPhotos] = result.current;
 
-      (RNCCameraRoll.getPhotos as jest.Mock).mockResolvedValueOnce(mockPhotos);
-      getPhotos();
+      await getPhotos();
 
-      await waitForNextUpdate();
-
+      rerender({});
       const [photos] = result.current;
 
-      expect(photos).toEqual(mockPhotos);
+      await waitFor(() => expect(photos).toEqual(mockPhotos));
     });
 
     it('should handle an error when invoke getPhotos', async () => {
       const error = new Error('Ops...');
-      const {result} = renderHook(() => useCameraRoll());
+      (RNCCameraRoll.getPhotos as jest.Mock).mockRejectedValueOnce(error);
+      const {result} = renderHook(useCameraRoll);
       const [initialPhotos, getPhotos] = result.current;
 
-      (RNCCameraRoll.getPhotos as jest.Mock).mockRejectedValueOnce(error);
-      getPhotos();
+      await getPhotos();
 
       const [afterError] = result.current;
 

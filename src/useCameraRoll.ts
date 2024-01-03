@@ -42,9 +42,9 @@ export function useCameraRoll(): UseCameraRollResult {
   ).current;
 
   const save = useRef(
-    async (...args: Parameters<typeof CameraRoll.save>): Promise<void> => {
+    async (...args: Parameters<typeof CameraRoll.saveAsset>): Promise<void> => {
       try {
-        await CameraRoll.save(...args);
+        await CameraRoll.saveAsset(...args);
       } catch (error) {
         if (__DEV__)
           console.log('[useCameraRoll] Error saving to camera roll: ', error);
