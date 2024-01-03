@@ -231,7 +231,7 @@ export class CameraRoll {
   /**
    * Saves the photo or video to the camera roll or photo library, and returns the URI of the newly created asset.
    *
-   * @deprecated `save(...)` is deprected - use `saveAsset(...)` instead.
+   * @deprecated `save(...)` is deprecated - use `saveAsset(...)` instead.
    */
   static async save(
     tag: string,
@@ -268,11 +268,11 @@ export class CameraRoll {
   static saveToCameraRoll(
     tag: string,
     type?: 'photo' | 'video' | 'auto',
-  ): Promise<string> {
+  ): Promise<PhotoIdentifier> {
     console.warn(
       'CameraRoll.saveToCameraRoll(tag, type) is deprecated.  Use the save function instead',
     );
-    return CameraRoll.save(tag, {type});
+    return CameraRoll.saveAsset(tag, {type});
   }
 
   static getAlbums(

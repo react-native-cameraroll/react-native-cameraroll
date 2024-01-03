@@ -2,20 +2,27 @@ version: 2.1
 
 orbs:
   rn: react-native-community/react-native@7.1.1
+  node: circleci/node@5.1.1
 
 jobs:
   checkout_code:
     executor: rn/linux_js
     steps:
       - checkout
+      - node/install:
+          install-yarn: true
+          node-version: '20.10.0'
       - persist_to_workspace:
           root: .
-          paths: 
+          paths:
             - .
 
   analyse_js:
     executor: rn/linux_js
     steps:
+      - node/install:
+          install-yarn: true
+          node-version: '20.10.0'
       - attach_workspace:
           at: .
       - rn/yarn_install
@@ -30,15 +37,18 @@ jobs:
           command: yarn run test:jest
       - run:
           name: Android JavaScript Bundle
-          command: yarn run test:detox:android:bundle:release
+          command: export NODE_OPTIONS=--openssl-legacy-provider && yarn run test:detox:android:bundle:release
       - run:
           name: iOS JavaScript Bundle
-          command: yarn run test:detox:ios:bundle:release
+          command: export NODE_OPTIONS=--openssl-legacy-provider && yarn run test:detox:ios:bundle:release
   publish:
     executor: rn/linux_js
     steps:
       - attach_workspace:
           at: .
+      - node/install:
+          install-yarn: true
+          node-version: '20.10.0'
       - rn/yarn_install
       - run:
           name: Publish to NPM
@@ -51,27 +61,29 @@ workflows:
       - analyse_js:
           requires:
             - checkout_code
-      - rn/android_build:
-          build_type: release
-          name: build_android_release
-          project_path: android
-          store_artifacts: false
-          persist_to_workspace: false
-          requires:
-            - analyse_js
+      # TODO: customize node version or change the builder.
+      # - rn/android_build:
+      #     build_type: release
+      #     name: build_android_release
+      #     project_path: android
+      #     store_artifacts: false
+      #     persist_to_workspace: false
+      #     requires:
+      #       - analyse_js
       # - rn/ios_build:
       #     build_configuration: Debug
       #     device: iPhone 11
       #     name: build_ios_debug
       #     project_path: example/ios/CameraRollExample.xcworkspace
       #     project_type: workspace
+      #     node_version: '20.10.0'
       #     requires:
       #       - analyse_js
       #     scheme: CameraRollExample
       - publish:
-          requires:
-            - build_android_release
-            # - build_ios_debug
+          # requires:
+          #   - build_android_release
+          #   - build_ios_debug
           filters:
             branches:
               only: master

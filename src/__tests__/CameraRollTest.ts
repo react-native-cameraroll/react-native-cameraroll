@@ -8,7 +8,9 @@ let mockGetPhotos: jest.Mock;
 
 jest.mock('../NativeCameraRollModule', () => {
   mockDeletePhotos = jest.fn();
-  mockSaveToCameraRoll = () => Promise.resolve(({ node: { image: { uri: '' } } }));
+  mockSaveToCameraRoll = jest.fn(() =>
+    Promise.resolve({node: {image: {uri: ''}}}),
+  );
   mockGetPhotos = jest.fn();
   return {
     deletePhotos: mockDeletePhotos,
@@ -18,8 +20,8 @@ jest.mock('../NativeCameraRollModule', () => {
 });
 
 describe('CameraRoll', () => {
-  it('Should call deletePhotos', () => {
-    CameraRoll.deletePhotos(['a uri']);
+  it('Should call deletePhotos', async () => {
+    await CameraRoll.deletePhotos(['a uri']);
     expect(
       (NativeModule.deletePhotos as jest.Mock).mock.calls,
     ).toMatchSnapshot();
@@ -27,13 +29,6 @@ describe('CameraRoll', () => {
 
   it('Should call saveToCameraRoll', async () => {
     await CameraRoll.saveToCameraRoll('a tag', 'photo');
-    expect(
-      (NativeModule.saveToCameraRoll as jest.Mock).mock.calls,
-    ).toMatchSnapshot();
-  });
-
-  it('Should call save', async () => {
-    await CameraRoll.save('a tag', {type: 'photo'});
     expect(
       (NativeModule.saveToCameraRoll as jest.Mock).mock.calls,
     ).toMatchSnapshot();

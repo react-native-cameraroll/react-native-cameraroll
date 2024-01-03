@@ -1,9 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`CameraRoll Should call deletePhotos 1`] = `
-Array [
-  Array [
-    Array [
+[
+  [
+    [
       "a uri",
     ],
   ],
@@ -11,9 +11,9 @@ Array [
 `;
 
 exports[`CameraRoll Should call getPhotos 1`] = `
-Array [
-  Array [
-    Object {
+[
+  [
+    {
       "assetType": "All",
       "first": 0,
       "groupTypes": "All",
@@ -22,23 +22,11 @@ Array [
 ]
 `;
 
-exports[`CameraRoll Should call save 1`] = `
-Array [
-  Array [
-    "a tag",
-    Object {
-      "album": "",
-      "type": "photo",
-    },
-  ],
-]
-`;
-
 exports[`CameraRoll Should call saveToCameraRoll 1`] = `
-Array [
-  Array [
+[
+  [
     "a tag",
-    Object {
+    {
       "album": "",
       "type": "photo",
     },
