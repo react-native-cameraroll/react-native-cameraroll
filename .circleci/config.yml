@@ -81,7 +81,8 @@ workflows:
       #       - analyse_js
       #     scheme: CameraRollExample
       - publish:
-          # requires:
+          requires:
+            - analyse_js
           #   - build_android_release
           #   - build_ios_debug
           filters:
