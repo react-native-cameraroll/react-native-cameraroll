@@ -178,28 +178,7 @@ public class CameraRollModule extends NativeCameraRollModuleSpec {
           mediaDetails.put(Images.Media.IS_PENDING, 0);
           resolver.update(mediaContentUri, mediaDetails, null, null);
 
-          Cursor cursor = resolver.query(
-                  mediaContentUri,
-                  PROJECTION,
-                  null,
-                  null,
-                  null);
-          if (cursor == null) {
-            mPromise.reject(ERROR_UNABLE_TO_LOAD, "Failed to find the photo that was just saved!");
-            return;
-          }
-          cursor.moveToFirst();
-          WritableMap asset = convertMediaToMap(resolver,
-                  cursor,
-                  Set.of(INCLUDE_LOCATION,
-                          INCLUDE_FILENAME,
-                          INCLUDE_FILE_SIZE,
-                          INCLUDE_FILE_EXTENSION,
-                          INCLUDE_IMAGE_SIZE,
-                          INCLUDE_PLAYABLE_DURATION,
-                          INCLUDE_ORIENTATION,
-                          INCLUDE_ALBUMS));
-          cursor.close();
+          WritableMap asset = getSingleAssetInfo(mediaContentUri);
           mPromise.resolve(asset);
         } else {
           final File environment;
@@ -250,13 +229,19 @@ public class CameraRollModule extends NativeCameraRollModuleSpec {
           input.close();
           output.close();
 
+
           MediaScannerConnection.scanFile(
                   mContext,
                   new String[]{dest.getAbsolutePath()},
                   null,
                   (path, uri) -> {
                     if (uri != null) {
-                      mPromise.resolve(uri.toString());
+                      try {
+                        WritableMap asset = getSingleAssetInfo(uri);
+                        mPromise.resolve(asset);
+                      } catch (Exception exc) {
+                        mPromise.reject(ERROR_UNABLE_TO_SAVE, exc.getMessage());
+                      }
                     } else {
                       mPromise.reject(ERROR_UNABLE_TO_SAVE, "Could not add image to gallery");
                     }
@@ -280,6 +265,33 @@ public class CameraRollModule extends NativeCameraRollModuleSpec {
           }
         }
       }
+    }
+
+    private WritableMap getSingleAssetInfo(Uri assetUri) {
+      ContentResolver resolver = mContext.getContentResolver();
+
+      Cursor cursor = resolver.query(
+              assetUri,
+              PROJECTION,
+              null,
+              null,
+              null);
+      if (cursor == null) {
+        throw new RuntimeException("Failed to find the photo that was just saved!");
+      }
+      cursor.moveToFirst();
+      WritableMap asset = convertMediaToMap(resolver,
+              cursor,
+              Set.of(INCLUDE_LOCATION,
+                      INCLUDE_FILENAME,
+                      INCLUDE_FILE_SIZE,
+                      INCLUDE_FILE_EXTENSION,
+                      INCLUDE_IMAGE_SIZE,
+                      INCLUDE_PLAYABLE_DURATION,
+                      INCLUDE_ORIENTATION,
+                      INCLUDE_ALBUMS));
+      cursor.close();
+      return asset;
     }
   }
 
