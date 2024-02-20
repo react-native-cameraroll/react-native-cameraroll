@@ -33,9 +33,11 @@ interface State {
 const includeValues: Include[] = [
   'filename',
   'fileSize',
+  'fileExtension',
   'location',
   'imageSize',
   'playableDuration',
+  'orientation',
   'albums',
   'sourceType',
 ];
