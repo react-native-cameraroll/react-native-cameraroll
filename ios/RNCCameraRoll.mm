@@ -346,6 +346,13 @@ static void RCTResolvePromise(RCTPromiseResolveBlock resolve,
   PHAssetResource *_Nullable resource = NULL;
   NSNumber* fileSize = [NSNumber numberWithInt:0];
 
+  if (includeFilename || includeFileSize) {
+    NSArray<PHAssetResource *> *const assetResources = [PHAssetResource assetResourcesForAsset:asset];
+    resource = [assetResources firstObject];
+    originalFilename = resource.originalFilename;
+    fileSize = [resource valueForKey:@"fileSize"];
+  }
+
   NSString *const assetMediaTypeLabel = (asset.mediaType == PHAssetMediaTypeVideo
                                         ? @"video"
                                         : (asset.mediaType == PHAssetMediaTypeImage
@@ -472,18 +479,13 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
         }
         return;
       }
-      NSString *_Nullable originalFilename = NULL;
-      NSString *_Nullable fileExtension = NULL;
       PHAssetResource *_Nullable resource = NULL;
-      NSNumber* fileSize = [NSNumber numberWithInt:0];
 
-      if (includeFilename || includeFileSize || [mimeTypes count] > 0) {
+      if ([mimeTypes count] > 0) {
         // Get underlying resources of an asset - this includes files as well as details about edited PHAssets
-        // This is required for the filename and mimeType filtering
+        // This is required for mimeType filtering
         NSArray<PHAssetResource *> *const assetResources = [PHAssetResource assetResourcesForAsset:asset];
         resource = [assetResources firstObject];
-        originalFilename = resource.originalFilename;
-        fileSize = [resource valueForKey:@"fileSize"];
       }
 
       // WARNING: If you add any code to `collectAsset` that may skip adding an
