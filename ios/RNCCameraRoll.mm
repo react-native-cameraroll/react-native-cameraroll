@@ -520,12 +520,6 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
         return;
       }
 
-      if (includeFileExtension) {
-        NSString *name = [asset valueForKey:@"filename"];
-        NSString *extension = [name pathExtension];
-        fileExtension = [extension lowercaseString];
-      }
-
       NSDictionary* dict = [self convertAssetToDictionary:asset
                                             includeAlbums:includeAlbums
                                           includeFilename:includeFilename
