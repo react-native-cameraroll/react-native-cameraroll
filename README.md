@@ -271,6 +271,7 @@ Returns a Promise with photo identifier objects from the local camera roll of th
   * `playableDuration` : Ensures `image.playableDuration` is available in each node. This has a medium peformance impact on Android.
   * `orientation` : Ensures `image.orientation` is available in each node. This has a small peformance impact on Android. **Android only**
   * `albums` : Ensures `group_name` is available in each node. This has a large peformance impact on iOS.
+  * `sourceType` : Ensures `sourceType` is available in each node.
 
 Returns a Promise which when resolved will be of the following shape:
 
@@ -279,6 +280,7 @@ Returns a Promise which when resolved will be of the following shape:
     * `id`: {string} : A local identifier. Correspond to `Media._ID` on Android and `localIdentifier` on iOS.
     * `type`: {string}
     * `subTypes`: {Array<string>} : An array of subtype strings (see `SubTypes` type). Always [] on Android.
+    * `sourceType`: {string | null} : "UserLibrary" (for the user library) or "CloudShared" (for an iCloud Shared Album). Always "UserLibrary" on Android.
     * `group_name`: {Array<string>} : An array of albums containing the element. Always 1 element on Android. 0 to n elements on iOS.
     * `image`: {object} : An object with the following shape:
       * `uri`: {string}

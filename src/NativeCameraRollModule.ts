@@ -33,11 +33,14 @@ type SubTypes =
   | 'VideoHighFrameRate'
   | 'VideoTimelapse';
 
+type SourceType = 'UserLibrary' | 'CloudShared';
+
 type PhotoIdentifier = {
   node: {
     id: string;
     type: string;
     subTypes: SubTypes;
+    sourceType: SourceType;
     group_name: string[];
     image: {
       filename: string | null;

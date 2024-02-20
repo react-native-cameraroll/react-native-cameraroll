@@ -218,7 +218,8 @@ RCT_EXPORT_METHOD(saveToCameraRoll:(NSURLRequest *)request
                                                  includeImageSize:YES
                                                   includeFileSize:YES
                                           includePlayableDuration:YES
-                                                  includeLocation:YES];
+                                                  includeLocation:YES
+                                                  includeSourceType:YES];
         resolve(dictionary);
       } else {
         reject(kErrorUnableToSave, nil, error);
@@ -336,6 +337,7 @@ static void RCTResolvePromise(RCTPromiseResolveBlock resolve,
                            includeFileSize:(BOOL)includeFileSize
                    includePlayableDuration:(BOOL)includePlayableDuration
                            includeLocation:(BOOL)includeLocation
+                           includeSourceType:(BOOL)includeSourceType
 {
   NSString *const uri = [NSString stringWithFormat:@"ph://%@", [asset localIdentifier]];
 
@@ -360,6 +362,12 @@ static void RCTResolvePromise(RCTPromiseResolveBlock resolve,
     albums = [self getAlbumsForAsset:asset];
   }
 
+  NSString *_Nullable sourceType = NULL;
+
+  if (includeSourceType) {
+    sourceType = [self sourceTypeForAsset:asset];
+  }
+
   if (includeFileExtension) {
     NSString *name = [asset valueForKey:@"filename"];
     NSString *extension = [name pathExtension];
@@ -374,6 +382,7 @@ static void RCTResolvePromise(RCTPromiseResolveBlock resolve,
       @"id": localIdentifier,
       @"type": assetMediaTypeLabel, // TODO: switch to mimeType?
       @"subTypes": assetMediaSubtypesLabel,
+      @"sourceType": (includeSourceType ? sourceType : [NSNull null]),
       @"group_name": albums,
       @"image": @{
           @"uri": uri,
@@ -420,6 +429,7 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
   BOOL __block includeFilename = [include indexOfObject:@"filename"] != NSNotFound;
   BOOL __block includeFileSize = [include indexOfObject:@"fileSize"] != NSNotFound;
   BOOL __block includeFileExtension = [include indexOfObject:@"fileExtension"] != NSNotFound;
+  BOOL __block includeSourceType = [include indexOfObject:@"sourceType"] != NSNotFound;
   BOOL __block includeLocation = [include indexOfObject:@"location"] != NSNotFound;
   BOOL __block includeImageSize = [include indexOfObject:@"imageSize"] != NSNotFound;
   BOOL __block includePlayableDuration = [include indexOfObject:@"playableDuration"] != NSNotFound;
@@ -523,7 +533,8 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
                                          includeImageSize:includeImageSize
                                           includeFileSize:includeFileSize
                                   includePlayableDuration:includePlayableDuration
-                                          includeLocation:includeLocation];
+                                          includeLocation:includeLocation
+                                          includeSourceType:includeSourceType];
       [assets addObject:dict];
     };
 
@@ -885,6 +896,20 @@ NSString *subTypeLabelForCollection(PHAssetCollection *assetCollection) {
     }
 
     return mediaSubTypeLabels;
+}
+
+
+- (nullable NSString *) sourceTypeForAsset:(PHAsset *)asset {
+    PHAssetSourceType sourceType = asset.sourceType;
+
+    switch (sourceType) {
+      case PHAssetSourceTypeUserLibrary:
+          return @"UserLibrary";
+      case PHAssetSourceTypeCloudShared:
+          return @"CloudShared";   
+      default:
+          return NULL;
+    }
 }
 
 - (NSArray<NSString *> *) getAlbumsForAsset:(PHAsset *)asset {
