@@ -86,6 +86,7 @@ public class CameraRollModule extends NativeCameraRollModuleSpec {
   private static final String INCLUDE_PLAYABLE_DURATION = "playableDuration";
   private static final String INCLUDE_ORIENTATION = "orientation";
   private static final String INCLUDE_ALBUMS = "albums";
+  private static final String INCLUDE_SOURCE_TYPE = "sourceType";
 
   private static final String[] PROJECTION = {
           Images.Media._ID,
@@ -289,7 +290,8 @@ public class CameraRollModule extends NativeCameraRollModuleSpec {
                       INCLUDE_IMAGE_SIZE,
                       INCLUDE_PLAYABLE_DURATION,
                       INCLUDE_ORIENTATION,
-                      INCLUDE_ALBUMS));
+                      INCLUDE_ALBUMS,
+                      INCLUDE_SOURCE_TYPE));
       cursor.close();
       return asset;
     }
@@ -617,6 +619,7 @@ public class CameraRollModule extends NativeCameraRollModuleSpec {
     boolean includePlayableDuration = include.contains(INCLUDE_PLAYABLE_DURATION);
     boolean includeOrientation = include.contains(INCLUDE_ORIENTATION);
     boolean includeAlbums = include.contains(INCLUDE_ALBUMS);
+    boolean includeSourceType = include.contains(INCLUDE_SOURCE_TYPE);
 
     WritableMap map = new WritableNativeMap();
     WritableMap node = new WritableNativeMap();
@@ -625,7 +628,7 @@ public class CameraRollModule extends NativeCameraRollModuleSpec {
                     mimeTypeIndex, includeFilename, includeFileSize, includeFileExtension, includeImageSize,
                     includePlayableDuration, includeOrientation);
     if (imageInfoSuccess) {
-      putBasicNodeInfo(media, node, idIndex, mimeTypeIndex, groupNameIndex, dateTakenIndex, dateAddedIndex, dateModifiedIndex, includeAlbums);
+      putBasicNodeInfo(media, node, idIndex, mimeTypeIndex, groupNameIndex, dateTakenIndex, dateAddedIndex, dateModifiedIndex, includeAlbums, includeSourceType);
       putLocationInfo(media, node, dataIndex, includeLocation, mimeTypeIndex, resolver);
 
       map.putMap("node", node);
@@ -667,12 +670,22 @@ public class CameraRollModule extends NativeCameraRollModuleSpec {
           int dateTakenIndex,
           int dateAddedIndex,
           int dateModifiedIndex,
-          boolean includeAlbums) {
+          boolean includeAlbums,
+          boolean includeSourceType) {
     node.putString("id", Long.toString(media.getLong(idIndex)));
     node.putString("type", media.getString(mimeTypeIndex));
+
     WritableArray subTypes = Arguments.createArray();
     node.putArray("subTypes", subTypes);
+    
+    if (includeSourceType) {
+      node.putString("sourceType", "UserLibrary");
+    } else {
+      node.putNull("sourceType");
+    }
+
     WritableArray group_name = Arguments.createArray();
+  
     if (includeAlbums) {
       group_name.pushString(media.getString(groupNameIndex));
     }

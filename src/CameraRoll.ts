@@ -50,6 +50,8 @@ export type SubTypes =
   | 'VideoHighFrameRate'
   | 'VideoTimelapse';
 
+export type SourceType = 'UserLibrary' | 'CloudShared';
+
 export type Include =
   | 'filename'
   | 'fileSize'
@@ -58,7 +60,8 @@ export type Include =
   | 'imageSize'
   | 'playableDuration'
   | 'orientation'
-  | 'albums';
+  | 'albums'
+  | 'sourceType';
 
 export type AssetType = 'All' | 'Videos' | 'Photos';
 
@@ -128,6 +131,7 @@ export type PhotoIdentifier = {
     id: string;
     type: string;
     subTypes: SubTypes;
+    sourceType: SourceType;
     group_name: string[];
     image: {
       filename: string | null;
