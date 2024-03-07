@@ -720,7 +720,11 @@ public class CameraRollModule extends NativeCameraRollModuleSpec {
           boolean includePlayableDuration,
           boolean includeOrientation) {
     WritableMap image = new WritableNativeMap();
-    Uri photoUri = Uri.parse("file://" + media.getString(dataIndex));
+    int index = media.getColumnIndex(Images.Media._ID);
+    long id = (index >= 0) ? media.getLong(index) : -1;
+    // Updating this to return content uri to fix issue with playing videos saved to SD cards as
+    // this ensures item that is picked is read-only, and masks it's real source
+    Uri photoUri = ContentUris.withAppendedId(MediaStore.Files.getContentUri("external"), id);
     image.putString("uri", photoUri.toString());
     String mimeType = media.getString(mimeTypeIndex);
 
