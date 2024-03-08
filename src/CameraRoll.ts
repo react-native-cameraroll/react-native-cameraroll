@@ -4,7 +4,7 @@
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  */
-import {Platform} from 'react-native';
+import {NativeEventEmitter, Platform} from 'react-native';
 import RNCCameraRoll from './NativeCameraRollModule';
 
 const GROUP_TYPES_OPTIONS = {
@@ -212,6 +212,12 @@ export type PhotoThumbnailOptions = {
 export type PhotoThumbnail = {
   thumbnailBase64: string;
 };
+
+const isIOS = Platform.OS === 'ios';
+
+export const progressUpdateEventEmitter = new NativeEventEmitter(
+  isIOS ? RNCCameraRoll : undefined,
+);
 
 /**
  * `CameraRoll` provides access to the local camera roll or photo library.

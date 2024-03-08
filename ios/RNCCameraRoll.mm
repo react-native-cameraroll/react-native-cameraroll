@@ -90,6 +90,9 @@ RCT_ENUM_CONVERTER(PHAssetCollectionSubtype, (@{
 @end
 
 @implementation RNCCameraRoll
+{
+  bool hasListeners;
+}
 
 RCT_EXPORT_MODULE()
 
@@ -602,6 +605,29 @@ RCT_EXPORT_METHOD(deletePhotos:(NSArray<NSString *>*)assets
   ];
 }
 
+- (NSArray<NSString *> *)supportedEvents {
+	return @[@"onProgressUpdate"];
+}
+
+-(void)startObserving {
+  hasListeners = YES;
+}
+
+-(void)stopObserving {
+  hasListeners = NO;
+}
+
+// Sends progress update for id when selected
+// media is downloading from iCloud
+-(void)sendProgressUpdateWithId:(NSString *)internalId
+					   progress:(double)progress {
+	if (hasListeners && self.callableJSModules) {
+		[self sendEventWithName:@"onProgressUpdate"
+						   body:@{@"id" : internalId, @"progress": @(progress)}];
+	}
+}
+
+
 RCT_EXPORT_METHOD(getPhotoByInternalID:(NSString *)internalId
                   options:(NSDictionary *)options
                   resolve:(RCTPromiseResolveBlock)resolve
@@ -663,7 +689,10 @@ RCT_EXPORT_METHOD(getPhotoByInternalID:(NSString *)internalId
         requestOptions.networkAccessAllowed = YES;
         requestOptions.version = PHImageRequestOptionsVersionUnadjusted;
         requestOptions.deliveryMode = PHImageRequestOptionsDeliveryModeHighQualityFormat;
-
+		requestOptions.progressHandler = ^(double progress, NSError * _Nullable error, BOOL * _Nonnull stop, NSDictionary * _Nullable info) {
+			[self sendProgressUpdateWithId:internalId progress:progress];
+		};
+		  
         CGSize const targetSize = CGSizeMake((CGFloat)asset.pixelWidth, (CGFloat)asset.pixelHeight);
         [[PHImageManager defaultManager] requestImageForAsset:asset
                                                      targetSize:targetSize
@@ -719,6 +748,9 @@ RCT_EXPORT_METHOD(getPhotoByInternalID:(NSString *)internalId
         PHContentEditingInputRequestOptions *const editOptions = [PHContentEditingInputRequestOptions new];
         // Download asset if on icloud.
         editOptions.networkAccessAllowed = YES;
+		editOptions.progressHandler = ^(double progress, BOOL * _Nonnull stop) {
+			[self sendProgressUpdateWithId:internalId progress:progress];
+		};
 
         [asset requestContentEditingInputWithOptions:editOptions completionHandler:^(PHContentEditingInput *contentEditingInput, NSDictionary *info) {
           if (contentEditingInput.mediaType == PHAssetMediaTypeImage) {

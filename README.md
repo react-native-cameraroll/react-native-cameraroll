@@ -530,6 +530,31 @@ catch (error) {}
 
 ```
 
+**Note:**
+
+Sometimes when calling `iosGetImageDataById`, the image/video can be downloaded from iCloud. To be able to receive the progress of this download, you need to add a listener to the `onProgressUpdate` event and use it to render on the UI.
+
+The event generated will be an object containing the image id (`id`) and the progress of the download (`progress`). The `id` is a string with the `internalID` you used to call `iosGetImageDataById`. The `progress` is a double ranging from 0 to 1, where 0 represents the start of the download and 1 represents the completion of the download.
+
+```javascript
+
+import { progressUpdateEventEmitter } from '@react-native-camera-roll/camera-roll';
+
+useEffect(() => {
+  const subscription = progressUpdateEventEmitter.addListener(
+    'onProgressUpdate',
+    event => {
+      // Render the progress of the image / video being 
+      // downloaded using event.id and event.progress
+    },
+  );
+
+  return () => {
+    subscription.remove();
+  };
+}, []);
+
+```
 
 
 ### `useCameraRoll()`
