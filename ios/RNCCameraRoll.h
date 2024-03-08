@@ -12,6 +12,7 @@
 #else
 #import <React/RCTBridge.h>
 #endif
+#import <React/RCTEventEmitter.h>
 #import <React/RCTConvert.h>
 
 @interface RCTConvert (PHFetchOptions)
@@ -23,7 +24,7 @@
 @end
 
 
-@interface RNCCameraRoll : NSObject
+@interface RNCCameraRoll : RCTEventEmitter
 #ifdef RCT_NEW_ARCH_ENABLED
                                    <NativeCameraRollModuleSpec>
 #else
