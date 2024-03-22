@@ -177,24 +177,27 @@ RCT_EXPORT_METHOD(saveToCameraRoll:(NSURLRequest *)request
         [request addResourceWithType:PHAssetResourceTypePhoto data:data options:NULL];
         assetRequest = request;
       } else {
-        NSData *data = [NSData dataWithContentsOfURL:inputURI];
         if ([[inputURI.pathExtension lowercaseString] isEqualToString:@"webp"]) {
+          NSData *data = [NSData dataWithContentsOfURL:inputURI];
           UIImage *webpImage;
 
-          #ifdef SD_WEB_IMAGE_WEBP_CODER_AVAILABLE 
+          #ifdef SD_WEB_IMAGE_WEBP_CODER_AVAILABLE
             webpImage = [[SDImageWebPCoder sharedCoder] decodedImageWithData:data options:nil];
           #else
             if (@available(iOS 14, *)) {
               webpImage = [UIImage imageWithData:data];
+            } else {
+              // webp cannot be saved if SDWebImage is not installed and we're not on iOS 14 or above.
+              reject(kErrorUnableToSave, nil, nil);
+              return;
             }
           #endif
-          
-          if (webpImage) {
-            data = UIImageJPEGRepresentation(webpImage, 1.0);
-          }
+
+          assetRequest = [PHAssetChangeRequest creationRequestForAssetFromImage:webpImage];
+        } else {
+          // normal Image (jpg, heif, png, ...)
+          assetRequest = [PHAssetChangeRequest creationRequestForAssetFromImageAtFileURL:inputURI];
         }
-        UIImage *image = [UIImage imageWithData:data];
-        assetRequest = [PHAssetChangeRequest creationRequestForAssetFromImage:image];
       }
       placeholder = [assetRequest placeholderForCreatedAsset];
       if (![options[@"album"] isEqualToString:@""]) {
@@ -367,7 +370,7 @@ static void RCTResolvePromise(RCTPromiseResolveBlock resolve,
   NSArray<NSString*> *const assetMediaSubtypesLabel = [self mediaSubTypeLabelsForAsset:asset];
 
   NSArray<NSString*> *albums = @[];
-  
+
   if (includeAlbums) {
     albums = [self getAlbumsForAsset:asset];
   }
@@ -692,7 +695,7 @@ RCT_EXPORT_METHOD(getPhotoByInternalID:(NSString *)internalId
 		requestOptions.progressHandler = ^(double progress, NSError * _Nullable error, BOOL * _Nonnull stop, NSDictionary * _Nullable info) {
 			[self sendProgressUpdateWithId:internalId progress:progress];
 		};
-		  
+
         CGSize const targetSize = CGSizeMake((CGFloat)asset.pixelWidth, (CGFloat)asset.pixelHeight);
         [[PHImageManager defaultManager] requestImageForAsset:asset
                                                      targetSize:targetSize
@@ -815,15 +818,15 @@ RCT_EXPORT_METHOD(getPhotoThumbnail:(NSString *)internalId
     checkPhotoLibraryConfig();
 
     BOOL const allowNetworkAccess = options[@"allowNetworkAccess"] == nil ? NO : [RCTConvert BOOL:options[@"allowNetworkAccess"]];
-    
+
     NSDictionary *const targetSize = [RCTConvert NSDictionary:options[@"targetSize"]];
     CGFloat const targetHeight = targetSize[@"height"] == nil ? 400 : [RCTConvert CGFloat:targetSize[@"height"]];
     CGFloat const targetWidth = targetSize[@"width"] == nil ? 400 : [RCTConvert CGFloat:targetSize[@"width"]];
-    
+
     CGFloat quality = options[@"quality"] == nil ? 1.0 : [RCTConvert CGFloat:options[@"quality"]];
 
     requestPhotoLibraryAccess(reject, ^(bool isLimited){
-    
+
         PHFetchResult<PHAsset *> *fetchResult;
         PHAsset *asset;
         NSString *mediaIdentifier = internalId;
@@ -843,7 +846,7 @@ RCT_EXPORT_METHOD(getPhotoThumbnail:(NSString *)internalId
             requestOptions.networkAccessAllowed = allowNetworkAccess;
             requestOptions.version = PHImageRequestOptionsVersionUnadjusted;
             requestOptions.deliveryMode = PHImageRequestOptionsDeliveryModeHighQualityFormat;
-            
+
             CGSize const thumbnailSize = CGSizeMake(targetWidth, targetHeight);
             [[PHImageManager defaultManager] requestImageForAsset:asset
                                                        targetSize:thumbnailSize
@@ -855,9 +858,9 @@ RCT_EXPORT_METHOD(getPhotoThumbnail:(NSString *)internalId
                 if (error) {
                     reject(@"Error while getting thumbnail image",@"Error while getting thumbnail image",error);
                 }
-                
+
                 NSString *thumbnailBase64 = [UIImageJPEGRepresentation(image, quality) base64EncodedStringWithOptions:NSDataBase64EncodingEndLineWithLineFeed];
-                
+
                 resolve(@{
                     @"thumbnailBase64": thumbnailBase64
                 });
@@ -873,7 +876,7 @@ RCT_EXPORT_METHOD(getPhotoThumbnail:(NSString *)internalId
 
 NSString *subTypeLabelForCollection(PHAssetCollection *assetCollection) {
     PHAssetCollectionSubtype subtype = assetCollection.assetCollectionSubtype;
-  
+
     switch (subtype) {
         case PHAssetCollectionSubtypeAlbumRegular:
             return @"AlbumRegular";
@@ -888,7 +891,7 @@ NSString *subTypeLabelForCollection(PHAssetCollection *assetCollection) {
       case PHAssetCollectionSubtypeAlbumMyPhotoStream:
           return @"AlbumMyPhotoStream";
       case PHAssetCollectionSubtypeAlbumCloudShared:
-          return @"AlbumCloudShared";      
+          return @"AlbumCloudShared";
       default:
           return @"Unknown";
   }
@@ -897,7 +900,7 @@ NSString *subTypeLabelForCollection(PHAssetCollection *assetCollection) {
 - (NSArray<NSString *> *) mediaSubTypeLabelsForAsset:(PHAsset *)asset {
     PHAssetMediaSubtype subtype = asset.mediaSubtypes;
     NSMutableArray<NSString*> *mediaSubTypeLabels = [NSMutableArray array];
-    
+
     if (subtype & PHAssetMediaSubtypePhotoPanorama) {
         [mediaSubTypeLabels addObject:@"PhotoPanorama"];
     }
@@ -934,7 +937,7 @@ NSString *subTypeLabelForCollection(PHAssetCollection *assetCollection) {
       case PHAssetSourceTypeUserLibrary:
           return @"UserLibrary";
       case PHAssetSourceTypeCloudShared:
-          return @"CloudShared";   
+          return @"CloudShared";
       default:
           return NULL;
     }
