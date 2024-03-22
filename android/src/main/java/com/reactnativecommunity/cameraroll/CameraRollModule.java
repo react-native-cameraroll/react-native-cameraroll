@@ -1088,4 +1088,7 @@ public class CameraRollModule extends NativeCameraRollModuleSpec {
   public void getPhotoThumbnail(String internalID, ReadableMap options, Promise promise) {
     promise.reject("CameraRoll:getPhotoThumbnail", "getPhotoThumbnail is not supported on Android");
   }
+
+  public void addListener(String eventName) {}
+  public void removeListeners(double count) {}
 }
