@@ -3,7 +3,7 @@
 // and we want to stay compatible with those
 import {TurboModuleRegistry, TurboModule} from 'react-native';
 import type {PhotoThumbnail} from './CameraRoll';
-import type {Int32} from 'react-native/Libraries/Types/CodegenTypes';
+import type {Double} from 'react-native/Libraries/Types/CodegenTypes';
 
 export type AlbumType = 'All' | 'Album' | 'SmartAlbum';
 
@@ -90,7 +90,7 @@ export interface Spec extends TurboModule {
     options: Object,
   ): Promise<PhotoThumbnail>;
   addListener(eventName: string): void;
-  removeListeners(count: Int32): void;
+  removeListeners(count: Double): void;
 }
 
 export default TurboModuleRegistry.getEnforcing<Spec>('RNCCameraRoll');
