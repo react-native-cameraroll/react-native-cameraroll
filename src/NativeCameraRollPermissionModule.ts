@@ -1,5 +1,5 @@
 import {TurboModuleRegistry, TurboModule} from 'react-native';
-import type {Int32} from 'react-native/Libraries/Types/CodegenTypes';
+import type {Double} from 'react-native/Libraries/Types/CodegenTypes';
 
 type CameraRollAuthorizationStatus =
   | 'granted'
@@ -15,7 +15,7 @@ export interface Spec extends TurboModule {
   requestAddOnlyPermission(): Promise<CameraRollAuthorizationStatus>;
   refreshPhotoSelection(): Promise<boolean>;
   addListener(eventName: string): void;
-  removeListeners(count: Int32): void;
+  removeListeners(count: Double): void;
 }
 
 // we call get here since on Android this module does not exist and it would throw
