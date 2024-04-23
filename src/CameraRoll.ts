@@ -192,6 +192,7 @@ export type AlbumSubType =
   | 'Unknown';
 
 export type Album = {
+  id: string;
   title: string;
   count: number;
   type: AlbumType;
