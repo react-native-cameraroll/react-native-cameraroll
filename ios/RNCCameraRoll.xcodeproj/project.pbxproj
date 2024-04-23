@@ -32,6 +32,7 @@
 		4F788CB622226740001DB9D2 /* RNCAssetsLibraryRequestHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RNCAssetsLibraryRequestHandler.h; sourceTree = "<group>"; };
 		4F788CB722226740001DB9D2 /* RNCAssetsLibraryRequestHandler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RNCAssetsLibraryRequestHandler.m; sourceTree = "<group>"; };
 		58B5115D1A9E6B3D00147676 /* libRNCCameraRoll.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRNCCameraRoll.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		F2E728342BCE4B0B00953E6E /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -48,6 +49,7 @@
 		58B511541A9E6B3D00147676 = {
 			isa = PBXGroup;
 			children = (
+				F2E728342BCE4B0B00953E6E /* PrivacyInfo.xcprivacy */,
 				2F2D96EB28ABF12100B2EF6B /* RNCCameraRollPermissionModule.m */,
 				2F2D96EA28ABF0FE00B2EF6B /* RNCCameraRollPermissionModule.h */,
 				4F788CB622226740001DB9D2 /* RNCAssetsLibraryRequestHandler.h */,
