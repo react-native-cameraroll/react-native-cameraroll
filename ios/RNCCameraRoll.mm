@@ -196,7 +196,9 @@ RCT_EXPORT_METHOD(saveToCameraRoll:(NSURLRequest *)request
           assetRequest = [PHAssetChangeRequest creationRequestForAssetFromImage:webpImage];
         } else {
           // normal Image (jpg, heif, png, ...)
-          assetRequest = [PHAssetChangeRequest creationRequestForAssetFromImageAtFileURL:inputURI];
+          NSData *data = [NSData dataWithContentsOfURL:inputURI];
+          UIImage *normalImage = [UIImage imageWithData:data];
+          assetRequest = [PHAssetChangeRequest creationRequestForAssetFromImage:normalImage];
         }
       }
       placeholder = [assetRequest placeholderForCreatedAsset];
