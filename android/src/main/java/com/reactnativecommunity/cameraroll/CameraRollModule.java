@@ -1090,5 +1090,5 @@ public class CameraRollModule extends NativeCameraRollModuleSpec {
   }
 
   public void addListener(String eventName) {}
-  public void removeListeners(double count) {}
+  public void removeListeners(int count) {}
 }
