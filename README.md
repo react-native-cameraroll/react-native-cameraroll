@@ -221,6 +221,7 @@ Returns a Promise with a list of albums
 **Returns:**
 
 Array of `Album` object
+  * id: {string}
   * title: {string}
   * count: {number}
   * type: {string} (iOS only)

@@ -534,7 +534,7 @@ public class CameraRollModule extends NativeCameraRollModuleSpec {
       return;
     }
 
-    final String[] projection = {MediaStore.Images.ImageColumns.BUCKET_DISPLAY_NAME};
+    final String[] projection = {MediaStore.Images.ImageColumns.BUCKET_DISPLAY_NAME, MediaStore.Images.Media.BUCKET_ID};
 
     try {
       Cursor media = getReactApplicationContext().getContentResolver().query(
@@ -549,27 +549,35 @@ public class CameraRollModule extends NativeCameraRollModuleSpec {
         WritableArray response = new WritableNativeArray();
         try {
           if (media.moveToFirst()) {
-            Map<String, Integer> albums = new HashMap<>();
+            Map<String, Map<String, Object>> albums = new HashMap<>();
             do {
               int column = media.getColumnIndex(MediaStore.Images.ImageColumns.BUCKET_DISPLAY_NAME);
+              int albumIdIndex = media.getColumnIndex(Images.ImageColumns.BUCKET_ID);
               if (column < 0) {
                 throw new IndexOutOfBoundsException();
               }
+              String albumId = media.getString(albumIdIndex);
               String albumName = media.getString(column);
               if (albumName != null) {
-                Integer albumCount = albums.get(albumName);
-                if (albumCount == null) {
-                  albums.put(albumName, 1);
+                Map<String, Object> albumData = albums.get(albumName);
+                if (albumData == null) {
+                  albums.put(albumName, new HashMap<String, Object>() {{
+                    put("id", albumId);
+                    put("count", 1);
+                  }});
                 } else {
-                  albums.put(albumName, albumCount + 1);
+                  Integer albumCount = (Integer) albumData.get("count");
+                  albumData.put("count", albumCount + 1);
                 }
               }
             } while (media.moveToNext());
 
-            for (Map.Entry<String, Integer> albumEntry : albums.entrySet()) {
+            for (Map.Entry<String, Map<String, Object>> albumEntry : albums.entrySet()) {
               WritableMap album = new WritableNativeMap();
+              Map<String, Object> albumData = albumEntry.getValue();
               album.putString("title", albumEntry.getKey());
-              album.putInt("count", albumEntry.getValue());
+              album.putInt("count", (Integer) albumData.get("count"));
+              album.putString("id", (String) albumData.get("id"));
               response.pushMap(album);
             }
           }
