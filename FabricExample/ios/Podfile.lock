@@ -935,7 +935,7 @@ PODS:
   - React-Mapbuffer (0.74.0):
     - glog
     - React-debug
-  - react-native-cameraroll (7.5.2):
+  - react-native-cameraroll (7.7.0):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1440,7 +1440,7 @@ SPEC CHECKSUMS:
   React-jsitracing: 36a2bbc272300313653d980de5ab700ec86c534a
   React-logger: 03f2f7b955cfe24593a2b8c9705c23e142d1ad24
   React-Mapbuffer: 5e05d78fe6505f4a054b86f415733d4ad02dd314
-  react-native-cameraroll: 1f45f158ed240a4aab7638396582daf7fcad35b9
+  react-native-cameraroll: eaf623ff4b666c9e93b0af4c21cbab091e1d4f2c
   react-native-slider: 42583bbf96c3476ed6faf6ea12e182b6e4604307
   React-nativeconfig: 951ec32f632e81cbd7d40aebb3211313251c092e
   React-NativeModulesApple: 0b3a42ca90069119ef79d8b2327d01441d71abd4
@@ -1466,7 +1466,7 @@ SPEC CHECKSUMS:
   React-utils: f013537c3371270d2095bff1d594d00d4bc9261b
   ReactCommon: 2cde697fd80bd31da1d6448d25a5803088585219
   SocketRocket: abac6f5de4d4d62d24e11868d7a2f427e0ef940d
-  Yoga: 56f906bf6c11c931588191dde1229fd3e4e3d557
+  Yoga: ff1d575b119f510a5de23c22a794872562078ccf
 
 PODFILE CHECKSUM: c270e520a11547ef636f117b51709c3ed2b291f7
 

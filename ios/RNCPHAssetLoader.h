@@ -14,7 +14,8 @@
 
 @class PHPhotoLibrary;
 
-// Uses the new CodeGen'd `modulesConformingToProtocol` feature
+// Uses the new CodeGen'd `modulesConformingToProtocol` feature.
+// Supports loading Images from ph:// and asset-library:// URLs.
 @interface RNCPHAssetLoader : NSObject <RCTImageURLLoader>
 @end
 

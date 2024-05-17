@@ -28,6 +28,7 @@ NSString *const PHUploadScheme = @"ph-upload";
 }
 
 - (id)sendRequest:(NSURLRequest *)request withDelegate:(id<RCTURLRequestDelegate>)delegate {
+  // TODO: I think there's a lot of dead code in here, I am not sure if that is needed at all to be honest. -mrousavy
   __block atomic_bool cancelled = ATOMIC_VAR_INIT(NO);
   void (^cancellationBlock)(void) = ^{
     atomic_store(&cancelled, YES);
