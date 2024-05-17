@@ -7,6 +7,10 @@
 
 #import "RNCAssetsLibraryRequestHandler.h"
 
+#if RCT_NEW_ARCH_ENABLED
+// on new arch, we have RNCPHAssetLoader and RNCPHUploader.
+#else
+
 #import <stdatomic.h>
 #import <dlfcn.h>
 #import <objc/runtime.h>
@@ -50,15 +54,15 @@ RCT_EXPORT_MODULE()
   if (isPHUpload) {
     requestURL = [NSURL URLWithString:[@"ph" stringByAppendingString:[requestURL.absoluteString substringFromIndex:PHUploadScheme.length]]];
   }
-  
+
   if (!requestURL) {
     NSString *const msg = [NSString stringWithFormat:@"Cannot send request without URL"];
     [delegate URLRequest:cancellationBlock didCompleteWithError:RCTErrorWithMessage(msg)];
     return cancellationBlock;
   }
-  
+
   PHFetchResult<PHAsset *> *fetchResult;
- 
+
   if ([requestURL.scheme caseInsensitiveCompare:@"ph"] == NSOrderedSame) {
     // Fetch assets using PHAsset localIdentifier (recommended)
     NSString *const localIdentifier = [requestURL.absoluteString substringFromIndex:@"ph://".length];
@@ -72,7 +76,7 @@ RCT_EXPORT_MODULE()
     [delegate URLRequest:cancellationBlock didCompleteWithError:RCTErrorWithMessage(msg)];
     return cancellationBlock;
   }
-  
+
   if (![fetchResult firstObject]) {
     NSString *errorMessage = [NSString stringWithFormat:@"Failed to load asset"
                               " at URL %@ with no error message.", requestURL];
@@ -80,7 +84,7 @@ RCT_EXPORT_MODULE()
     [delegate URLRequest:cancellationBlock didCompleteWithError:error];
     return cancellationBlock;
   }
-  
+
   if (atomic_load(&cancelled)) {
     return cancellationBlock;
   }
@@ -151,7 +155,7 @@ RCT_EXPORT_MODULE()
       [delegate URLRequest:cancellationBlock didCompleteWithError:nil];
     }];
   }
-  
+
   return cancellationBlock;
 }
 
@@ -167,3 +171,6 @@ RCT_EXPORT_MODULE()
 //}
 
 @end
+
+
+#endif
