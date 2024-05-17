@@ -10,12 +10,12 @@
 #if RCT_NEW_ARCH_ENABLED
 
 #import <Foundation/Foundation.h>
-#import <React/RCTImageURLLoader.h>
+#import <React/RCTURLRequestHandler.h>
 
 @class PHPhotoLibrary;
 
 // Uses the new CodeGen'd `modulesConformingToProtocol` feature
-@interface RNCPHAssetLoader : NSObject <RCTImageURLLoader>
+@interface RNCPHAssetUploader : NSObject <RCTURLRequestHandler>
 @end
 
 #endif

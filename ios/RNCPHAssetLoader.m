@@ -10,6 +10,8 @@
 
 #import "RNCPHAssetLoader.h"
 
+#if RCT_NEW_ARCH_ENABLED
+
 #import <Photos/Photos.h>
 #import <React/RCTUtils.h>
 
@@ -109,3 +111,5 @@ RCT_EXPORT_MODULE()
 }
 
 @end
+
+#endif
