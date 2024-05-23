@@ -5,45 +5,30 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#import "RNCAssetsLibraryRequestHandler.h"
+#import "RNCPHAssetUploader.h"
 
 #if RCT_NEW_ARCH_ENABLED
-// on new arch, we have RNCPHAssetLoader and RNCPHUploader.
-#else
-
-#import <stdatomic.h>
-#import <dlfcn.h>
-#import <objc/runtime.h>
 
 #import <Photos/Photos.h>
-#import <MobileCoreServices/MobileCoreServices.h>
-
-#import <React/RCTBridge.h>
-#import <React/RCTNetworking.h>
 #import <React/RCTUtils.h>
+#import <stdatomic.h>
+#import <CoreServices/CoreServices.h>
 
-@implementation RNCAssetsLibraryRequestHandler
-
-NSString *const PHUploadScheme = @"ph-upload";
+@implementation RNCPHAssetUploader
 
 RCT_EXPORT_MODULE()
 
-#pragma mark - RNCURLRequestHandler
+NSString *const PHUploadScheme = @"ph-upload";
 
-- (BOOL)canHandleRequest:(NSURLRequest *)request
-{
+- (BOOL)canHandleRequest:(NSURLRequest *)request {
   if (![PHAsset class]) {
     return NO;
   }
-
-  return [request.URL.scheme caseInsensitiveCompare:@"assets-library"] == NSOrderedSame
-    || [request.URL.scheme caseInsensitiveCompare:@"ph"] == NSOrderedSame
-    || [request.URL.scheme caseInsensitiveCompare:PHUploadScheme] == NSOrderedSame;
+  return [request.URL.scheme caseInsensitiveCompare:PHUploadScheme] == NSOrderedSame;
 }
 
-- (id)sendRequest:(NSURLRequest *)request
-     withDelegate:(id<RCTURLRequestDelegate>)delegate
-{
+- (id)sendRequest:(NSURLRequest *)request withDelegate:(id<RCTURLRequestDelegate>)delegate {
+  // TODO: I think there's a lot of dead code in here, I am not sure if that is needed at all to be honest. -mrousavy
   __block atomic_bool cancelled = ATOMIC_VAR_INIT(NO);
   void (^cancellationBlock)(void) = ^{
     atomic_store(&cancelled, YES);
@@ -164,13 +149,6 @@ RCT_EXPORT_MODULE()
   ((void (^)(void))requestToken)();
 }
 
-//- (std::shared_ptr<facebook::react::TurboModule>)getTurboModule:
-//    (const facebook::react::ObjCTurboModule::InitParams &)params
-//{
-//  return nullptr;
-//}
-
 @end
-
 
 #endif

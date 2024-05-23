@@ -119,6 +119,11 @@
     "name": "rncameraroll",
     "type": "modules",
     "jsSrcsDir": "./src",
+    "ios": {
+      "modulesConformingToProtocol": {
+        "RCTImageURLLoader": "RNCPHAssetLoader"
+      }
+    },
     "android": {
       "javaPackageName": "com.reactnativecommunity.cameraroll"
     }
