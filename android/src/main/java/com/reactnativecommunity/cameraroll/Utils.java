@@ -6,7 +6,11 @@ public class Utils {
 
     public static String getMimeType(String url) {
         String type = null;
-        String extension = MimeTypeMap.getFileExtensionFromUrl(url);
+        String extension = null;
+        int dotPos = url.lastIndexOf('.');
+        if (0 <= dotPos) {
+            extension = url.substring(dotPos + 1);
+        }
         if (extension != null) {
             type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
         }
