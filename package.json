@@ -2,7 +2,7 @@
   "name": "@react-native-camera-roll/camera-roll",
   "author": "Bartol Karuza <bartol.k@gmail.com>",
   "homepage": "https://github.com/react-native-cameraroll/react-native-cameraroll#readme",
-  "version": "7.8.2",
+  "version": "7.8.3",
   "description": "React Native Camera Roll for iOS & Android",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
