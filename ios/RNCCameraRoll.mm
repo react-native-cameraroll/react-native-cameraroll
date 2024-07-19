@@ -860,7 +860,17 @@ RCT_EXPORT_METHOD(getPhotoThumbnail:(NSString *)internalId
                     reject(@"Error while getting thumbnail image",@"Error while getting thumbnail image",error);
                 }
 
+                 if (!image) {
+                    reject(@"Error while getting thumbnail image", @"Image is nil", RCTErrorWithMessage(@"Image is nil"));
+                    return;
+                 }
+
                 NSString *thumbnailBase64 = [UIImageJPEGRepresentation(image, quality) base64EncodedStringWithOptions:NSDataBase64EncodingEndLineWithLineFeed];
+                
+                if (!thumbnailBase64) {
+                    reject(@"Error while encoding image to Base64", @"Failed to encode image to Base64", RCTErrorWithMessage(@"Failed to encode image to Base64"));
+                    return;
+                }
 
                 resolve(@{
                     @"thumbnailBase64": thumbnailBase64
