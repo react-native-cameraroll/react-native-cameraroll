@@ -14,6 +14,8 @@
 #import <dlfcn.h>
 #import <objc/runtime.h>
 #import <MobileCoreServices/UTType.h>
+#import <MobileCoreServices/MobileCoreServices.h>
+#import <ImageIO/ImageIO.h>
 
 #import <React/RCTBridge.h>
 #import <React/RCTConvert.h>
@@ -697,23 +699,19 @@ RCT_EXPORT_METHOD(getPhotoByInternalID:(NSString *)internalId
 			[self sendProgressUpdateWithId:internalId progress:progress];
 		};
 
-        CGSize const targetSize = CGSizeMake((CGFloat)asset.pixelWidth, (CGFloat)asset.pixelHeight);
-        [[PHImageManager defaultManager] requestImageForAsset:asset
-                                                     targetSize:targetSize
-                                                    contentMode:PHImageContentModeDefault
+        [[PHImageManager defaultManager] requestImageDataAndOrientationForAsset:asset
                                                         options:requestOptions
-                                                  resultHandler:^(UIImage * _Nullable image,
-                                                                  NSDictionary * _Nullable info) {
+                                                  resultHandler:^(NSData *imageData, NSString *dataUTI, CGImagePropertyOrientation orientation, NSDictionary *info) {
           NSError *const error = [info objectForKey:PHImageErrorKey];
           if (error) {
             reject(@"Error while converting to JPEG image",@"Error while converting",error);
           }
 
           originalFilename = [originalFilename stringByReplacingOccurrencesOfString:@"HEIC" withString:@"JPEG" options:NSCaseInsensitiveSearch range:NSMakeRange(0, [originalFilename length])];
-          NSData *const imageData = UIImageJPEGRepresentation(image, quality);
+          NSData *const jpegData = [self convertHeicToJpeg:imageData quality:quality];
           NSFileManager *fileManager = [NSFileManager defaultManager];
           NSString *fullPath = [NSTemporaryDirectory() stringByAppendingPathComponent:originalFilename];
-          if ([fileManager createFileAtPath:fullPath contents:imageData attributes:nil]) {
+          if ([fileManager createFileAtPath:fullPath contents:jpegData attributes:nil]) {
             unsigned long long fileSize = [[fileManager attributesOfItemAtPath:fullPath error:nil] fileSize];
 
             resolve(@{
@@ -952,6 +950,36 @@ NSString *subTypeLabelForCollection(PHAssetCollection *assetCollection) {
       default:
           return NULL;
     }
+}
+
+- (NSData *)convertHeicToJpeg:(NSData *)heicData quality:(CGFloat)quality {
+    CGImageSourceRef source = CGImageSourceCreateWithData((__bridge CFDataRef)heicData, NULL);
+    if (!source) {
+        return nil;
+    }
+
+    NSDictionary *properties = (__bridge_transfer NSDictionary *)CGImageSourceCopyPropertiesAtIndex(source, 0, NULL);
+
+    NSMutableData *jpegData = [NSMutableData data];
+    CGImageDestinationRef destination = CGImageDestinationCreateWithData((__bridge CFMutableDataRef)jpegData, kUTTypeJPEG, 1, NULL);
+    if (!destination) {
+        CFRelease(source);
+        return nil;
+    }
+
+    NSDictionary *options = @{(__bridge NSString *)kCGImageDestinationLossyCompressionQuality: @(quality)};
+    CGImageDestinationAddImageFromSource(destination, source, 0, (__bridge CFDictionaryRef)options);
+
+    if (!CGImageDestinationFinalize(destination)) {
+        CFRelease(destination);
+        CFRelease(source);
+        return nil;
+    }
+
+    CFRelease(destination);
+    CFRelease(source);
+
+    return jpegData;
 }
 
 - (NSArray<NSString *> *) getAlbumsForAsset:(PHAsset *)asset {
