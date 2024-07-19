@@ -11,49 +11,44 @@
 
 const React = require('react');
 const ReactNative = require('react-native');
-const {
-  Image,
-  StyleSheet,
-  Switch,
-  Text,
-  View,
-  TouchableOpacity,
-  Dimensions,
-} = ReactNative;
-import { CameraRoll } from "@react-native-camera-roll/camera-roll";
+const {Image, StyleSheet, Switch, Text, View, TouchableOpacity, Dimensions} =
+  ReactNative;
+import {CameraRoll} from '@react-native-camera-roll/camera-roll';
 import Slider from '@react-native-community/slider';
-import type {PhotoIdentifier, GroupTypes} from '@react-native-camera-roll/camera-roll';
+import type {
+  PhotoIdentifier,
+  GroupTypes,
+} from '@react-native-camera-roll/camera-roll';
+import { Platform } from 'react-native';
 
 const invariant = require('invariant');
 
 const CameraRollView = require('./CameraRollView');
 
-const AssetScaledImageExampleView = require('./AssetScaledImageExample');
+type Props = Readonly<{
+  navigator?: Array<
+    Readonly<{
+      title: string;
+      component: React.Component<any, any>;
+      backButtonTitle: string;
+      passProps: Readonly<{asset: PhotoIdentifier}>;
+    }>
+  >;
+}>;
 
-type Props = $ReadOnly<{|
-  navigator?: ?Array<
-    $ReadOnly<{|
-      title: string,
-      component: Class<React.Component<any, any>>,
-      backButtonTitle: string,
-      passProps: $ReadOnly<{|asset: PhotoIdentifier|}>,
-    |}>,
-  >,
-|}>;
-
-type State = {|
-  groupTypes: GroupTypes,
-  sliderValue: number,
-  bigImages: boolean,
-|};
+type State = {
+  groupTypes: GroupTypes;
+  sliderValue: number;
+  bigImages: boolean;
+};
 
 export default class CameraRollExample extends React.Component<Props, State> {
   state = {
     groupTypes: 'All',
     sliderValue: 1,
-    bigImages: true,
+    bigImages: false,
   };
-  _cameraRollView: ?React.ElementRef<typeof CameraRollView>;
+  _cameraRollView: React.ElementRef<typeof CameraRollView>;
 
   render() {
     return (
@@ -71,7 +66,7 @@ export default class CameraRollExample extends React.Component<Props, State> {
           <Text>{'Group Type: ' + this.state.groupTypes}</Text>
         </View>
         <CameraRollView
-          ref={ref => {
+          ref={(ref: typeof CameraRollView) => {
             this._cameraRollView = ref;
           }}
           batchSize={20}
@@ -84,13 +79,13 @@ export default class CameraRollExample extends React.Component<Props, State> {
   }
 
   loadAsset(asset: PhotoIdentifier) {
-    if (this.props.navigator) {
-      this.props.navigator.push({
-        title: 'Camera Roll Image',
-        component: AssetScaledImageExampleView,
-        backButtonTitle: 'Back',
-        passProps: {asset: asset},
-      });
+    if (Platform.OS === 'ios') {
+      CameraRoll.iosGetImageDataById(asset.node.id, {
+        convertHeicImages: true,
+        quality: 1,
+      }).then(console.log);
+    } else {
+      console.log(console.log(asset));
     }
   }
 
@@ -104,7 +99,8 @@ export default class CameraRollExample extends React.Component<Props, State> {
     return (
       <TouchableOpacity
         key={asset.node.image.uri}
-        onPress={this.loadAsset.bind(this, asset)}>
+        onPress={this.loadAsset.bind(this, asset)}
+        style={styles.flex1}>
         <View style={styles.row}>
           <Image source={{uri: asset.node.image.uri}} style={imageStyle} />
           <View style={styles.flex1}>
@@ -112,15 +108,17 @@ export default class CameraRollExample extends React.Component<Props, State> {
             <Text>{locationStr}</Text>
             <Text>{asset.node.group_name}</Text>
             <Text>{new Date(asset.node.timestamp * 1000).toString()}</Text>
-            <Text>{new Date(asset.node.modificationTimestamp * 1000).toString()}</Text>
-            <Text>Subtypes: {asset.node.subTypes.join(' ')}</Text>
+            <Text>
+              {new Date(asset.node.modificationTimestamp * 1000).toString()}
+            </Text>
+            <Text>Subtypes: {asset.node.subTypes}</Text>
           </View>
         </View>
       </TouchableOpacity>
     );
   };
 
-  _onSliderChange = value => {
+  _onSliderChange = (value: number) => {
     const options = Object.keys(CameraRoll.GroupTypesOptions);
     const index = Math.floor(value * options.length * 0.99);
     const groupTypes = options[index];
@@ -129,7 +127,7 @@ export default class CameraRollExample extends React.Component<Props, State> {
     }
   };
 
-  _onSwitchChange = value => {
+  _onSwitchChange = (value: number) => {
     invariant(this._cameraRollView, 'ref should be set');
     this.setState({bigImages: value});
   };
@@ -143,6 +141,7 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     flex: 1,
+    width: '100%',
   },
   url: {
     fontSize: 9,
