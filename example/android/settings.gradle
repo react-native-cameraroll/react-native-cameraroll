@@ -1,9 +1,6 @@
-rootProject.name = 'CameraRollExample'
-apply from: file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesSettingsGradle(settings)
-
+pluginManagement { includeBuild("../node_modules/@react-native/gradle-plugin") }
+plugins { id("com.facebook.react.settings") }
+extensions.configure(com.facebook.react.ReactSettingsExtension){ ex -> ex.autolinkLibrariesFromCommand() }
+rootProject.name = 'cameraroll'
 include ':app'
-
-// Start added for this project (react-native-cameraroll)
-include ':react-native-cameraroll'
-project(':react-native-cameraroll').projectDir = new File(rootProject.projectDir, '../../android')
-// End added
+includeBuild('../node_modules/@react-native/gradle-plugin')

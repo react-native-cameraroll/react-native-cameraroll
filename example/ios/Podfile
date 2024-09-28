@@ -1,37 +1,40 @@
-require_relative '../../node_modules/react-native/scripts/react_native_pods'
-require_relative '../../node_modules/@react-native-community/cli-platform-ios/native_modules'
+# Resolve react_native_pods.rb with node to allow for hoisting
+require Pod::Executable.execute_command('node', ['-p',
+  'require.resolve(
+    "react-native/scripts/react_native_pods.rb",
+    {paths: [process.argv[1]]},
+  )', __dir__]).strip
 
-platform :ios, '13.0'
+platform :ios, min_ios_version_supported
+prepare_react_native_project!
 
-target 'CameraRollExample' do
-  # Added for this project (react-native-cameraroll)
-  pod 'react-native-cameraroll', :path => "../.."
+linkage = ENV['USE_FRAMEWORKS']
+if linkage != nil
+  Pod::UI.puts "Configuring Pod with #{linkage}ally linked Frameworks".green
+  use_frameworks! :linkage => linkage.to_sym
+end
 
-  # `'../../node_modules/react-native'` added for
-  # react-native-cameraroll (our node_modules doesn't live in
-  # example/).
-  use_react_native!(:path => '../../node_modules/react-native')
+target 'cameraroll' do
+  config = use_native_modules!
 
-  target 'CameraRollExampleTests' do
+  use_react_native!(
+    :path => config[:reactNativePath],
+    # An absolute path to your application root.
+    :app_path => "#{Pod::Config.instance.installation_root}/.."
+  )
+
+  target 'camerarollTests' do
     inherit! :complete
     # Pods for testing
   end
 
-  # Enables Flipper.
-  #
-  # Note that if you have use_frameworks! enabled, Flipper will not work and
-  # you should disable these next few lines.
-  use_flipper!
   post_install do |installer|
-    flipper_post_install(installer)
-  end
-end
-
-target 'CameraRollExample-tvOS' do
-  # Pods for CameraRollExample-tvOS
-
-  target 'CameraRollExample-tvOSTests' do
-    inherit! :search_paths
-    # Pods for testing
+    # https://github.com/facebook/react-native/blob/main/packages/react-native/scripts/react_native_pods.rb#L197-L202
+    react_native_post_install(
+      installer,
+      config[:reactNativePath],
+      :mac_catalyst_enabled => false,
+      # :ccache_enabled => true
+    )
   end
 end
