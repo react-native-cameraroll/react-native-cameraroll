@@ -16,7 +16,7 @@ const App: React.FC = () => {
   const [selectedUris, setSelectedUris] = useState<string[]>([]);
 
   const hasAndroidPermission = async (): Promise<boolean> => {
-    const getCheckPermissionPromise = (): Promise<boolean> => {
+    const getCheckPermissionPromise = async (): Promise<boolean> => {
       if (Number(Platform.Version) >= 33) {
         return Promise.all([
           PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES),
