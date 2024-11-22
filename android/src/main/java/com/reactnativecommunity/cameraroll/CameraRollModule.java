@@ -8,6 +8,8 @@
 package com.reactnativecommunity.cameraroll;
 
 import android.content.ContentResolver;
+import android.content.Intent;
+import android.content.IntentSender;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
@@ -23,6 +25,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.provider.MediaStore;
+import android.app.Activity;
 import android.provider.MediaStore.Images;
 import android.text.TextUtils;
 import android.media.ExifInterface;
@@ -41,6 +44,7 @@ import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.WritableNativeArray;
 import com.facebook.react.bridge.WritableNativeMap;
 import com.facebook.react.bridge.Arguments;
+import com.facebook.react.bridge.BaseActivityEventListener;
 import com.facebook.react.common.ReactConstants;
 import com.facebook.react.module.annotations.ReactModule;
 
@@ -88,6 +92,9 @@ public class CameraRollModule extends NativeCameraRollModuleSpec {
   private static final String INCLUDE_ALBUMS = "albums";
   private static final String INCLUDE_SOURCE_TYPE = "sourceType";
 
+  private static final int DELETE_REQUEST_CODE = 1001;
+  private Promise deletePromise;
+
   private static final String[] PROJECTION = {
           Images.Media._ID,
           Images.Media.MIME_TYPE,
@@ -106,6 +113,21 @@ public class CameraRollModule extends NativeCameraRollModuleSpec {
 
   public CameraRollModule(ReactApplicationContext reactContext) {
     super(reactContext);
+    reactContext.addActivityEventListener(new BaseActivityEventListener() {
+            @Override
+            public void onActivityResult(Activity activity, int requestCode, int resultCode, Intent data) {
+                if (requestCode == DELETE_REQUEST_CODE) {
+                    if (deletePromise != null) {
+                        if (resultCode == Activity.RESULT_OK) {
+                            deletePromise.resolve("Files successfully deleted");
+                        } else {
+                            deletePromise.reject("ERROR", "Deletion was not completed");
+                        }
+                        deletePromise = null;
+                    }
+                }
+            }
+        });
   }
 
   @Override
@@ -346,6 +368,44 @@ public class CameraRollModule extends NativeCameraRollModuleSpec {
             promise)
             .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
   }
+
+    @ReactMethod
+    public void deleteMediaFiles(ReadableArray uriArray, Promise promise) {
+    ContentResolver contentResolver = getReactApplicationContext().getContentResolver();
+    List<Uri> urisToDelete = new ArrayList<>();
+
+    for (int i = 0; i < uriArray.size(); i++) {
+        String uriString = uriArray.getString(i);
+        urisToDelete.add(Uri.parse(uriString));
+    }
+
+    this.deletePromise = promise;
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        try {
+            IntentSender intentSender = MediaStore.createDeleteRequest(contentResolver, urisToDelete).getIntentSender();
+            Activity activity = getCurrentActivity();
+            if (activity != null) {
+                activity.startIntentSenderForResult(intentSender, DELETE_REQUEST_CODE, null, 0, 0, 0);
+            } else {
+                promise.reject("ERROR", "Activity is null");
+            }
+        } catch (Exception e) {
+            promise.reject("ERROR", e.getMessage());
+        }
+    } else {
+        // Handle pre-Android 11 deletion
+        try {
+            for (Uri uri : urisToDelete) {
+                contentResolver.delete(uri, null, null);
+            }
+            promise.resolve("Files deleted");
+        } catch (Exception e) {
+            promise.reject("ERROR", e.getMessage());
+        }
+    }
+}
+
 
   private static class GetMediaTask extends GuardedAsyncTask<Void, Void> {
     private final Context mContext;
@@ -730,13 +790,18 @@ public class CameraRollModule extends NativeCameraRollModuleSpec {
     WritableMap image = new WritableNativeMap();
     int index = media.getColumnIndex(Images.Media._ID);
     long id = (index >= 0) ? media.getLong(index) : -1;
+    String mimeType = media.getString(mimeTypeIndex);
+    boolean isVideo = mimeType != null && mimeType.startsWith("video");
     // Updating this to return content uri to fix issue with playing videos saved to SD cards as
     // this ensures item that is picked is read-only, and masks it's real source
-    Uri photoUri = ContentUris.withAppendedId(MediaStore.Files.getContentUri("external"), id);
+    Uri photoUri;
+    if (isVideo) {
+        photoUri = ContentUris.withAppendedId(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, id);
+    } else {
+        photoUri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id);
+    }
     image.putString("uri", photoUri.toString());
-    String mimeType = media.getString(mimeTypeIndex);
 
-    boolean isVideo = mimeType != null && mimeType.startsWith("video");
     boolean putImageSizeSuccess = putImageSize(resolver, media, image, widthIndex, heightIndex, orientationIndex,
             photoUri, isVideo, includeImageSize);
     boolean putPlayableDurationSuccess = putPlayableDuration(resolver, image, photoUri, isVideo,
@@ -1023,8 +1088,7 @@ public class CameraRollModule extends NativeCameraRollModuleSpec {
     if (uris.size() == 0) {
       promise.reject(ERROR_UNABLE_TO_DELETE, "Need at least one URI to delete");
     } else {
-      new DeletePhotos(getReactApplicationContext(), uris, promise)
-              .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+      deleteMediaFiles(uris, promise);
     }
   }
 
