@@ -121,7 +121,8 @@
     "jsSrcsDir": "./src",
     "ios": {
       "modulesConformingToProtocol": {
-        "RCTImageURLLoader": "RNCPHAssetLoader"
+        "RCTImageURLLoader": "RNCPHAssetLoader",
+        "RCTURLRequestHandler": "RNCPHAssetUploader"
       }
     },
     "android": {
