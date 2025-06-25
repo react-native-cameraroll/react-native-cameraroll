@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.ArrayList;
 
 import com.facebook.react.TurboReactPackage;
 import com.facebook.react.ViewManagerOnDemandReactPackage;
@@ -32,7 +33,7 @@ public class CameraRollPackage extends TurboReactPackage implements ViewManagerO
     /** {@inheritDoc} */
     @Override
     public List<String> getViewManagerNames(ReactApplicationContext reactContext) {
-        return null;
+        return new ArrayList<String>();
     }
 
     @Override
