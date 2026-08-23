@@ -193,6 +193,7 @@ public class CameraRollModule extends NativeCameraRollModuleSpec {
                   : resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, mediaDetails);
           if (mediaContentUri == null) {
             mPromise.reject(ERROR_UNABLE_TO_LOAD, "ContentResolver#insert() returns null, insert failed");
+            return;
           }
           output = resolver.openOutputStream(mediaContentUri);
           input = new FileInputStream(source);
